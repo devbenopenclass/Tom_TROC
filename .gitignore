@@ -1,0 +1,6 @@
+/public/assets/uploads/*
+!/public/assets/uploads/.gitkeep
+/storage/*
+!/storage/.gitkeep
+/config/config.local.php
+.env
