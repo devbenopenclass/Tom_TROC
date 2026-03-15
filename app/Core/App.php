@@ -39,6 +39,7 @@ class App
 
     // Books
     $router->get('/books/exchange', 'BookController@exchange');
+    $router->get('/books/exchangege', 'BookController@exchange');
     $router->get('/books/show', 'BookController@show');        // ?id=1
     $router->get('/books/create', 'BookController@createForm');
     $router->post('/books/create', 'BookController@create');

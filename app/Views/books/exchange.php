@@ -24,13 +24,30 @@
 <?php else: ?>
   <section class="grid">
     <?php foreach ($books as $b): ?>
+      <?php
+      $status = (string)($b['status'] ?? 'available');
+      $statusClass = 'status-available';
+      $statusLabel = 'disponible';
+      $image = (string)($b['image'] ?? '');
+      if ($image !== '' && str_starts_with($image, '/')) {
+        $image = $base . $image;
+      }
+      if ($status === 'reserved') {
+        $statusClass = 'status-reserved';
+        $statusLabel = 'reserve';
+      } elseif ($status === 'unavailable') {
+        $statusClass = 'status-unavailable';
+        $statusLabel = 'non dispo.';
+      }
+      ?>
       <a class="book" href="<?= $base ?>/books/show?id=<?= (int)$b['id'] ?>">
         <div class="thumb">
-          <?php if (!empty($b['image'])): ?>
-            <img src="<?= htmlspecialchars($b['image']) ?>" alt="">
+          <?php if ($image !== ''): ?>
+            <img src="<?= htmlspecialchars($image) ?>" alt="">
           <?php else: ?>
             <img src="<?= $base ?>/assets/img/figma/mask-group.png" alt="Couverture par défaut">
           <?php endif; ?>
+          <span class="book-status <?= $statusClass ?>"><?= htmlspecialchars($statusLabel) ?></span>
         </div>
         <div class="meta">
           <strong><?= htmlspecialchars($b['title']) ?></strong>
