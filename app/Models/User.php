@@ -85,4 +85,18 @@ class User extends Model
       'bio' => $bio,
     ]);
   }
+
+  public static function avatarPath(?array $user, string $fallback = '/assets/img/figma/mask-group-3.png'): string
+  {
+    $avatar = trim((string)($user['avatar'] ?? ''));
+    if ($avatar !== '') {
+      $path = '/' . ltrim($avatar, '/');
+      $publicPath = realpath(__DIR__ . '/../../public');
+      if ($publicPath !== false && is_file($publicPath . $path)) {
+        return $path;
+      }
+    }
+
+    return $fallback;
+  }
 }

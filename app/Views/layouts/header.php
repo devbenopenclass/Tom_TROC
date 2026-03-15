@@ -3,9 +3,13 @@ $base = \App\Core\Url::baseUrl();
 $isLogged = !empty($_SESSION['user_id']);
 $unreadCount = 0;
 $cssPath = __DIR__ . '/../../../public/assets/css/style.css';
+$accountCssPath = __DIR__ . '/../../../public/assets/css/account-admin.css';
 $logoPath = __DIR__ . '/../../../public/assets/img/figma/logo.svg';
 $cssVersion = is_file($cssPath) ? (string)filemtime($cssPath) : '1';
+$accountCssVersion = is_file($accountCssPath) ? (string)filemtime($accountCssPath) : '1';
 $logoVersion = is_file($logoPath) ? (string)filemtime($logoPath) : '1';
+$requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+$isAccountPage = str_contains($requestPath, '/account');
 if ($isLogged) {
   $unreadCount = \App\Models\Message::unreadCount((int)$_SESSION['user_id']);
 }
@@ -17,8 +21,11 @@ if ($isLogged) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TomTroc</title>
   <link rel="stylesheet" href="<?= $base ?>/assets/css/style.css?v=<?= htmlspecialchars($cssVersion) ?>">
+  <?php if ($isAccountPage): ?>
+    <link rel="stylesheet" href="<?= $base ?>/assets/css/account-admin.css?v=<?= htmlspecialchars($accountCssVersion) ?>">
+  <?php endif; ?>
 </head>
-<body>
+<body class="<?= $isAccountPage ? 'account-admin-page' : '' ?>">
 <header class="site-header <?= $isLogged ? 'is-auth' : '' ?>">
   <div class="shell header-row">
     <a class="brand" href="<?= $base ?>/" aria-label="Accueil TomTroc">

@@ -35,7 +35,7 @@ class Message extends Model
   public static function thread(int $me, int $other): array
   {
     $stmt = self::db()->prepare("
-      SELECT m.*, us.username AS sender_name, ur.username AS receiver_name
+      SELECT m.*, us.username AS sender_name, us.avatar AS sender_avatar, ur.username AS receiver_name, ur.avatar AS receiver_avatar
       FROM messages m
       JOIN users us ON us.id = m.sender_id
       JOIN users ur ON ur.id = m.receiver_id
@@ -65,16 +65,70 @@ class Message extends Model
 
   public static function inbox(int $me): array
   {
+    try {
+      $stmt = self::db()->prepare("
+        SELECT
+          CASE WHEN m.sender_id = :me THEN m.receiver_id ELSE m.sender_id END AS other_id,
+          u.username AS other_username,
+          u.avatar AS other_avatar,
+          m.content AS last_message,
+          m.created_at AS last_at,
+          COALESCE(unread.unread_count, 0) AS unread_count
+        FROM messages m
+        JOIN users u
+          ON u.id = CASE WHEN m.sender_id = :me THEN m.receiver_id ELSE m.sender_id END
+        JOIN (
+          SELECT
+            MAX(id) AS last_message_id
+          FROM messages
+          WHERE sender_id = :me OR receiver_id = :me
+          GROUP BY CASE WHEN sender_id = :me THEN receiver_id ELSE sender_id END
+        ) latest ON latest.last_message_id = m.id
+        LEFT JOIN (
+          SELECT sender_id, COUNT(*) AS unread_count
+          FROM messages
+          WHERE receiver_id = :me AND is_read = 0
+          GROUP BY sender_id
+        ) unread ON unread.sender_id = CASE WHEN m.sender_id = :me THEN m.receiver_id ELSE m.sender_id END
+        ORDER BY m.created_at DESC, m.id DESC
+      ");
+      $stmt->execute(['me' => $me]);
+      return $stmt->fetchAll();
+    } catch (PDOException $e) {
+      $stmt = self::db()->prepare("
+        SELECT
+          CASE WHEN m.sender_id = :me THEN m.receiver_id ELSE m.sender_id END AS other_id,
+          u.username AS other_username,
+          u.avatar AS other_avatar,
+          m.content AS last_message,
+          m.created_at AS last_at,
+          0 AS unread_count
+        FROM messages m
+        JOIN users u
+          ON u.id = CASE WHEN m.sender_id = :me THEN m.receiver_id ELSE m.sender_id END
+        JOIN (
+          SELECT
+            MAX(id) AS last_message_id
+          FROM messages
+          WHERE sender_id = :me OR receiver_id = :me
+          GROUP BY CASE WHEN sender_id = :me THEN receiver_id ELSE sender_id END
+        ) latest ON latest.last_message_id = m.id
+        ORDER BY m.created_at DESC, m.id DESC
+      ");
+      $stmt->execute(['me' => $me]);
+      return $stmt->fetchAll();
+    }
+  }
+
+  public static function contacts(int $me): array
+  {
     $stmt = self::db()->prepare("
-      SELECT m.*
-      FROM messages m
-      WHERE m.id IN (
-        SELECT MAX(id)
-        FROM messages
-        WHERE sender_id = :me OR receiver_id = :me
-        GROUP BY LEAST(sender_id, receiver_id), GREATEST(sender_id, receiver_id)
-      )
-      ORDER BY m.created_at DESC
+      SELECT u.id, u.username, u.email, u.avatar, COUNT(b.id) AS books_count
+      FROM users u
+      LEFT JOIN books b ON b.user_id = u.id
+      WHERE u.id <> :me
+      GROUP BY u.id, u.username, u.email, u.avatar
+      ORDER BY books_count DESC, u.username ASC
     ");
     $stmt->execute(['me' => $me]);
     return $stmt->fetchAll();

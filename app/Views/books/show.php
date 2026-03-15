@@ -1,4 +1,5 @@
 <?php use App\Models\Book; ?>
+<?php use App\Models\User; ?>
 
 <?php
 $status = (string)($book['status'] ?? 'available');
@@ -12,6 +13,10 @@ if (!preg_match('#^https?://#i', $image)) {
   $imageVersion = is_file($assetFile) ? (string)filemtime($assetFile) : '1';
   $image = $base . $image . '?v=' . $imageVersion;
 }
+$ownerAvatar = User::avatarPath($book);
+$ownerAvatarFile = __DIR__ . '/../../../public' . $ownerAvatar;
+$ownerAvatarVersion = is_file($ownerAvatarFile) ? (string)filemtime($ownerAvatarFile) : '1';
+$ownerAvatar = $base . $ownerAvatar . '?v=' . $ownerAvatarVersion;
 
 if ($description === '') {
   $description = sprintf(
@@ -51,7 +56,7 @@ $paragraphs = preg_split("/\n\s*\n/", $description) ?: [$description];
 
       <p class="book-show-label">Propriétaire</p>
       <a class="book-show-owner" href="<?= $base ?>/profiles/show?id=<?= (int)$book['user_id'] ?>">
-        <img src="<?= $base ?>/assets/img/figma/mask-group-3.png" alt="">
+        <img src="<?= htmlspecialchars($ownerAvatar) ?>" alt="">
         <strong><?= htmlspecialchars($owner) ?></strong>
       </a>
 

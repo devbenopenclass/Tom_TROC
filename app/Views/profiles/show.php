@@ -1,4 +1,12 @@
 <?php use App\Models\Book; ?>
+<?php use App\Models\User; ?>
+
+<?php
+$avatar = User::avatarPath($user);
+$avatarFile = __DIR__ . '/../../../public' . $avatar;
+$avatarVersion = is_file($avatarFile) ? (string)filemtime($avatarFile) : '1';
+$avatar = $base . $avatar . '?v=' . $avatarVersion;
+?>
 
 <section class="page-head">
   <div>
@@ -10,7 +18,7 @@
 </section>
 
 <section class="card profile-header">
-  <img src="<?= $base ?>/assets/img/figma/mask-group-3.png" alt="Avatar utilisateur">
+  <img src="<?= htmlspecialchars($avatar) ?>" alt="Avatar utilisateur">
   <div>
     <?php if (!empty($user['bio'])): ?>
       <p><?= nl2br(htmlspecialchars($user['bio'])) ?></p>

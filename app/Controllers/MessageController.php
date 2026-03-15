@@ -11,26 +11,44 @@ class MessageController extends Controller
   public function inbox(): void
   {
     Auth::requireLogin();
-    $items = Message::inbox(Auth::id());
-    $this->render('messages/inbox', ['items' => $items]);
+    $me = Auth::id();
+    $items = Message::inbox($me);
+    $contacts = Message::contacts($me);
+
+    $other = (int)($_GET['user'] ?? 0);
+    if ($other <= 0 && !empty($items)) {
+      $other = (int)$items[0]['other_id'];
+    }
+
+    $otherUser = null;
+    $messages = [];
+    if ($other > 0) {
+      foreach ($contacts as $contact) {
+        if ((int)$contact['id'] === $other) {
+          $otherUser = $contact;
+          break;
+        }
+      }
+      if ($otherUser) {
+        Message::markThreadAsRead($me, $other);
+        $messages = Message::thread($me, $other);
+      }
+    }
+
+    $this->render('messages/inbox', [
+      'items' => $items,
+      'contacts' => $contacts,
+      'other' => $otherUser,
+      'messages' => $messages,
+      'activeUserId' => $other,
+    ]);
   }
 
   public function thread(): void
   {
     Auth::requireLogin();
-
     $other = (int)($_GET['user'] ?? 0);
-    $otherUser = $other ? User::find($other) : null;
-
-    if (!$otherUser) {
-      http_response_code(404);
-      echo "Conversation introuvable";
-      return;
-    }
-
-    Message::markThreadAsRead(Auth::id(), $other);
-    $messages = Message::thread(Auth::id(), $other);
-    $this->render('messages/thread', ['other' => $otherUser, 'messages' => $messages]);
+    $this->redirect('/messages' . ($other > 0 ? '?user=' . $other : ''));
   }
 
   public function send(): void
@@ -40,7 +58,7 @@ class MessageController extends Controller
     $receiver = (int)($_POST['receiver_id'] ?? 0);
     $content = trim($_POST['content'] ?? '');
 
-    if ($receiver <= 0 || $content === '') {
+    if ($receiver <= 0 || $content === '' || $receiver === Auth::id()) {
       $this->redirect('/messages');
       return;
     }
