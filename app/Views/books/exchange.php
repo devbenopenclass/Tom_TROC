@@ -1,19 +1,12 @@
-<section class="page-head">
-  <div>
-    <p class="kicker">Catalogue</p>
-    <h1>Nos livres à l'échange</h1>
-    <p>Explore la bibliothèque de la communauté.</p>
-  </div>
-  <img src="<?= $base ?>/assets/img/figma/vector.svg" alt="Décor">
-</section>
+<?php use App\Models\Book; ?>
 
-<section class="card">
-  <form method="get" action="<?= $base ?>/books/exchange" class="form form-inline form-wide">
-    <div>
-      <label class="mini-label">Recherche</label>
-      <input name="q" value="<?= htmlspecialchars($q ?? '') ?>" placeholder="Titre, auteur...">
-    </div>
-    <button class="btn" type="submit">Rechercher</button>
+<section class="exchange-head">
+  <div class="exchange-copy">
+    <h1>Nos livres à l'échange</h1>
+  </div>
+
+  <form method="get" action="<?= $base ?>/books/exchange" class="exchange-search">
+    <input name="q" value="<?= htmlspecialchars($q ?? '') ?>" placeholder="Rechercher un livre">
   </form>
 </section>
 
@@ -28,9 +21,11 @@
       $status = (string)($b['status'] ?? 'available');
       $statusClass = 'status-available';
       $statusLabel = 'disponible';
-      $image = (string)($b['image'] ?? '');
-      if ($image !== '' && str_starts_with($image, '/')) {
-        $image = $base . $image;
+      $image = Book::imagePath($b);
+      if (!preg_match('#^https?://#i', $image)) {
+        $assetFile = __DIR__ . '/../../../public' . $image;
+        $imageVersion = is_file($assetFile) ? (string)filemtime($assetFile) : '1';
+        $image = $base . $image . '?v=' . $imageVersion;
       }
       if ($status === 'reserved') {
         $statusClass = 'status-reserved';
@@ -42,17 +37,13 @@
       ?>
       <a class="book" href="<?= $base ?>/books/show?id=<?= (int)$b['id'] ?>">
         <div class="thumb">
-          <?php if ($image !== ''): ?>
-            <img src="<?= htmlspecialchars($image) ?>" alt="">
-          <?php else: ?>
-            <img src="<?= $base ?>/assets/img/figma/mask-group.png" alt="Couverture par défaut">
-          <?php endif; ?>
+          <img src="<?= htmlspecialchars($image) ?>" alt="">
           <span class="book-status <?= $statusClass ?>"><?= htmlspecialchars($statusLabel) ?></span>
         </div>
         <div class="meta">
           <strong><?= htmlspecialchars($b['title']) ?></strong>
           <div class="muted"><?= htmlspecialchars($b['author']) ?></div>
-          <div class="muted">par <?= htmlspecialchars($b['username']) ?></div>
+          <div class="book-owner">Vendu par : <?= htmlspecialchars($b['username']) ?></div>
         </div>
       </a>
     <?php endforeach; ?>

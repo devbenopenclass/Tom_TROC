@@ -2,6 +2,10 @@
 $base = \App\Core\Url::baseUrl();
 $isLogged = !empty($_SESSION['user_id']);
 $unreadCount = 0;
+$cssPath = __DIR__ . '/../../../public/assets/css/style.css';
+$logoPath = __DIR__ . '/../../../public/assets/img/figma/logo.svg';
+$cssVersion = is_file($cssPath) ? (string)filemtime($cssPath) : '1';
+$logoVersion = is_file($logoPath) ? (string)filemtime($logoPath) : '1';
 if ($isLogged) {
   $unreadCount = \App\Models\Message::unreadCount((int)$_SESSION['user_id']);
 }
@@ -12,13 +16,13 @@ if ($isLogged) {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TomTroc</title>
-  <link rel="stylesheet" href="<?= $base ?>/assets/css/style.css">
+  <link rel="stylesheet" href="<?= $base ?>/assets/css/style.css?v=<?= htmlspecialchars($cssVersion) ?>">
 </head>
 <body>
 <header class="site-header <?= $isLogged ? 'is-auth' : '' ?>">
   <div class="shell header-row">
     <a class="brand" href="<?= $base ?>/" aria-label="Accueil TomTroc">
-      <img src="<?= $base ?>/assets/img/figma/logo.svg" alt="TomTroc">
+      <img class="brand-logo" src="<?= $base ?>/assets/img/figma/logo.svg?v=<?= htmlspecialchars($logoVersion) ?>" alt="TomTroc">
     </a>
 
     <input id="nav-toggle" class="nav-toggle" type="checkbox" aria-hidden="true">

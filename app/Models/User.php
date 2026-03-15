@@ -38,6 +38,20 @@ class User extends Model
     return $u ?: null;
   }
 
+  public static function findByLogin(string $login): ?array
+  {
+    $passwordColumn = self::resolvePasswordColumn();
+    $stmt = self::db()->prepare("
+      SELECT id, username, email, avatar, bio, created_at, {$passwordColumn} AS password_hash
+      FROM users
+      WHERE email = :login OR username = :login
+      LIMIT 1
+    ");
+    $stmt->execute(['login' => $login]);
+    $u = $stmt->fetch();
+    return $u ?: null;
+  }
+
   public static function find(int $id): ?array
   {
     $stmt = self::db()->prepare("SELECT id, username, email, avatar, bio, created_at FROM users WHERE id = :id");

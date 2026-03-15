@@ -5,6 +5,25 @@ use App\Core\Model;
 
 class Book extends Model
 {
+  public static function imagePath(?array $book, string $fallback = '/assets/img/figma/mask-group.png'): string
+  {
+    $image = trim((string)($book['image'] ?? ''));
+    $titleFallback = self::fallbackImageByTitle((string)($book['title'] ?? ''));
+
+    if ($titleFallback !== null) {
+      return $titleFallback;
+    }
+
+    if ($image !== '') {
+      $normalized = self::normalizeImagePath($image);
+      if ($normalized !== null) {
+        return $normalized;
+      }
+    }
+
+    return $fallback;
+  }
+
   public static function latest(int $limit = 4): array
   {
     try {
@@ -197,5 +216,57 @@ class Book extends Model
       ),
       'created_at' => date('Y-m-d H:i:s'),
     ];
+  }
+
+  private static function normalizeImagePath(string $image): ?string
+  {
+    if (preg_match('#^https?://#i', $image)) {
+      return $image;
+    }
+
+    $path = '/' . ltrim($image, '/');
+    $publicPath = realpath(__DIR__ . '/../../public');
+    if ($publicPath === false) {
+      return null;
+    }
+
+    if (str_starts_with($path, '/assets/')) {
+      $candidate = $publicPath . $path;
+      if (is_file($candidate)) {
+        return $path;
+      }
+    }
+
+    $uploadsCandidate = $publicPath . '/assets/uploads/' . ltrim(basename($image), '/');
+    if (is_file($uploadsCandidate)) {
+      return '/assets/uploads/' . basename($image);
+    }
+
+    return null;
+  }
+
+  private static function fallbackImageByTitle(string $title): ?string
+  {
+    $map = [
+      'esther' => '/assets/img/exchange-covers/esther.png',
+      'thekinfolktable' => '/assets/img/exchange-covers/the-kinfolk-table.png',
+      'wabisabi' => '/assets/img/exchange-covers/wabi-sabi.png',
+      'milkhoney' => '/assets/img/exchange-covers/milk-and-honey.png',
+      'delight' => '/assets/img/exchange-covers/delight.png',
+      'milwaukeemission' => '/assets/img/exchange-covers/milwaukee-mission.png',
+      'minimalistgraphics' => '/assets/img/exchange-covers/minimalist-graphics.png',
+      'hygge' => '/assets/img/exchange-covers/hygge.png',
+      'innovation' => '/assets/img/exchange-covers/innovation.png',
+      'psalms' => '/assets/img/exchange-covers/psalms.png',
+      'thinkingfastslow' => '/assets/img/exchange-covers/thinking-fast-and-slow.png',
+      'abookfullofhope' => '/assets/img/exchange-covers/a-book-full-of-hope.png',
+      'thesubtleartofnotgivingafck' => '/assets/img/exchange-covers/the-subtle-art-of-not-giving-a-fck.png',
+      'narnia' => '/assets/img/exchange-covers/narnia.png',
+      'companyofone' => '/assets/img/exchange-covers/company-of-one.png',
+      'thetwotowers' => '/assets/img/exchange-covers/the-two-towers.png',
+    ];
+
+    $key = preg_replace('/[^a-z0-9]+/i', '', mb_strtolower(trim($title)));
+    return $map[$key] ?? null;
   }
 }

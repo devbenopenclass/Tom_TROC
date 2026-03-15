@@ -1,3 +1,5 @@
+<?php use App\Models\Book; ?>
+
 <section class="page-head">
   <div>
     <p class="kicker">Profil public</p>
@@ -29,13 +31,17 @@
   <?php else: ?>
     <div class="grid">
       <?php foreach ($books as $b): ?>
+        <?php
+        $image = Book::imagePath($b);
+        if (!preg_match('#^https?://#i', $image)) {
+          $assetFile = __DIR__ . '/../../../public' . $image;
+          $imageVersion = is_file($assetFile) ? (string)filemtime($assetFile) : '1';
+          $image = $base . $image . '?v=' . $imageVersion;
+        }
+        ?>
         <a class="book" href="<?= $base ?>/books/show?id=<?= (int)$b['id'] ?>">
           <div class="thumb">
-            <?php if (!empty($b['image'])): ?>
-              <img src="<?= htmlspecialchars($b['image']) ?>" alt="">
-            <?php else: ?>
-              <img src="<?= $base ?>/assets/img/figma/mask-group.png" alt="Couverture par défaut">
-            <?php endif; ?>
+            <img src="<?= htmlspecialchars($image) ?>" alt="">
           </div>
           <div class="meta">
             <strong><?= htmlspecialchars($b['title']) ?></strong>

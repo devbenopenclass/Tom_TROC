@@ -4,8 +4,8 @@
     <?php if (!empty($error)): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
 
     <form method="post" action="<?= $base ?>/login" class="login-form">
-      <label>Adresse email</label>
-      <input name="email" type="email" required>
+      <label>Email ou pseudo</label>
+      <input name="email" type="text" required>
 
       <label>Mot de passe</label>
       <input name="password" type="password" required>

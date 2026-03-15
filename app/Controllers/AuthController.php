@@ -42,10 +42,10 @@ class AuthController extends Controller
 
   public function login(): void
   {
-    $email = trim($_POST['email'] ?? '');
+    $login = trim($_POST['email'] ?? '');
     $password = (string)($_POST['password'] ?? '');
 
-    $user = User::findByEmail($email);
+    $user = User::findByLogin($login);
     if (!$user || !password_verify($password, $user['password_hash'])) {
       $this->render('auth/login', ['error' => 'Identifiants invalides.']);
       return;

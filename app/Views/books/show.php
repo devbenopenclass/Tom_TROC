@@ -1,17 +1,16 @@
+<?php use App\Models\Book; ?>
+
 <?php
 $status = (string)($book['status'] ?? 'available');
-$statusClass = 'status-available';
-if ($status === 'reserved') $statusClass = 'status-reserved';
-if ($status === 'unavailable') $statusClass = 'status-unavailable';
-
 $title = trim((string)($book['title'] ?? 'Livre'));
 $author = trim((string)($book['author'] ?? 'Auteur inconnu'));
 $owner = trim((string)($book['username'] ?? 'membre de la communaute'));
 $description = trim((string)($book['description'] ?? ''));
-$image = (string)($book['image'] ?? '');
-
-if ($image !== '' && str_starts_with($image, '/')) {
-  $image = $base . $image;
+$image = Book::imagePath($book, '/assets/img/figma/mask-group-1.png');
+if (!preg_match('#^https?://#i', $image)) {
+  $assetFile = __DIR__ . '/../../../public' . $image;
+  $imageVersion = is_file($assetFile) ? (string)filemtime($assetFile) : '1';
+  $image = $base . $image . '?v=' . $imageVersion;
 }
 
 if ($description === '') {
@@ -22,37 +21,43 @@ if ($description === '') {
     $author
   );
 }
+
+$paragraphs = preg_split("/\n\s*\n/", $description) ?: [$description];
 ?>
 
-<section class="page-head">
-  <div>
-    <p class="kicker">Fiche livre</p>
-    <h1><?= htmlspecialchars($title) ?></h1>
-    <p><?= htmlspecialchars($author) ?></p>
-  </div>
-  <span class="badge <?= $statusClass ?>"><?= htmlspecialchars($status) ?></span>
-</section>
+<section class="book-show">
+  <p class="book-show-breadcrumb">
+    <a href="<?= $base ?>/books/exchange">Nos livres</a>
+    <span>&gt;</span>
+    <span><?= htmlspecialchars($title) ?></span>
+  </p>
 
-<section class="split">
-  <article class="card">
-    <div class="thumb" style="height:380px;border-radius:14px;overflow:hidden;">
-      <?php if ($image !== ''): ?>
-        <img src="<?= htmlspecialchars($image) ?>" alt="">
-      <?php else: ?>
-        <img src="<?= $base ?>/assets/img/figma/mask-group-1.png" alt="Couverture par défaut">
+  <div class="book-show-layout">
+    <article class="book-show-media">
+      <img src="<?= htmlspecialchars($image) ?>" alt="">
+    </article>
+
+    <article class="book-show-panel">
+      <h1><?= htmlspecialchars($title) ?></h1>
+      <p class="book-show-author">par <?= htmlspecialchars($author) ?></p>
+      <span class="book-show-divider" aria-hidden="true"></span>
+
+      <p class="book-show-label">Description</p>
+      <div class="book-show-copy">
+        <?php foreach ($paragraphs as $paragraph): ?>
+          <p><?= nl2br(htmlspecialchars(trim($paragraph))) ?></p>
+        <?php endforeach; ?>
+      </div>
+
+      <p class="book-show-label">Propriétaire</p>
+      <a class="book-show-owner" href="<?= $base ?>/profiles/show?id=<?= (int)$book['user_id'] ?>">
+        <img src="<?= $base ?>/assets/img/figma/mask-group-3.png" alt="">
+        <strong><?= htmlspecialchars($owner) ?></strong>
+      </a>
+
+      <?php if (!empty($_SESSION['user_id']) && (int)$_SESSION['user_id'] !== (int)$book['user_id']): ?>
+        <p class="book-show-cta"><a class="btn" href="<?= $base ?>/messages/thread?user=<?= (int)$book['user_id'] ?>">Envoyer un message</a></p>
       <?php endif; ?>
-    </div>
-  </article>
-
-  <article class="card">
-    <h2>A propos de "<?= htmlspecialchars($title) ?>"</h2>
-    <p><?= nl2br(htmlspecialchars($description)) ?></p>
-
-    <p class="mini-label">Propriétaire</p>
-    <p><a href="<?= $base ?>/profiles/show?id=<?= (int)$book['user_id'] ?>"><strong><?= htmlspecialchars($owner) ?></strong></a></p>
-
-    <?php if (!empty($_SESSION['user_id']) && (int)$_SESSION['user_id'] !== (int)$book['user_id']): ?>
-      <p><a class="btn" href="<?= $base ?>/messages/thread?user=<?= (int)$book['user_id'] ?>">Contacter <?= htmlspecialchars($owner) ?></a></p>
-    <?php endif; ?>
-  </article>
+    </article>
+  </div>
 </section>
