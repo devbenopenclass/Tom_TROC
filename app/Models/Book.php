@@ -106,4 +106,36 @@ final class Book extends BaseModel
         $stmt = $this->pdo->prepare('DELETE FROM books WHERE id = :id AND user_id = :uid');
         return $stmt->execute([':id' => $bookId, ':uid' => $userId]);
     }
+
+    public function allWithOwner(): array
+    {
+        $stmt = $this->pdo->query('
+            SELECT b.*, u.username, u.email
+            FROM books b
+            JOIN users u ON u.id = b.user_id
+            ORDER BY b.created_at DESC
+        ');
+
+        return $stmt->fetchAll();
+    }
+
+    public function adminSetStatus(int $bookId, string $status): bool
+    {
+        $stmt = $this->pdo->prepare('
+            UPDATE books
+            SET status = :status
+            WHERE id = :id
+        ');
+
+        return $stmt->execute([
+            ':status' => $status,
+            ':id' => $bookId,
+        ]);
+    }
+
+    public function adminDelete(int $bookId): bool
+    {
+        $stmt = $this->pdo->prepare('DELETE FROM books WHERE id = :id');
+        return $stmt->execute([':id' => $bookId]);
+    }
 }

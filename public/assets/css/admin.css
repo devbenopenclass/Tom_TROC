@@ -1,0 +1,140 @@
+.admin-page .site-header,
+.admin-page .site-footer {
+  background: #fff;
+}
+
+.admin-wrap {
+  background: #0a0a0a;
+  padding: 56px 0 96px;
+}
+
+.admin-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+
+.admin-head h1 {
+  margin: 0;
+  font-family: var(--serif);
+  color: #f1f1f1;
+  font-size: 52px;
+  font-weight: 400;
+}
+
+.admin-head__link {
+  color: #0aa36c;
+  background: #fff;
+  border: 1px solid #0aa36c;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+}
+
+.admin-table {
+  background: #f3f3f3;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.admin-table__head,
+.admin-table__row {
+  display: grid;
+  grid-template-columns: 110px 1.2fr 1fr 1.1fr 150px 220px;
+  gap: 10px;
+  align-items: center;
+  padding: 14px 18px;
+}
+
+.admin-table__head {
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #5a5a5a;
+  font-weight: 700;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.admin-table__row {
+  min-height: 98px;
+  font-size: 14px;
+}
+
+.admin-table__row:nth-child(odd) {
+  background: #e8edf0;
+}
+
+.admin-table__photo img {
+  width: 68px;
+  height: 68px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.admin-table__muted {
+  color: #818181;
+  font-size: 12px;
+}
+
+.admin-table__actions {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-table__actions form {
+  margin: 0;
+}
+
+.admin-table__actions button {
+  width: 100%;
+  background: #fff;
+  border: 1px solid #0aa36c;
+  color: #0a8a5c;
+  border-radius: 6px;
+  font-size: 12px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.admin-table__actions .admin-table__danger {
+  border-color: #d65858;
+  color: #d65858;
+}
+
+.admin-table--members .admin-table__head,
+.admin-table--members .admin-table__row {
+  grid-template-columns: 90px 1fr 1.3fr 1fr 180px;
+}
+
+.admin-table__empty {
+  padding: 18px;
+  color: #666;
+}
+
+@media (max-width: 1100px) {
+  .admin-wrap {
+    padding: 26px 0 44px;
+  }
+
+  .admin-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-head h1 {
+    font-size: 34px;
+  }
+
+  .admin-table__head {
+    display: none;
+  }
+
+  .admin-table__row,
+  .admin-table--members .admin-table__row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding: 12px 14px;
+  }
+}

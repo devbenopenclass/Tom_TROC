@@ -1,0 +1,318 @@
+.account-admin {
+  background: #080808;
+  padding: 76px 0 96px;
+}
+
+.account-admin__top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 34px;
+}
+
+.account-card {
+  background: #f4f4f4;
+  border-radius: 24px;
+  padding: 44px 42px;
+  min-height: 520px;
+}
+
+.account-card--profile {
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.account-profile__avatar-wrap {
+  display: grid;
+  justify-items: center;
+}
+
+.account-profile__avatar {
+  width: 148px;
+  height: 148px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.account-profile__avatar--fallback {
+  display: grid;
+  place-items: center;
+  background: #d7dee3;
+  color: #3d4f59;
+  font-family: var(--serif);
+  font-size: 58px;
+  font-weight: 500;
+}
+
+.account-profile__edit {
+  margin-top: 10px;
+  border: 0;
+  border-bottom: 1px solid #adadad;
+  background: transparent;
+  color: #8b8b8b;
+  font-size: 30px;
+  font-family: inherit;
+  padding: 0;
+}
+
+.account-profile__identity {
+  border-top: 1px solid #d8d8d8;
+  margin-top: 42px;
+  padding-top: 34px;
+  width: 100%;
+}
+
+.account-profile__name {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 52px;
+  font-weight: 400;
+}
+
+.account-profile__since {
+  margin: 4px 0 18px;
+  color: #9b9b9b;
+  font-size: 25px;
+}
+
+.account-profile__library {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: .16em;
+  font-weight: 600;
+}
+
+.account-profile__count {
+  margin: 4px 0 0;
+  font-size: 35px;
+}
+
+.account-form__title {
+  margin: 0 0 24px;
+  font-size: 38px;
+  font-weight: 500;
+}
+
+.account-form {
+  display: grid;
+  gap: 18px;
+}
+
+.account-form__field {
+  display: grid;
+  gap: 8px;
+}
+
+.account-form__field span {
+  font-size: 29px;
+  color: #9a9a9a;
+}
+
+.account-form__field input {
+  height: 72px;
+  border: 1px solid #e3e7ea;
+  border-radius: 8px;
+  background: #e6ebef;
+  padding: 0 16px;
+  font-size: 27px;
+  font-family: inherit;
+}
+
+.account-form__field input:focus {
+  outline: 2px solid rgba(10, 163, 108, .2);
+  border-color: var(--green);
+}
+
+.account-form__submit {
+  margin-top: 14px;
+  width: fit-content;
+  min-width: 190px;
+  height: 64px;
+  font-size: 32px;
+}
+
+.account-books {
+  margin-top: 34px;
+  background: #f4f4f4;
+  border-radius: 22px;
+  overflow: hidden;
+}
+
+.account-books__head,
+.account-books__row {
+  display: grid;
+  grid-template-columns: 130px 1.1fr 1fr 1.4fr 150px 180px;
+  gap: 14px;
+  align-items: center;
+  padding: 18px 24px;
+}
+
+.account-books__head {
+  font-size: 11px;
+  letter-spacing: .14em;
+  color: #5a5a5a;
+  font-weight: 700;
+  border-bottom: 1px solid #ebebeb;
+}
+
+.account-books__row {
+  min-height: 118px;
+  font-size: 24px;
+  color: #2a2a2a;
+}
+
+.account-books__row:nth-child(odd) {
+  background: #eef1f4;
+}
+
+.account-books__photo img {
+  width: 84px;
+  height: 84px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.account-books__desc {
+  color: #3f3f3f;
+  font-style: italic;
+  line-height: 1.25;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.status-pill--ok {
+  background: #79c6a7;
+}
+
+.status-pill--off {
+  background: #cc6c6c;
+}
+
+.account-books__actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.account-books__actions a {
+  text-decoration: underline;
+  font-size: 14px;
+}
+
+.account-books__actions form {
+  margin: 0;
+}
+
+.account-books__actions button {
+  border: 0;
+  background: transparent;
+  color: #db4d4d;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: inherit;
+  padding: 0;
+}
+
+.account-books__empty {
+  padding: 28px 24px;
+  color: #666;
+}
+
+.account-admin-page .site-header,
+.account-admin-page .site-footer {
+  background: #fff;
+}
+
+@media (max-width: 1400px) {
+  .account-admin__top {
+    grid-template-columns: 1fr;
+  }
+
+  .account-card {
+    min-height: auto;
+  }
+
+  .account-books__head,
+  .account-books__row {
+    grid-template-columns: 108px 1fr 1fr;
+  }
+
+  .account-books__head span:nth-child(4),
+  .account-books__head span:nth-child(5),
+  .account-books__head span:nth-child(6),
+  .account-books__row > div:nth-child(4),
+  .account-books__row > div:nth-child(5),
+  .account-books__row > div:nth-child(6) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 900px) {
+  .account-admin {
+    padding: 26px 0 48px;
+  }
+
+  .account-card {
+    padding: 26px 20px;
+    border-radius: 16px;
+  }
+
+  .account-profile__avatar {
+    width: 96px;
+    height: 96px;
+  }
+
+  .account-profile__name {
+    font-size: 34px;
+  }
+
+  .account-profile__since {
+    font-size: 18px;
+  }
+
+  .account-form__title {
+    font-size: 28px;
+  }
+
+  .account-form__field span {
+    font-size: 18px;
+  }
+
+  .account-form__field input {
+    height: 50px;
+    font-size: 18px;
+  }
+
+  .account-form__submit {
+    width: 100%;
+    min-width: 0;
+    height: 50px;
+    font-size: 20px;
+  }
+
+  .account-books__head,
+  .account-books__row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 12px 14px;
+  }
+
+  .account-books__head {
+    display: none;
+  }
+
+  .account-books__photo img {
+    width: 70px;
+    height: 70px;
+  }
+}

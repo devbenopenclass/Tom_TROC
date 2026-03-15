@@ -27,6 +27,27 @@ final class Auth
         return $u->findById($id);
     }
 
+    public static function isAdmin(): bool
+    {
+        $user = self::user();
+        if (!$user || empty($user['email'])) {
+            return false;
+        }
+
+        $config = require CONFIG_PATH . '/config.php';
+        $raw = (string)($config['app']['admin_emails'] ?? '');
+        if ($raw === '') {
+            return false;
+        }
+
+        $adminEmails = array_filter(array_map(
+            static fn(string $email): string => strtolower(trim($email)),
+            explode(',', $raw)
+        ));
+
+        return in_array(strtolower((string)$user['email']), $adminEmails, true);
+    }
+
     public static function login(int $userId): void
     {
         Session::regenerate();

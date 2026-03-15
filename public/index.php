@@ -1,38 +1,10 @@
 <?php
 declare(strict_types=1);
 
-// Front Controller - point d'entrée unique
-$debug = getenv('APP_DEBUG') === '1';
-error_reporting(E_ALL);
-ini_set('display_errors', $debug ? '1' : '0');
-
-// Base paths
-define('BASE_PATH', dirname(__DIR__));
-define('APP_PATH', BASE_PATH . '/app');
-define('CONFIG_PATH', BASE_PATH . '/config');
-define('STORAGE_PATH', BASE_PATH . '/storage');
-
-// Base URL (support installation en sous-dossier, ex: /tomtroc_mvc/public)
-$scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
-define('BASE_URL', rtrim($scriptDir, '/'));
-
-// Autoload simple (sans Composer)
-spl_autoload_register(function (string $class): void {
-    $prefix = 'App\\';
-    $baseDir = APP_PATH . '/';
-
-    $len = strlen($prefix);
-    if (strncmp($prefix, $class, $len) !== 0) {
-        return;
-    }
-    $relative = substr($class, $len);
-    $file = $baseDir . str_replace('\\', '/', $relative) . '.php';
-    if (file_exists($file)) {
-        require $file;
-    }
-});
-
-require CONFIG_PATH . '/config.php';
+bootErrorHandling();
+defineBasePaths();
+defineBaseUrl();
+registerAutoloader();
 
 use App\Core\Router;
 use App\Core\Session;
@@ -40,32 +12,49 @@ use App\Core\Session;
 Session::start();
 
 $router = new Router();
+$routes = require CONFIG_PATH . '/routes.php';
+$router->register($routes);
 
-$router->get('/', 'HomeController@index');
+$method = is_string($_SERVER['REQUEST_METHOD'] ?? null) ? $_SERVER['REQUEST_METHOD'] : 'GET';
+$uri = is_string($_SERVER['REQUEST_URI'] ?? null) ? $_SERVER['REQUEST_URI'] : '/';
+$router->dispatch($method, $uri);
 
-$router->get('/register', 'AuthController@registerForm');
-$router->post('/register', 'AuthController@register');
-$router->get('/login', 'AuthController@loginForm');
-$router->post('/login', 'AuthController@login');
-$router->get('/logout', 'AuthController@logout');
+function bootErrorHandling(): void
+{
+    $debug = getenv('APP_DEBUG') === '1';
+    error_reporting(E_ALL);
+    ini_set('display_errors', $debug ? '1' : '0');
+}
 
-$router->get('/books', 'BookController@index');
-$router->get('/books/show', 'BookController@show');
+function defineBasePaths(): void
+{
+    define('BASE_PATH', dirname(__DIR__));
+    define('APP_PATH', BASE_PATH . '/app');
+    define('CONFIG_PATH', BASE_PATH . '/config');
+    define('STORAGE_PATH', BASE_PATH . '/storage');
+}
 
-$router->get('/profile', 'UserController@show');
+function defineBaseUrl(): void
+{
+    $scriptName = (string)($_SERVER['SCRIPT_NAME'] ?? '');
+    $scriptDir = str_replace('\\', '/', dirname($scriptName));
+    $baseUrl = rtrim($scriptDir, '/');
 
-$router->get('/account', 'AccountController@index');
-$router->post('/account', 'AccountController@update');
+    define('BASE_URL', $baseUrl === '/' ? '' : $baseUrl);
+}
 
-$router->get('/library', 'BookController@myBooks');
-$router->get('/library/create', 'BookController@createForm');
-$router->post('/library/create', 'BookController@store');
-$router->get('/library/edit', 'BookController@editForm');
-$router->post('/library/edit', 'BookController@update');
-$router->post('/library/delete', 'BookController@delete');
+function registerAutoloader(): void
+{
+    spl_autoload_register(static function (string $class): void {
+        $prefix = 'App\\';
+        if (!str_starts_with($class, $prefix)) {
+            return;
+        }
 
-$router->get('/messages', 'MessageController@index');
-$router->get('/messages/thread', 'MessageController@thread');
-$router->post('/messages/send', 'MessageController@send');
-
-$router->dispatch($_SERVER['REQUEST_METHOD'] ?? 'GET', $_SERVER['REQUEST_URI'] ?? '/');
+        $relative = substr($class, strlen($prefix));
+        $file = APP_PATH . '/' . str_replace('\\', '/', $relative) . '.php';
+        if (is_file($file)) {
+            require $file;
+        }
+    });
+}

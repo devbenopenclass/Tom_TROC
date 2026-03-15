@@ -35,17 +35,49 @@ final class User extends BaseModel
         return $row ?: null;
     }
 
-    public function updateProfile(int $id, string $username, ?string $bio): bool
+    public function updateAccount(int $id, string $username, string $email, ?string $passwordHash): bool
     {
+        if ($passwordHash !== null) {
+            $stmt = $this->pdo->prepare('
+                UPDATE users
+                SET username = :username, email = :email, password = :password
+                WHERE id = :id
+            ');
+            return $stmt->execute([
+                ':username' => $username,
+                ':email' => $email,
+                ':password' => $passwordHash,
+                ':id' => $id,
+            ]);
+        }
+
         $stmt = $this->pdo->prepare('
             UPDATE users
-            SET username = :username, bio = :bio
+            SET username = :username, email = :email
             WHERE id = :id
         ');
         return $stmt->execute([
             ':username' => $username,
-            ':bio' => $bio,
+            ':email' => $email,
             ':id' => $id,
         ]);
+    }
+
+    public function allMembers(): array
+    {
+        $stmt = $this->pdo->query('
+            SELECT
+                u.id,
+                u.username,
+                u.email,
+                u.created_at,
+                COUNT(b.id) AS books_count
+            FROM users u
+            LEFT JOIN books b ON b.user_id = u.id
+            GROUP BY u.id, u.username, u.email, u.created_at
+            ORDER BY u.created_at DESC
+        ');
+
+        return $stmt->fetchAll();
     }
 }

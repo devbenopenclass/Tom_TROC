@@ -1,0 +1,16 @@
+RewriteEngine On
+
+# Redirect legacy /public/* URLs only for direct browser requests
+RewriteCond %{THE_REQUEST} \s/+[^\s]*public(?:/([^\s?]*))?[\s?] [NC]
+RewriteRule ^public(?:/(.*))?$ $1 [R=301,L]
+
+# Expose public assets at /assets/*
+RewriteRule ^assets/(.*)$ public/assets/$1 [END]
+
+# Serve existing files/directories directly
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [END]
+
+# Front controller at project root
+RewriteRule ^ index.php [QSA,END]

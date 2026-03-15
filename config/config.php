@@ -18,5 +18,7 @@ return [
         // Fallback automatique sur le sous-dossier courant (ex: /tomtroc_mvc/public).
         'base_url' => getenv('APP_BASE_URL') ?: $defaultBaseUrl,
         'name' => 'Tom Troc',
+        // Emails admin séparés par virgule, ex: "admin@site.com,owner@site.com"
+        'admin_emails' => getenv('APP_ADMIN_EMAILS') ?: 'admin@tomtroc.local',
     ],
 ];

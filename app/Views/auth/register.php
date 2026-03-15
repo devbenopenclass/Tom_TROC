@@ -1,7 +1,7 @@
 <?php
 use App\Core\Csrf;
 ?>
-<section class="auth">
+<section class="auth auth--register">
   <h1 class="page-title">Inscription</h1>
 
   <form class="form" method="post" action="<?= BASE_URL ?>/register">

@@ -20,8 +20,10 @@ $error = Session::flash('error');
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/layout.css">
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/components.css">
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/home.css">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/account-admin.css">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/admin.css">
 </head>
-<body>
+<body class="<?= isset($bodyClass) ? View::e((string)$bodyClass) : '' ?>">
   <?php require APP_PATH . '/Views/layouts/header.php'; ?>
 
   <main>

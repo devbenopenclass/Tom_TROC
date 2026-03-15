@@ -13,23 +13,51 @@ final class Router
 
     public function get(string $path, string $handler): void
     {
-        $this->routes['GET'][$this->normalize($path)] = $handler;
+        $this->map('GET', $path, $handler);
     }
 
     public function post(string $path, string $handler): void
     {
-        $this->routes['POST'][$this->normalize($path)] = $handler;
+        $this->map('POST', $path, $handler);
+    }
+
+    public function map(string $method, string $path, string $handler): void
+    {
+        $method = strtoupper(trim($method));
+        if (!isset($this->routes[$method])) {
+            throw new \InvalidArgumentException('Méthode HTTP non supportée : ' . $method);
+        }
+
+        $this->routes[$method][$this->normalize($path)] = $handler;
+    }
+
+    /** @param array<string, array<string, string>> $routes */
+    public function register(array $routes): void
+    {
+        foreach ($routes as $method => $methodRoutes) {
+            if (!is_array($methodRoutes)) {
+                continue;
+            }
+
+            foreach ($methodRoutes as $path => $handler) {
+                if (!is_string($path) || !is_string($handler)) {
+                    continue;
+                }
+
+                $this->map($method, $path, $handler);
+            }
+        }
     }
 
     public function dispatch(string $method, string $uri): void
     {
         $method = strtoupper($method);
-        $path = parse_url($uri, PHP_URL_PATH) ?: '/';
+        $path = (string)(parse_url($uri, PHP_URL_PATH) ?: '/');
 
-        $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
-        $scriptDir = rtrim($scriptDir, '/');
-        if ($scriptDir !== '' && $scriptDir !== '/' && str_starts_with($path, $scriptDir)) {
-            $path = substr($path, strlen($scriptDir)) ?: '/';
+        $baseUrl = defined('BASE_URL') ? (string)BASE_URL : '';
+        $baseUrl = rtrim($baseUrl, '/');
+        if ($baseUrl !== '' && str_starts_with($path, $baseUrl)) {
+            $path = substr($path, strlen($baseUrl)) ?: '/';
         }
 
         $path = $this->normalize($path);
@@ -63,7 +91,14 @@ final class Router
 
     private function normalize(string $path): string
     {
-        $path = '/' . trim($path, '/');
-        return $path === '//' ? '/' : $path;
+        $path = trim($path);
+        if ($path === '' || $path === '/') {
+            return '/';
+        }
+
+        $normalized = '/' . trim($path, '/');
+        $normalized = preg_replace('#/+#', '/', $normalized) ?: '/';
+
+        return rtrim($normalized, '/') ?: '/';
     }
 }

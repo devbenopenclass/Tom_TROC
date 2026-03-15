@@ -18,8 +18,14 @@ $user = Auth::user();
       <?php if ($user): ?>
         <a class="nav__link" href="<?= BASE_URL ?>/messages">Messagerie</a>
         <a class="nav__link" href="<?= BASE_URL ?>/account">Mon compte</a>
+        <?php if (Auth::isAdmin()): ?>
+          <a class="nav__link" href="<?= BASE_URL ?>/admin/books">Admin livres</a>
+          <a class="nav__link" href="<?= BASE_URL ?>/admin/members">Membres</a>
+        <?php endif; ?>
         <a class="nav__link" href="<?= BASE_URL ?>/logout">Déconnexion</a>
       <?php else: ?>
+        <a class="nav__link" href="<?= BASE_URL ?>/messages">Messagerie</a>
+        <a class="nav__link" href="<?= BASE_URL ?>/account">Mon compte</a>
         <a class="nav__link" href="<?= BASE_URL ?>/login">Connexion</a>
       <?php endif; ?>
     </nav>
