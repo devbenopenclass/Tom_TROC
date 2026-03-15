@@ -1,31 +1,33 @@
-<?php
-use App\Core\View;
-use App\Core\Auth;
-use App\Core\Csrf;
+<section class="page-head">
+  <div>
+    <p class="kicker">Conversation</p>
+    <h1><?= htmlspecialchars($other['username']) ?></h1>
+    <p>Échangez autour des livres.</p>
+  </div>
+  <img src="<?= $base ?>/assets/img/figma/icon-messagerie.svg" alt="Icône messagerie">
+</section>
 
-$me = (int)Auth::id();
-?>
-<section class="section">
-  <a class="back" href="<?= BASE_URL ?>/messages">← Retour</a>
-  <h1 class="page-title">Discussion avec <?= View::e($other['username'] ?? '') ?></h1>
-
+<section class="card">
   <div class="thread">
-    <?php foreach (($messages ?? []) as $m): ?>
-      <?php $isMine = ((int)$m['sender_id'] === $me); ?>
-      <div class="bubble <?= $isMine ? 'bubble--mine' : 'bubble--theirs' ?>">
-        <div class="bubble__content"><?= nl2br(View::e((string)$m['content'])) ?></div>
-        <div class="bubble__meta"><?= View::e((string)$m['created_at']) ?></div>
-      </div>
-    <?php endforeach; ?>
+    <?php if (empty($messages)): ?>
+      <p class="muted">Aucun message pour l'instant.</p>
+    <?php else: ?>
+      <?php foreach ($messages as $m):
+        $isMe = (int)$m['sender_id'] === (int)($_SESSION['user_id'] ?? 0);
+      ?>
+        <article class="bubble <?= $isMe ? 'me' : '' ?>">
+          <strong><?= htmlspecialchars($m['sender_name']) ?></strong><br>
+          <?= nl2br(htmlspecialchars($m['content'])) ?>
+          <span class="bubble-meta"><?= htmlspecialchars($m['created_at']) ?></span>
+        </article>
+      <?php endforeach; ?>
+    <?php endif; ?>
   </div>
 
-  <form class="form thread-form" method="post" action="<?= BASE_URL ?>/messages/send">
-    <?= Csrf::input(); ?>
-    <input type="hidden" name="receiver_id" value="<?= (int)($other['id'] ?? 0) ?>">
-    <label class="field">
-      <span>Votre message</span>
-      <textarea name="content" rows="3" required></textarea>
-    </label>
-    <button class="btn btn--primary" type="submit">Envoyer</button>
+  <form method="post" action="<?= $base ?>/messages/send" class="form form-wide">
+    <input type="hidden" name="receiver_id" value="<?= (int)$other['id'] ?>">
+    <label class="mini-label">Votre message</label>
+    <textarea name="content" rows="4" required placeholder="Écrire un message..."></textarea>
+    <button class="btn" type="submit">Envoyer</button>
   </form>
 </section>

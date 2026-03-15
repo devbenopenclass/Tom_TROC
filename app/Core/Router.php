@@ -1,104 +1,70 @@
 <?php
-declare(strict_types=1);
-
 namespace App\Core;
 
-final class Router
+class Router
 {
-    /** @var array<string, array<string, string>> */
-    private array $routes = [
-        'GET' => [],
-        'POST' => [],
-    ];
+  private array $routes = ['GET' => [], 'POST' => []];
 
-    public function get(string $path, string $handler): void
-    {
-        $this->map('GET', $path, $handler);
+  public function get(string $path, string $handler): void
+  {
+    $this->routes['GET'][$this->normalize($path)] = $handler;
+  }
+
+  public function post(string $path, string $handler): void
+  {
+    $this->routes['POST'][$this->normalize($path)] = $handler;
+  }
+
+  private function normalize(string $path): string
+  {
+    $path = '/' . trim($path, '/');
+    return $path === '//' ? '/' : $path;
+  }
+
+  public function dispatch(): void
+  {
+    $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+    $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+
+    // Handle configured or auto-detected base_url
+    $baseUrl = Url::baseUrl();
+    if ($baseUrl && str_starts_with($uri, $baseUrl)) {
+      $uri = substr($uri, strlen($baseUrl)) ?: '/';
     }
 
-    public function post(string $path, string $handler): void
-    {
-        $this->map('POST', $path, $handler);
+    // Support front-controller URLs such as /index.php and /index.php/...
+    if ($uri === '/index.php') {
+      $uri = '/';
+    } elseif (str_starts_with($uri, '/index.php/')) {
+      $uri = substr($uri, strlen('/index.php')) ?: '/';
     }
 
-    public function map(string $method, string $path, string $handler): void
-    {
-        $method = strtoupper(trim($method));
-        if (!isset($this->routes[$method])) {
-            throw new \InvalidArgumentException('Méthode HTTP non supportée : ' . $method);
-        }
+    $path = $this->normalize($uri);
 
-        $this->routes[$method][$this->normalize($path)] = $handler;
+    $handler = $this->routes[$method][$path] ?? null;
+    if (!$handler) {
+      http_response_code(404);
+      echo "404 Not Found";
+      return;
     }
 
-    /** @param array<string, array<string, string>> $routes */
-    public function register(array $routes): void
-    {
-        foreach ($routes as $method => $methodRoutes) {
-            if (!is_array($methodRoutes)) {
-                continue;
-            }
+    [$controllerName, $action] = explode('@', $handler);
+    $fqcn = "\\App\\Controllers\\{$controllerName}";
 
-            foreach ($methodRoutes as $path => $handler) {
-                if (!is_string($path) || !is_string($handler)) {
-                    continue;
-                }
-
-                $this->map($method, $path, $handler);
-            }
-        }
+    if (!class_exists($fqcn)) {
+      http_response_code(500);
+      echo "Controller not found: " . htmlspecialchars($fqcn);
+      return;
     }
 
-    public function dispatch(string $method, string $uri): void
-    {
-        $method = strtoupper($method);
-        $path = (string)(parse_url($uri, PHP_URL_PATH) ?: '/');
+    $controller = new $fqcn();
 
-        $baseUrl = defined('BASE_URL') ? (string)BASE_URL : '';
-        $baseUrl = rtrim($baseUrl, '/');
-        if ($baseUrl !== '' && str_starts_with($path, $baseUrl)) {
-            $path = substr($path, strlen($baseUrl)) ?: '/';
-        }
-
-        $path = $this->normalize($path);
-        $handler = $this->routes[$method][$path] ?? null;
-
-        if (!$handler) {
-            http_response_code(404);
-            View::render('errors/404');
-            return;
-        }
-
-        [$controllerName, $action] = explode('@', $handler, 2);
-
-        $controllerClass = 'App\\Controllers\\' . $controllerName;
-        if (!class_exists($controllerClass)) {
-            http_response_code(500);
-            echo 'Controller introuvable : ' . htmlspecialchars($controllerClass);
-            return;
-        }
-
-        $controller = new $controllerClass();
-
-        if (!method_exists($controller, $action)) {
-            http_response_code(500);
-            echo 'Action introuvable : ' . htmlspecialchars($action);
-            return;
-        }
-
-        $controller->$action();
+    if (!method_exists($controller, $action)) {
+      http_response_code(500);
+      echo "Action not found: " . htmlspecialchars($action);
+      return;
     }
 
-    private function normalize(string $path): string
-    {
-        $path = trim($path);
-        if ($path === '' || $path === '/') {
-            return '/';
-        }
-
-        $normalized = '/' . trim($path, '/');
-        $normalized = preg_replace('#/+#', '/', $normalized) ?: '/';
-
-        return rtrim($normalized, '/') ?: '/';
-    }
+    $controller->$action();
+  }
 }

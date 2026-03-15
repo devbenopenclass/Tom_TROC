@@ -1,26 +1,22 @@
-<?php
-use App\Core\Csrf;
-?>
-<section class="auth auth--login">
-  <div class="auth__left auth__content">
-    <h1 class="page-title">Connexion</h1>
+<section class="login-page full-bleed">
+  <div class="login-left">
+    <h1>Connexion</h1>
+    <?php if (!empty($error)): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
 
-    <form class="form" method="post" action="<?= BASE_URL ?>/login">
-      <?= Csrf::input(); ?>
+    <form method="post" action="<?= $base ?>/login" class="login-form">
+      <label>Adresse email</label>
+      <input name="email" type="email" required>
 
-      <label class="field">
-        <span>Adresse email</span>
-        <input type="email" name="email" required>
-      </label>
+      <label>Mot de passe</label>
+      <input name="password" type="password" required>
 
-      <label class="field">
-        <span>Mot de passe</span>
-        <input type="password" name="password" required>
-      </label>
-
-      <button class="btn btn--primary" type="submit">Se connecter</button>
+      <button class="btn" type="submit">Connexion</button>
     </form>
 
-    <p class="muted">Pas encore de compte ? <a href="<?= BASE_URL ?>/register">Créer un compte</a></p>
+    <p>Pas de compte ? <a href="<?= $base ?>/register">Inscrivez-vous</a></p>
+  </div>
+
+  <div class="login-right">
+    <img src="<?= $base ?>/assets/img/figma/mask-group-1.png" alt="Bibliothèque">
   </div>
 </section>

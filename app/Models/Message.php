@@ -1,64 +1,82 @@
 <?php
-declare(strict_types=1);
-
 namespace App\Models;
 
-final class Message extends BaseModel
+use App\Core\Model;
+use PDOException;
+
+class Message extends Model
 {
-    public function inbox(int $userId): array
-    {
-        // Liste des conversations: dernier message par interlocuteur
-        $stmt = $this->pdo->prepare('
-            SELECT m1.*
-            FROM messages m1
-            JOIN (
-                SELECT
-                    CASE
-                        WHEN sender_id = :uid THEN receiver_id
-                        ELSE sender_id
-                    END AS other_id,
-                    MAX(created_at) AS max_created
-                FROM messages
-                WHERE sender_id = :uid OR receiver_id = :uid
-                GROUP BY other_id
-            ) t
-            ON (
-                (
-                  (m1.sender_id = :uid AND m1.receiver_id = t.other_id)
-                  OR (m1.receiver_id = :uid AND m1.sender_id = t.other_id)
-                )
-                AND m1.created_at = t.max_created
-            )
-            ORDER BY m1.created_at DESC
-        ');
-        $stmt->execute([':uid' => $userId]);
-        return $stmt->fetchAll();
+  public static function unreadCount(int $me): int
+  {
+    try {
+      $stmt = self::db()->prepare("
+        SELECT COUNT(*) AS c
+        FROM messages
+        WHERE receiver_id = :me AND is_read = 0
+      ");
+      $stmt->execute(['me' => $me]);
+      $row = $stmt->fetch();
+      return (int)($row['c'] ?? 0);
+    } catch (PDOException $e) {
+      // Fallback for older schemas where `is_read` is missing.
+      return 0;
     }
+  }
 
-    public function thread(int $userId, int $otherId): array
-    {
-        $stmt = $this->pdo->prepare('
-            SELECT *
-            FROM messages
-            WHERE (sender_id = :uid AND receiver_id = :oid)
-               OR (sender_id = :oid AND receiver_id = :uid)
-            ORDER BY created_at ASC
-        ');
-        $stmt->execute([':uid' => $userId, ':oid' => $otherId]);
-        return $stmt->fetchAll();
-    }
+  public static function send(int $senderId, int $receiverId, string $content): void
+  {
+    $stmt = self::db()->prepare("
+      INSERT INTO messages (sender_id, receiver_id, content)
+      VALUES (:s, :r, :c)
+    ");
+    $stmt->execute(['s' => $senderId, 'r' => $receiverId, 'c' => $content]);
+  }
 
-    public function send(int $senderId, int $receiverId, string $content): int
-    {
-        $stmt = $this->pdo->prepare('
-            INSERT INTO messages (sender_id, receiver_id, content, created_at)
-            VALUES (:sid, :rid, :content, NOW())
-        ');
-        $stmt->execute([
-            ':sid' => $senderId,
-            ':rid' => $receiverId,
-            ':content' => $content,
-        ]);
-        return (int)$this->pdo->lastInsertId();
+  public static function thread(int $me, int $other): array
+  {
+    $stmt = self::db()->prepare("
+      SELECT m.*, us.username AS sender_name, ur.username AS receiver_name
+      FROM messages m
+      JOIN users us ON us.id = m.sender_id
+      JOIN users ur ON ur.id = m.receiver_id
+      WHERE (m.sender_id = :me AND m.receiver_id = :other)
+         OR (m.sender_id = :other AND m.receiver_id = :me)
+      ORDER BY m.created_at ASC
+    ");
+    $stmt->execute(['me' => $me, 'other' => $other]);
+    return $stmt->fetchAll();
+  }
+
+  public static function markThreadAsRead(int $me, int $other): void
+  {
+    try {
+      $stmt = self::db()->prepare("
+        UPDATE messages
+        SET is_read = 1
+        WHERE sender_id = :other
+          AND receiver_id = :me
+          AND is_read = 0
+      ");
+      $stmt->execute(['me' => $me, 'other' => $other]);
+    } catch (PDOException $e) {
+      // Ignore on legacy schemas.
     }
+  }
+
+  public static function inbox(int $me): array
+  {
+    $stmt = self::db()->prepare("
+      SELECT m.*
+      FROM messages m
+      WHERE m.id IN (
+        SELECT MAX(id)
+        FROM messages
+        WHERE sender_id = :me OR receiver_id = :me
+        GROUP BY LEAST(sender_id, receiver_id), GREATEST(sender_id, receiver_id)
+      )
+      ORDER BY m.created_at DESC
+    ");
+    $stmt->execute(['me' => $me]);
+    return $stmt->fetchAll();
+  }
 }

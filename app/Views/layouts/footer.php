@@ -1,8 +1,12 @@
+</main>
+
 <footer class="site-footer">
-  <div class="site-shell site-footer__inner">
-    <a class="footer-link" href="#">Politique de confidentialité</a>
-    <a class="footer-link" href="#">Mentions légales</a>
-    <span class="footer-copy">Tom Troc©</span>
-    <span class="footer-mark">TT</span>
+  <div class="shell footer-row">
+    <a href="#">Politique de confidentialité</a>
+    <a href="#">Mentions légales</a>
+    <span>Tom Troc©</span>
+    <img src="<?= $base ?>/assets/img/figma/group-10.svg" alt="Décor coeur">
   </div>
 </footer>
+</body>
+</html>

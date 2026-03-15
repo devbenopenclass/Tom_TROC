@@ -1,38 +1,39 @@
 <?php
-use App\Core\View;
-use App\Core\Auth;
-use App\Core\Csrf;
-
-$img = $book['image'] ?? null;
-$cover = $img ? '/assets/uploads/' . $img : '/assets/img/logo@2x.png';
-$me = Auth::id();
+$status = (string)($book['status'] ?? 'available');
+$statusClass = 'status-available';
+if ($status === 'reserved') $statusClass = 'status-reserved';
+if ($status === 'unavailable') $statusClass = 'status-unavailable';
 ?>
-<section class="section">
-  <a class="back" href="<?= BASE_URL ?>/books">← Retour</a>
 
-  <div class="book-show">
-    <img class="book-show__img" src="<?= View::e($cover) ?>" alt="">
-    <div class="book-show__body">
-      <h1 class="page-title"><?= View::e($book['title'] ?? '') ?></h1>
-      <div class="muted">Auteur : <?= View::e($book['author'] ?? '') ?></div>
-      <div class="muted">Statut : <?= View::e($book['status'] ?? '') ?></div>
-
-      <?php if (!empty($book['description'])): ?>
-        <p class="book-show__desc"><?= nl2br(View::e($book['description'])) ?></p>
-      <?php endif; ?>
-
-      <div class="book-show__actions">
-        <a class="btn btn--outline" href="<?= BASE_URL ?>/profile?id=<?= (int)$book['owner_id'] ?>">Voir le profil du propriétaire</a>
-
-        <?php if ($me && (int)$book['owner_id'] !== (int)$me): ?>
-          <form method="post" action="<?= BASE_URL ?>/messages/send" class="inline">
-            <?= Csrf::input(); ?>
-            <input type="hidden" name="receiver_id" value="<?= (int)$book['owner_id'] ?>">
-            <input type="hidden" name="content" value="Bonjour ! Je suis intéressé par votre livre « <?= View::e($book['title'] ?? '') ?> »." />
-            <button class="btn btn--primary" type="submit">Envoyer un message</button>
-          </form>
-        <?php endif; ?>
-      </div>
-    </div>
+<section class="page-head">
+  <div>
+    <p class="kicker">Fiche livre</p>
+    <h1><?= htmlspecialchars($book['title']) ?></h1>
+    <p><?= htmlspecialchars($book['author']) ?></p>
   </div>
+  <span class="badge <?= $statusClass ?>"><?= htmlspecialchars($status) ?></span>
+</section>
+
+<section class="split">
+  <article class="card">
+    <div class="thumb" style="height:380px;border-radius:14px;overflow:hidden;">
+      <?php if (!empty($book['image'])): ?>
+        <img src="<?= htmlspecialchars($book['image']) ?>" alt="">
+      <?php else: ?>
+        <img src="<?= $base ?>/assets/img/figma/mask-group-1.png" alt="Couverture par défaut">
+      <?php endif; ?>
+    </div>
+  </article>
+
+  <article class="card">
+    <h2>À propos du livre</h2>
+    <p><?= nl2br(htmlspecialchars($book['description'] ?? 'Aucune description.')) ?></p>
+
+    <p class="mini-label">Propriétaire</p>
+    <p><a href="<?= $base ?>/profiles/show?id=<?= (int)$book['user_id'] ?>"><strong><?= htmlspecialchars($book['username']) ?></strong></a></p>
+
+    <?php if (!empty($_SESSION['user_id']) && (int)$_SESSION['user_id'] !== (int)$book['user_id']): ?>
+      <p><a class="btn" href="<?= $base ?>/messages/thread?user=<?= (int)$book['user_id'] ?>">Envoyer un message</a></p>
+    <?php endif; ?>
+  </article>
 </section>

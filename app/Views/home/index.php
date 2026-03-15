@@ -1,77 +1,100 @@
-<?php
-use App\Core\View;
-?>
-<section class="hero-block">
-  <div class="site-shell hero">
-    <div class="hero__left">
-      <h1 class="hero__title">Rejoignez nos<br>lecteurs passionnés</h1>
-      <p class="hero__text">
-        Donnez une nouvelle vie à vos livres en les échangeant avec d'autres amoureux de la
-        lecture. Nous croyons en la magie du partage de connaissances et d'histoires à
-        travers les livres.
-      </p>
-      <a class="btn btn--primary" href="<?= BASE_URL ?>/books">Découvrir</a>
-    </div>
-
-    <div class="hero__right">
-      <img class="hero__image" src="<?= BASE_URL ?>/assets/img/Accueil.png" alt="Lecteur entouré de livres">
-      <div class="hero__credit">Hamza</div>
-    </div>
+<section class="home-hero">
+  <div class="home-copy">
+    <h1>Rejoignez nos<br>lecteurs passionnés</h1>
+    <p>
+      Donnez une nouvelle vie à vos livres en les échangeant avec d'autres amoureux de la lecture.
+      Nous croyons en la magie du partage de connaissances et d'histoires à travers les livres.
+    </p>
+    <a class="btn" href="<?= $base ?>/books/exchange">Découvrir</a>
   </div>
+
+  <figure class="home-hero-image">
+    <img src="<?= $base ?>/assets/img/figma/hero-reader.png" alt="Lecteur dans une librairie">
+    <figcaption>Hamza</figcaption>
+  </figure>
 </section>
 
-<section class="latest-block">
-  <div class="site-shell">
-    <h2 class="section-title">Les derniers livres ajoutés</h2>
+<section class="home-section">
+  <h2>Les derniers livres ajoutés</h2>
 
-    <div class="book-grid">
-      <?php foreach (($latest ?? []) as $b): ?>
-        <?php require APP_PATH . '/Views/partials/book-card.php'; ?>
-      <?php endforeach; ?>
-    </div>
+  <div class="home-books">
+    <?php
+    $fixedImages = [
+      $base . '/assets/img/figma/latest-card-1.png',
+      $base . '/assets/img/figma/latest-card-2.png',
+      $base . '/assets/img/figma/latest-card-3.png',
+      $base . '/assets/img/figma/latest-card-4.png',
+    ];
 
-    <div class="section-actions">
-      <a class="btn btn--primary" href="<?= BASE_URL ?>/books">Voir tous les livres</a>
-    </div>
+    $fallback = [
+      ['title' => 'Esther', 'author' => 'Alabaster', 'owner' => 'CamilleDuCuir'],
+      ['title' => 'The Kinfolk Table', 'author' => 'Nathan Williams', 'owner' => 'Nathalie'],
+      ['title' => 'Wabi Sabi', 'author' => 'Beth Kempton', 'owner' => 'Alicecture'],
+      ['title' => 'Milk & honey', 'author' => 'Rupi Kaur', 'owner' => 'jugo1980_17'],
+    ];
+
+    $cards = [];
+    if (!empty($latest)) {
+      foreach (array_slice($latest, 0, 4) as $i => $b) {
+        $cards[] = [
+          'title' => $b['title'] ?? '',
+          'author' => $b['author'] ?? '',
+          'owner' => $b['username'] ?? '',
+          'img' => $fixedImages[$i] ?? $fixedImages[0],
+          'id' => (int)($b['id'] ?? 0),
+        ];
+      }
+    }
+
+    if (count($cards) < 4) {
+      $offset = count($cards);
+      foreach (array_slice($fallback, 0, 4 - $offset) as $j => $f) {
+        $f['img'] = $fixedImages[$offset + $j] ?? $fixedImages[0];
+        $cards[] = $f;
+      }
+    }
+    ?>
+
+    <?php foreach ($cards as $c): ?>
+      <?php $url = !empty($c['id']) ? ($base . '/books/show?id=' . (int)$c['id']) : ($base . '/books/exchange'); ?>
+      <a class="home-book" href="<?= $url ?>">
+        <div class="img-wrap"><img src="<?= htmlspecialchars($c['img']) ?>" alt=""></div>
+        <div class="txt">
+          <strong><?= htmlspecialchars($c['title']) ?></strong>
+          <div><?= htmlspecialchars($c['author']) ?></div>
+          <small>Vendu par : <?= htmlspecialchars($c['owner']) ?></small>
+        </div>
+      </a>
+    <?php endforeach; ?>
   </div>
+
+  <p class="center-btn latest-books-cta" style="margin-top: 120px;"><a class="btn" href="<?= $base ?>/books/exchange">Voir tous les livres</a></p>
 </section>
 
-<section class="steps-block">
-  <div class="site-shell steps-wrap">
-    <h2 class="section-title">Comment ça marche ?</h2>
-    <p class="section-subtitle">Échanger des livres avec TomTroc c'est simple et amusant ! Suivez ces étapes pour commencer :</p>
+<section class="home-section howto">
+  <h2>Comment ça marche ?</h2>
+  <p>Échanger des livres avec TomTroc c'est simple et amusant ! Suivez ces étapes pour commencer :</p>
 
-    <div class="steps">
-      <article class="step">Inscrivez-vous<br>gratuitement sur<br>notre plateforme.</article>
-      <article class="step">Ajoutez les livres que vous<br>souhaitez échanger à<br>votre profil.</article>
-      <article class="step">Parcourez les livres<br>disponibles chez d'autres<br>membres.</article>
-      <article class="step">Proposez un échange et<br>discutez avec d'autres<br>passionnés de lecture.</article>
-    </div>
-
-    <div class="section-actions">
-      <a class="btn btn--outline" href="<?= BASE_URL ?>/books">Voir tous les livres</a>
-    </div>
+  <div class="steps">
+    <div class="step">Inscrivez-vous gratuitement sur notre plateforme.</div>
+    <div class="step">Ajoutez les livres que vous souhaitez échanger à votre profil.</div>
+    <div class="step">Parcourez les livres disponibles chez d'autres membres.</div>
+    <div class="step">Proposez un échange et discutez avec d'autres passionnés de lecture.</div>
   </div>
+
+  <p class="center-btn" style="margin-top: 120px;"><a class="btn btn-outline" href="<?= $base ?>/books/exchange">Voir tous les livres</a></p>
 </section>
 
-<section class="visual-band" aria-hidden="true"></section>
+<section class="home-banner">
+  <img src="<?= $base ?>/assets/img/figma/mask-group-1.png" alt="Bannière bibliothèque">
+</section>
 
-<section class="values-block">
-  <div class="site-shell values">
-    <div class="values__text">
-      <h2 class="section-title section-title--left">Nos valeurs</h2>
-      <p>Chez Tom Troc, nous mettons l'accent sur le partage, la découverte et la communauté. Nos valeurs sont ancrées dans notre passion pour les livres et notre désir de créer des liens entre les lecteurs.</p>
-      <p>Nous croyons en la puissance des histoires pour rassembler les gens et inspirer des conversations enrichissantes.</p>
-      <p>Notre association a été fondée avec une conviction profonde : chaque livre mérite d'être lu et partagé.</p>
-      <p>Nous sommes passionnés par la création d'une plateforme conviviale qui permet aux lecteurs de se connecter, de partager leurs découvertes littéraires et d'échanger des livres qui attendent patiemment sur les étagères.</p>
-      <p class="values__sig">L'équipe Tom Troc</p>
-    </div>
-
-    <div class="values__icon" aria-hidden="true">
-      <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M60 82C38 62 26 50 26 36C26 27 33 20 42 20C49 20 55 24 60 30C65 24 71 20 78 20C87 20 94 27 94 36C94 50 82 62 60 82Z" stroke="currentColor" stroke-width="2" fill="none"/>
-        <path d="M60 82C46 95 35 103 22 110" stroke="currentColor" stroke-width="2" fill="none"/>
-      </svg>
-    </div>
-  </div>
+<section class="home-section values">
+  <h2>Nos valeurs</h2>
+  <p>Chez Tom Troc, nous mettons l'accent sur le partage, la découverte et la communauté. Nos valeurs sont ancrées dans notre passion pour les livres et notre désir de créer des liens entre les lecteurs.</p>
+  <p>Nous croyons en la puissance des histoires pour rassembler les gens et inspirer des conversations enrichissantes.</p>
+  <p>Notre association a été fondée avec une conviction profonde : chaque livre mérite d'être lu et partagé.</p>
+  <p>Nous sommes passionnés par la création d'une plateforme conviviale qui permet aux lecteurs de se connecter, de partager leurs découvertes littéraires et d'échanger des livres qui attendent patiemment sur les étagères.</p>
+  <small>L'équipe Tom Troc</small>
+  <img class="values-heart" src="<?= $base ?>/assets/img/figma/group-10.svg" alt="Décor coeur">
 </section>

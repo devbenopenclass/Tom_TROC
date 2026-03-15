@@ -1,29 +1,36 @@
-<?php
-use App\Core\Csrf;
-?>
-<section class="auth auth--register">
-  <h1 class="page-title">Inscription</h1>
+<section class="page-head">
+  <div>
+    <p class="kicker">TomTroc</p>
+    <h1>Inscription</h1>
+    <p>Crée ton profil et commence tes échanges.</p>
+  </div>
+  <img src="<?= $base ?>/assets/img/figma/group-10.svg" alt="Décor coeur">
+</section>
 
-  <form class="form" method="post" action="<?= BASE_URL ?>/register">
-    <?= Csrf::input(); ?>
+<section class="auth-wrap">
+  <article class="auth-panel">
+    <?php if (!empty($error)): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
 
-    <label class="field">
-      <span>Nom d’utilisateur</span>
-      <input type="text" name="username" required>
-    </label>
+    <form method="post" action="<?= $base ?>/register" class="form form-wide">
+      <label class="mini-label">Pseudo</label>
+      <input name="username" required>
 
-    <label class="field">
-      <span>Email</span>
-      <input type="email" name="email" required>
-    </label>
+      <label class="mini-label">Email</label>
+      <input name="email" type="email" required>
 
-    <label class="field">
-      <span>Mot de passe</span>
-      <input type="password" name="password" minlength="6" required>
-    </label>
+      <label class="mini-label">Mot de passe</label>
+      <input name="password" type="password" required>
 
-    <button class="btn btn--primary" type="submit">Créer mon compte</button>
-  </form>
+      <label class="mini-label">Confirmer</label>
+      <input name="confirm" type="password" required>
 
-  <p class="muted">Déjà inscrit ? <a href="<?= BASE_URL ?>/login">Se connecter</a></p>
+      <button class="btn" type="submit">Créer le compte</button>
+    </form>
+
+    <p class="muted">Déjà un compte ? <a href="<?= $base ?>/login"><strong>Connectez-vous</strong></a></p>
+  </article>
+
+  <figure class="auth-visual">
+    <img src="<?= $base ?>/assets/img/figma/mask-group.png" alt="Couverture de livre">
+  </figure>
 </section>

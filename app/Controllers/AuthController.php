@@ -1,85 +1,63 @@
 <?php
-declare(strict_types=1);
-
 namespace App\Controllers;
 
 use App\Core\Controller;
-use App\Core\Session;
-use App\Core\Auth;
-use App\Core\Csrf;
 use App\Models\User;
 
-final class AuthController extends Controller
+class AuthController extends Controller
 {
-    public function registerForm(): void
-    {
-        $this->view('auth/register');
+  public function registerForm(): void
+  {
+    $this->render('auth/register');
+  }
+
+  public function register(): void
+  {
+    $username = trim($_POST['username'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $password = (string)($_POST['password'] ?? '');
+    $confirm = (string)($_POST['confirm'] ?? '');
+
+    if ($username === '' || $email === '' || $password === '' || $password !== $confirm) {
+      $this->render('auth/register', ['error' => 'Champs invalides ou mots de passe différents.']);
+      return;
     }
 
-    public function register(): void
-    {
-        if (!Csrf::verify($_POST['_csrf'] ?? null)) {
-            http_response_code(419);
-            echo 'CSRF token invalide';
-            return;
-        }
-
-        $username = trim((string)($_POST['username'] ?? ''));
-        $email = trim((string)($_POST['email'] ?? ''));
-        $password = (string)($_POST['password'] ?? '');
-
-        if ($username === '' || $email === '' || $password === '') {
-            Session::flash('error', 'Tous les champs sont requis.');
-            $this->redirect('/register');
-        }
-
-        $userModel = new User();
-        if ($userModel->findByEmail($email)) {
-            Session::flash('error', 'Cet email est déjà utilisé.');
-            $this->redirect('/register');
-        }
-
-        $hash = password_hash($password, PASSWORD_DEFAULT);
-        $id = $userModel->create($username, $email, $hash);
-
-        Auth::login($id);
-        Session::flash('success', 'Bienvenue sur TomTroc !');
-        $this->redirect('/account');
+    if (User::findByEmail($email)) {
+      $this->render('auth/register', ['error' => 'Email déjà utilisé.']);
+      return;
     }
 
-    public function loginForm(): void
-    {
-        $this->view('auth/login');
+    $hash = password_hash($password, PASSWORD_BCRYPT);
+    $id = User::create($username, $email, $hash);
+
+    $_SESSION['user_id'] = $id;
+    $this->redirect('/account');
+  }
+
+  public function loginForm(): void
+  {
+    $this->render('auth/login');
+  }
+
+  public function login(): void
+  {
+    $email = trim($_POST['email'] ?? '');
+    $password = (string)($_POST['password'] ?? '');
+
+    $user = User::findByEmail($email);
+    if (!$user || !password_verify($password, $user['password_hash'])) {
+      $this->render('auth/login', ['error' => 'Identifiants invalides.']);
+      return;
     }
 
-    public function login(): void
-    {
-        if (!Csrf::verify($_POST['_csrf'] ?? null)) {
-            http_response_code(419);
-            echo 'CSRF token invalide';
-            return;
-        }
+    $_SESSION['user_id'] = (int)$user['id'];
+    $this->redirect('/account');
+  }
 
-        $email = trim((string)($_POST['email'] ?? ''));
-        $password = (string)($_POST['password'] ?? '');
-
-        $userModel = new User();
-        $user = $userModel->findByEmail($email);
-
-        if (!$user || !password_verify($password, $user['password'])) {
-            Session::flash('error', 'Identifiants invalides.');
-            $this->redirect('/login');
-        }
-
-        Auth::login((int)$user['id']);
-        Session::flash('success', 'Connexion réussie.');
-        $this->redirect('/account');
-    }
-
-    public function logout(): void
-    {
-        Auth::logout();
-        Session::flash('success', 'Vous êtes déconnecté.');
-        $this->redirect('/');
-    }
+  public function logout(): void
+  {
+    session_destroy();
+    $this->redirect('/');
+  }
 }

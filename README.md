@@ -1,45 +1,43 @@
-# TomTroc (MVC PHP sans librairies)
+# TomTroc (MVP MVC PHP)
 
-## 1) Prérequis
-- PHP 8.1+
+## Prérequis
+- PHP 8.1+ (ou 8.0+)
 - MySQL/MariaDB
-- Apache (ou serveur PHP intégré)
+- Apache (ou `php -S`)
 
-## 2) Installation
-1. Créez la base `tomtroc`.
-2. Exécutez le schéma SQL : `database/schema.sql`.
-3. Configurez les variables d'environnement :
-   - `DB_DSN` (ex: `mysql:host=localhost;dbname=tomtroc;charset=utf8mb4`)
-   - `DB_USER`
-   - `DB_PASS`
-   - `APP_BASE_URL` (ex: `/tomtroc_mvc/public` sous Apache, vide avec `php -S`)
-   - `APP_DEBUG` (`1` en local, `0` en prod)
+## Installation rapide
 
-## 3) Lancer en local
-Depuis la racine du projet :
+1) **Importer la base**
+- Crée une base `tomtroc`
+- Importe `storage/schema.sql`
 
+2) **Configurer la DB**
+- Modifie `config/database.php` (user/pass/dbname)
+
+3) **Vérifier l'URL de base**
+- Le projet fonctionne en racine (`http://localhost`) et en sous-dossier (`http://localhost/tomtroc`) grâce à une détection automatique.
+- Si besoin, tu peux forcer l'URL dans `config/config.php` via `app.base_url` (ex: `/tomtroc`).
+
+4) **Lancer le serveur**
+### Option A (simple) : serveur PHP
+Depuis le dossier `public` :
 ```bash
-php -S localhost:8000 -t public
+php -S localhost:8000
 ```
+Puis ouvre http://localhost:8000
 
-Puis ouvrez : `http://localhost:8000`
+### Option B : Apache
+- Place le projet dans ton vhost
+- Pointe le DocumentRoot sur `/public`
 
-## 4) Structure MVC
-- Routeur : `public/index.php` + `app/Core/Router.php`
-- Contrôleurs : `app/Controllers/*`
-- Modèles : `app/Models/*`
-- Vues : `app/Views/*` (avec layout commun `layouts/main.php`)
+## Routes principales
+- `/` accueil
+- `/register` inscription
+- `/login` connexion
+- `/account` mon compte
+- `/books/exchange` livres dispo + recherche
+- `/messages` messagerie
 
-## 5) Fonctionnalités MVP
-- Inscription / Connexion
-- Accueil avec derniers livres
-- Liste des livres disponibles + recherche
-- Détail livre + profil propriétaire + messagerie
-- Mon compte (édition profil)
-- Ma bibliothèque (CRUD)
-- Messagerie (conversations + fil)
-
-## 6) Notes
-- Upload image : `public/assets/uploads/`
-- Statuts livre : `available` / `unavailable`
-- Page 404 dédiée : `app/Views/errors/404.php`
+## Notes
+- Upload image optionnel (stocké dans `public/assets/uploads`)
+- Messagerie MVP: table `messages` (thread entre 2 utilisateurs)

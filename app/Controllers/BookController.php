@@ -1,193 +1,129 @@
 <?php
-declare(strict_types=1);
-
 namespace App\Controllers;
 
-use App\Core\Controller;
 use App\Core\Auth;
-use App\Core\Session;
-use App\Core\Csrf;
+use App\Core\Controller;
 use App\Models\Book;
 
-final class BookController extends Controller
+class BookController extends Controller
 {
-    public function index(): void
-    {
-        $q = $_GET['q'] ?? null;
-        $bookModel = new Book();
-        $books = $bookModel->searchAvailable(is_string($q) ? $q : null);
+  public function exchange(): void
+  {
+    $q = trim($_GET['q'] ?? '');
+    $books = Book::exchangeList($q !== '' ? $q : null);
+    $this->render('books/exchange', ['books' => $books, 'q' => $q]);
+  }
 
-        $this->view('books/index', [
-            'books' => $books,
-            'q' => is_string($q) ? $q : '',
-        ]);
+  public function show(): void
+  {
+    $id = (int)($_GET['id'] ?? 0);
+    $book = $id ? Book::find($id) : null;
+
+    if (!$book) {
+      http_response_code(404);
+      echo "Livre introuvable";
+      return;
     }
 
-    public function show(): void
-    {
-        $id = (int)($_GET['id'] ?? 0);
-        if ($id <= 0) {
-            $this->redirect('/books');
-        }
+    $this->render('books/show', ['book' => $book]);
+  }
 
-        $bookModel = new Book();
-        $book = $bookModel->findById($id);
-        if (!$book) {
-            http_response_code(404);
-            echo 'Livre introuvable';
-            return;
-        }
+  public function createForm(): void
+  {
+    Auth::requireLogin();
+    $this->render('books/form', ['mode' => 'create']);
+  }
 
-        $this->view('books/show', [
-            'book' => $book,
-        ]);
+  public function create(): void
+  {
+    Auth::requireLogin();
+
+    $data = [
+      'user_id' => Auth::id(),
+      'title' => trim($_POST['title'] ?? ''),
+      'author' => trim($_POST['author'] ?? ''),
+      'image' => null,
+      'description' => trim($_POST['description'] ?? ''),
+      'status' => $_POST['status'] ?? 'available',
+    ];
+
+    if ($data['title'] === '' || $data['author'] === '') {
+      $this->render('books/form', ['mode' => 'create', 'error' => 'Titre et auteur sont obligatoires.']);
+      return;
     }
 
-    public function myBooks(): void
-    {
-        $this->requireAuth();
-
-        $bookModel = new Book();
-        $books = $bookModel->mine((int)Auth::id());
-
-        $this->view('books/my', [
-            'books' => $books,
-        ]);
+    if (!empty($_FILES['image']['name'])) {
+      $data['image'] = $this->handleUpload($_FILES['image']);
     }
 
-    public function createForm(): void
-    {
-        $this->requireAuth();
-        $this->view('books/create');
+    Book::create($data);
+    $this->redirect('/account');
+  }
+
+  public function editForm(): void
+  {
+    Auth::requireLogin();
+
+    $id = (int)($_GET['id'] ?? 0);
+    $book = $id ? Book::find($id) : null;
+
+    if (!$book || (int)$book['user_id'] !== Auth::id()) {
+      http_response_code(403);
+      echo "Accès interdit";
+      return;
     }
 
-    public function store(): void
-    {
-        $this->requireAuth();
+    $this->render('books/form', ['mode' => 'edit', 'book' => $book]);
+  }
 
-        if (!Csrf::verify($_POST['_csrf'] ?? null)) {
-            http_response_code(419);
-            echo 'CSRF token invalide';
-            return;
-        }
+  public function update(): void
+  {
+    Auth::requireLogin();
 
-        $title = trim((string)($_POST['title'] ?? ''));
-        $author = trim((string)($_POST['author'] ?? ''));
-        $description = trim((string)($_POST['description'] ?? ''));
-        $status = (string)($_POST['status'] ?? 'available');
+    $id = (int)($_POST['id'] ?? 0);
 
-        if ($title === '' || $author === '') {
-            Session::flash('error', 'Titre et auteur sont requis.');
-            $this->redirect('/library/create');
-        }
+    $data = [
+      'title' => trim($_POST['title'] ?? ''),
+      'author' => trim($_POST['author'] ?? ''),
+      'image' => $_POST['existing_image'] ?? null,
+      'description' => trim($_POST['description'] ?? ''),
+      'status' => $_POST['status'] ?? 'available',
+    ];
 
-        // Upload image (optionnel)
-        $imageName = null;
-        if (!empty($_FILES['image']['name'])) {
-            $uploadDir = BASE_PATH . '/public/assets/uploads';
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0775, true);
-            }
-            $tmp = $_FILES['image']['tmp_name'] ?? '';
-            $orig = basename((string)$_FILES['image']['name']);
-            $ext = strtolower(pathinfo($orig, PATHINFO_EXTENSION));
-            $allowed = ['jpg','jpeg','png','webp'];
-            if (in_array($ext, $allowed, true)) {
-                $imageName = uniqid('book_', true) . '.' . $ext;
-                move_uploaded_file($tmp, $uploadDir . '/' . $imageName);
-            }
-        }
-
-        $bookModel = new Book();
-        $bookModel->create((int)Auth::id(), $title, $author, $imageName, $description !== '' ? $description : null, $status);
-
-        Session::flash('success', 'Livre ajouté.');
-        $this->redirect('/library');
+    if (!empty($_FILES['image']['name'])) {
+      $data['image'] = $this->handleUpload($_FILES['image']);
     }
 
-    public function editForm(): void
-    {
-        $this->requireAuth();
-        $id = (int)($_GET['id'] ?? 0);
-        if ($id <= 0) $this->redirect('/library');
+    Book::update($id, Auth::id(), $data);
+    $this->redirect('/account');
+  }
 
-        $bookModel = new Book();
-        $book = $bookModel->findById($id);
-        if (!$book || (int)$book['owner_id'] !== (int)Auth::id()) {
-            Session::flash('error', 'Accès refusé.');
-            $this->redirect('/library');
-        }
+  public function delete(): void
+  {
+    Auth::requireLogin();
 
-        $this->view('books/edit', ['book' => $book]);
-    }
+    $id = (int)($_POST['id'] ?? 0);
+    Book::delete($id, Auth::id());
+    $this->redirect('/account');
+  }
 
-    public function update(): void
-    {
-        $this->requireAuth();
-        $id = (int)($_GET['id'] ?? 0);
-        if ($id <= 0) $this->redirect('/library');
+  private function handleUpload(array $file): ?string
+  {
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) return null;
 
-        if (!Csrf::verify($_POST['_csrf'] ?? null)) {
-            http_response_code(419);
-            echo 'CSRF token invalide';
-            return;
-        }
+    $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+    $mime = mime_content_type($file['tmp_name']);
+    if (!isset($allowed[$mime])) return null;
 
-        $title = trim((string)($_POST['title'] ?? ''));
-        $author = trim((string)($_POST['author'] ?? ''));
-        $description = trim((string)($_POST['description'] ?? ''));
-        $status = (string)($_POST['status'] ?? 'available');
+    $ext = $allowed[$mime];
+    $name = bin2hex(random_bytes(16)) . '.' . $ext;
+    $destDir = __DIR__ . '/../../public/assets/uploads';
 
-        if ($title === '' || $author === '') {
-            Session::flash('error', 'Titre et auteur sont requis.');
-            $this->redirect('/library/edit?id=' . $id);
-        }
+    if (!is_dir($destDir)) mkdir($destDir, 0777, true);
 
-        $bookModel = new Book();
-        $existing = $bookModel->findById($id);
-        if (!$existing || (int)$existing['owner_id'] !== (int)Auth::id()) {
-            Session::flash('error', 'Accès refusé.');
-            $this->redirect('/library');
-        }
+    $dest = $destDir . '/' . $name;
+    if (!move_uploaded_file($file['tmp_name'], $dest)) return null;
 
-        $imageName = $existing['image'] ?? null;
-        if (!empty($_FILES['image']['name'])) {
-            $uploadDir = BASE_PATH . '/public/assets/uploads';
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0775, true);
-            }
-            $tmp = $_FILES['image']['tmp_name'] ?? '';
-            $orig = basename((string)$_FILES['image']['name']);
-            $ext = strtolower(pathinfo($orig, PATHINFO_EXTENSION));
-            $allowed = ['jpg','jpeg','png','webp'];
-            if (in_array($ext, $allowed, true)) {
-                $imageName = uniqid('book_', true) . '.' . $ext;
-                move_uploaded_file($tmp, $uploadDir . '/' . $imageName);
-            }
-        }
-
-        $bookModel->update($id, (int)Auth::id(), $title, $author, $imageName, $description !== '' ? $description : null, $status);
-
-        Session::flash('success', 'Livre mis à jour.');
-        $this->redirect('/library');
-    }
-
-    public function delete(): void
-    {
-        $this->requireAuth();
-        if (!Csrf::verify($_POST['_csrf'] ?? null)) {
-            http_response_code(419);
-            echo 'CSRF token invalide';
-            return;
-        }
-
-        $id = (int)($_POST['id'] ?? 0);
-        if ($id <= 0) $this->redirect('/library');
-
-        $bookModel = new Book();
-        $bookModel->delete($id, (int)Auth::id());
-
-        Session::flash('success', 'Livre supprimé.');
-        $this->redirect('/library');
-    }
+    return '/assets/uploads/' . $name;
+  }
 }
