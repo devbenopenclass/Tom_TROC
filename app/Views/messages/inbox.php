@@ -1,17 +1,8 @@
 <?php use App\Models\User; ?>
 
-<section class="page-head">
-  <div>
-    <p class="kicker">Messagerie</p>
-    <h1>Messagerie</h1>
-    <p>Discute avec les autres membres autour des livres.</p>
-  </div>
-  <img src="<?= $base ?>/assets/img/figma/icon-messagerie.svg" alt="Icône messagerie">
-</section>
-
 <section class="messages-layout">
   <aside class="messages-sidebar card">
-    <h2>Conversations</h2>
+    <h2>Messagerie</h2>
     <?php if (empty($items)): ?>
       <p class="muted">Aucune conversation pour le moment.</p>
     <?php else: ?>
@@ -40,24 +31,6 @@
         <?php endforeach; ?>
       </div>
     <?php endif; ?>
-
-    <div class="messages-sidebar__contacts">
-      <h3>Membres</h3>
-      <div class="contact-list">
-        <?php foreach ($contacts as $contact): ?>
-          <?php
-          $contactAvatar = User::avatarPath($contact);
-          $contactAvatarFile = __DIR__ . '/../../../public' . $contactAvatar;
-          $contactAvatarVersion = is_file($contactAvatarFile) ? (string)filemtime($contactAvatarFile) : '1';
-          $contactAvatar = $base . $contactAvatar . '?v=' . $contactAvatarVersion;
-          ?>
-          <a class="contact-item" href="<?= $base ?>/messages?user=<?= (int)$contact['id'] ?>">
-            <img src="<?= htmlspecialchars($contactAvatar) ?>" alt="">
-            <span><?= htmlspecialchars($contact['username']) ?></span>
-          </a>
-        <?php endforeach; ?>
-      </div>
-    </div>
   </aside>
 
   <section class="messages-thread card">

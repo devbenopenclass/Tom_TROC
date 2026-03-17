@@ -38,7 +38,6 @@
       <a class="book" href="<?= $base ?>/books/show?id=<?= (int)$b['id'] ?>">
         <div class="thumb">
           <img src="<?= htmlspecialchars($image) ?>" alt="">
-          <span class="book-status <?= $statusClass ?>"><?= htmlspecialchars($statusLabel) ?></span>
         </div>
         <div class="meta">
           <strong><?= htmlspecialchars($b['title']) ?></strong>

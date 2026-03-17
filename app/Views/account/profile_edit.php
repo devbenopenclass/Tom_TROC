@@ -17,6 +17,12 @@
     <label class="mini-label">Bio</label>
     <textarea name="bio" rows="6"><?= htmlspecialchars($me['bio'] ?? '') ?></textarea>
 
+    <label class="mini-label">Nouveau mot de passe</label>
+    <input type="password" name="password" placeholder="Laisser vide pour ne pas changer">
+
+    <label class="mini-label">Confirmation du mot de passe</label>
+    <input type="password" name="password_confirm" placeholder="Confirmer le mot de passe">
+
     <button class="btn" type="submit">Enregistrer</button>
   </form>
 </section>

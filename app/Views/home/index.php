@@ -14,7 +14,7 @@
   </figure>
 </section>
 
-<section class="home-section">
+<section class="home-section home-section--framed">
   <h2>Les derniers livres ajoutés</h2>
 
   <div class="home-books">
@@ -96,5 +96,5 @@
   <p>Notre association a été fondée avec une conviction profonde : chaque livre mérite d'être lu et partagé.</p>
   <p>Nous sommes passionnés par la création d'une plateforme conviviale qui permet aux lecteurs de se connecter, de partager leurs découvertes littéraires et d'échanger des livres qui attendent patiemment sur les étagères.</p>
   <small>L'équipe Tom Troc</small>
-  <img class="values-heart" src="<?= $base ?>/assets/img/figma/group-10.svg" alt="Décor coeur">
+  <img class="values-heart" src="<?= $base ?>/assets/img/figma/vector-2b.svg" alt="Décor coeur">
 </section>

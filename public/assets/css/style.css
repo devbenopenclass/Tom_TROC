@@ -29,6 +29,7 @@ h1,h2,h3{
 
 .shell{width:min(1140px,calc(100vw - 32px));margin:0 auto}
 .main-content{padding:50px 0 72px}
+.main-content--messages{padding-top:0}
 
 .site-header{background:var(--bg);border-bottom:1px solid #ece9e4}
 .header-row{display:flex;align-items:center;gap:20px;min-height:80px}
@@ -102,6 +103,19 @@ h1,h2,h3{
 .home-hero-image figcaption{margin-top:8px;font-size:12px;font-style:italic;color:var(--muted);text-align:right}
 
 .home-section{margin:0 auto 88px}
+.home-section--framed{
+  width:100vw;
+  margin-left:calc(50% - 50vw);
+  padding:86px 0 92px;
+  background:#fff;
+  border-top:1px solid #efebe5;
+  border-bottom:1px solid #efebe5;
+}
+.home-section--framed > *{
+  width:min(1140px,calc(100vw - 32px));
+  margin-left:auto;
+  margin-right:auto;
+}
 .home-section h2{font-size:32px;line-height:43px;text-align:center;margin-bottom:12px}
 .home-section>p{max-width:520px;margin:0 auto 28px;text-align:center;font-size:16px;color:var(--text)}
 .home-books{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px}
@@ -129,11 +143,21 @@ h1,h2,h3{
 }
 .home-banner{width:100vw;margin-left:calc(50% - 50vw);margin-bottom:74px}
 .home-banner img{width:100%;height:230px;object-fit:cover}
-.values{max-width:392px;position:relative}
+.values{
+  max-width:392px;
+  position:relative;
+  padding-bottom:120px;
+}
 .values h2{text-align:left}
 .values p{margin:0 0 14px;font-size:16px;line-height:1.24;text-align:left}
 .values small{display:block;margin-top:22px;font-size:12px;font-style:italic;color:var(--muted)}
-.values-heart{width:120px;margin:14px auto 0}
+.values-heart{
+  width:120px;
+  position:absolute;
+  right:-120px;
+  bottom:0;
+  margin:0;
+}
 
 /* Exchange / generic cards */
 .exchange-head{
@@ -160,8 +184,16 @@ h1,h2,h3{
   border-radius:10px;overflow:hidden;background:#fff;
   box-shadow:0 4px 24px rgba(0,0,0,.04);
 }
-.book .thumb{position:relative;height:260px;background:#eaeaea}
-.book .thumb img{width:100%;height:100%;object-fit:cover}
+.book .thumb{
+  position:relative;
+  height:260px;
+  background:#eaeaea;
+}
+.book .thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
 .book .meta{padding:18px 14px 20px}
 .book .meta strong{
   display:block;margin-bottom:8px;font-size:16px;line-height:19px;
@@ -210,12 +242,15 @@ h1,h2,h3{
   width:720px;
   height:863px;
   overflow:hidden;
-  background:#d9d9d9;
+  background:#f3f3f1;
+  display:grid;
+  place-items:center;
+  padding:28px;
 }
 .book-show-media img{
   width:100%;
   height:100%;
-  object-fit:cover;
+  object-fit:contain;
 }
 .book-show-panel{
   width:720px;
@@ -367,26 +402,30 @@ h1,h2,h3{
 .thread{background:#fff;border:1px solid #f0f0f0;border-radius:10px;padding:16px;margin-bottom:18px}
 .messages-layout{
   display:grid;
-  grid-template-columns:340px minmax(0,1fr);
-  gap:24px;
-  align-items:start;
+  grid-template-columns:308px minmax(0,1fr);
+  gap:44px;
+  align-items:stretch;
+  min-height:calc(100vh - 163px);
 }
 .messages-sidebar{
   padding:0;
   overflow:hidden;
+  border-radius:0;
+  border-color:#f3efe8;
+  min-height:calc(100vh - 163px);
 }
 .messages-sidebar h2,
 .messages-sidebar h3{
-  font-family:Inter,"Segoe UI",Arial,sans-serif;
-  font-size:16px;
-  line-height:19px;
-  font-weight:600;
+  font-family:"Playfair Display",Georgia,"Times New Roman",serif;
+  font-size:32px;
+  line-height:43px;
+  font-weight:400;
 }
 .messages-sidebar > h2{
-  padding:24px 24px 18px;
+  padding:56px 34px 26px;
 }
 .messages-sidebar > .muted{
-  padding:0 24px 24px;
+  padding:0 34px 24px;
 }
 .conversation-list{
   display:grid;
@@ -396,7 +435,7 @@ h1,h2,h3{
   grid-template-columns:52px minmax(0,1fr) auto;
   gap:14px;
   align-items:start;
-  padding:16px 24px;
+  padding:18px 34px;
   border-top:1px solid #f3f1ed;
   transition:background .18s ease;
 }
@@ -422,13 +461,13 @@ h1,h2,h3{
   font-size:14px;
   line-height:17px;
   font-family:Inter,"Segoe UI",Arial,sans-serif;
-  font-weight:600;
+  font-weight:400;
 }
 .conversation-item__body span{
   display:block;
   color:var(--muted);
-  font-size:13px;
-  line-height:18px;
+  font-size:12px;
+  line-height:15px;
 }
 .conversation-item__meta{
   display:grid;
@@ -453,43 +492,17 @@ h1,h2,h3{
   font-size:11px;
   font-weight:600;
 }
-.messages-sidebar__contacts{
-  border-top:1px solid #ebe7e1;
-  padding:20px 24px 24px;
-}
-.messages-sidebar__contacts h3{
-  margin-bottom:14px;
-}
-.contact-list{
-  display:grid;
-  gap:10px;
-  max-height:360px;
-  overflow:auto;
-}
-.contact-item{
-  display:grid;
-  grid-template-columns:44px minmax(0,1fr);
-  gap:12px;
-  align-items:center;
-  padding:10px 12px;
-  border-radius:14px;
-  background:#faf8f4;
-}
-.contact-item img{
-  width:44px;
-  height:44px;
-}
-.contact-item span{
-  font-size:14px;
-  line-height:17px;
-}
 .messages-thread{
-  min-height:720px;
+  min-height:calc(100vh - 163px);
   display:grid;
-  grid-template-rows:auto minmax(320px,1fr) auto;
+  grid-template-rows:auto minmax(0,1fr) auto;
   gap:0;
   padding:0;
   overflow:hidden;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
 }
 .messages-empty{
   min-height:420px;
@@ -507,72 +520,77 @@ h1,h2,h3{
   display:flex;
   align-items:center;
   gap:16px;
-  padding:24px 28px;
-  border-bottom:1px solid #f2efea;
-  background:#fff;
+  padding:34px 0 22px;
+  border-bottom:0;
+  background:transparent;
 }
 .thread-head h2{
-  margin-bottom:5px;
-  font-size:26px;
-  line-height:35px;
+  margin-bottom:0;
+  font-size:14px;
+  line-height:17px;
+  font-family:Inter,"Segoe UI",Arial,sans-serif;
+  font-weight:600;
 }
 .thread-head p{
   margin:0;
-  font-size:14px;
-  line-height:17px;
+  display:none;
 }
 .thread-feed{
   display:grid;
   align-content:start;
-  gap:12px;
-  padding:24px 28px;
-  background:#faf9f7;
+  gap:20px;
+  padding:22px 0 30px;
+  background:transparent;
   overflow:auto;
 }
 .thread-form{
   display:grid;
-  gap:14px;
-  padding:24px 28px 28px;
-  border-top:1px solid #f2efea;
-  background:#fff;
+  grid-template-columns:minmax(0,1fr) 133px;
+  gap:22px;
+  align-items:end;
+  padding:20px 0 0;
+  border-top:0;
+  background:transparent;
 }
 .thread-form textarea{
-  min-height:110px;
-  padding:16px;
-  border:1px solid #ece6df;
-  border-radius:14px;
-  background:#faf8f4;
+  min-height:48px;
+  height:48px;
+  padding:14px 18px;
+  border:1px solid #f1ece4;
+  border-radius:8px;
+  background:#fff;
   color:var(--text);
   font:inherit;
-  resize:vertical;
+  resize:none;
 }
 .thread-form .btn{
-  width:fit-content;
-  min-width:160px;
+  width:133px;
+  min-width:133px;
+  min-height:48px;
 }
 .bubble{
   background:#fff;
-  border-radius:16px 16px 16px 4px;
-  padding:14px 16px;
+  border-radius:4px;
+  padding:14px 18px;
   margin:0;
-  max-width:min(560px,82%);
+  max-width:min(500px,62%);
   font-size:14px;
   line-height:19px;
-  box-shadow:0 6px 20px rgba(0,0,0,.04);
+  box-shadow:none;
 }
 .bubble strong{
   display:block;
-  margin-bottom:8px;
-  font-size:12px;
-  line-height:15px;
+  margin-bottom:6px;
+  font-size:11px;
+  line-height:14px;
   font-family:Inter,"Segoe UI",Arial,sans-serif;
   font-weight:600;
 }
 .bubble.me{
   margin-left:auto;
-  background:#e9f8f0;
-  border-radius:16px 16px 4px 16px;
-  border:1px solid #d6f0e2;
+  background:#eef6fb;
+  border-radius:4px;
+  border:0;
 }
 .bubble-meta{
   display:block;
@@ -587,10 +605,12 @@ h1,h2,h3{
   .home-hero{grid-template-columns:1fr 360px;gap:32px}
   .home-hero-image img{width:360px;height:480px}
   .exchange-copy h1{font-size:48px}
+  .messages-layout{grid-template-columns:280px minmax(0,1fr);gap:30px}
 }
 
 @media (max-width:900px){
   .main-content{padding:22px 0 38px}
+  .main-content--messages{padding-top:0}
   .menu-trigger{
     display:inline-flex;align-items:center;justify-content:center;
     margin-left:auto;width:38px;height:38px;border:1px solid #e3e1dd;border-radius:8px;
@@ -612,6 +632,13 @@ h1,h2,h3{
   .home-copy p{max-width:unset}
   .home-hero-image img{width:100%;height:auto;max-height:560px}
   .home-books,.grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .home-book .img-wrap{height:240px}
+  .home-section{margin-bottom:56px}
+  .home-section--framed{padding:54px 0 58px}
+  .home-banner{margin-bottom:48px}
+  .home-banner img{height:190px}
+  .values{max-width:100%}
+  .values-heart{margin-top:24px}
   .howto .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
   .book-show{width:100%}
   .book-show-breadcrumb{margin:16px 0}
@@ -625,17 +652,38 @@ h1,h2,h3{
   .auth-panel,.login-left{margin:56px auto 34px;padding:0 16px;max-width:520px;width:100%}
   .auth-visual img,.login-right img{min-height:280px}
   .footer-row{justify-content:center;flex-wrap:wrap;gap:12px}
-  .messages-layout{grid-template-columns:1fr}
+  .messages-layout{grid-template-columns:1fr;gap:18px;min-height:0}
+  .messages-sidebar,
   .messages-thread{min-height:unset}
+  .messages-sidebar{border-radius:18px}
+  .messages-thread{border-radius:18px;background:transparent}
+  .messages-sidebar > h2{padding:26px 20px 18px;font-size:28px;line-height:1.2}
+  .conversation-item{padding:14px 20px}
+  .thread-head{padding:12px 0 18px}
+  .thread-feed{padding:12px 0 20px}
+  .thread-form{grid-template-columns:1fr;padding-top:12px}
+  .thread-form .btn{width:100%;min-width:0}
 }
 
 @media (max-width:560px){
   .shell{width:min(1140px,calc(100vw - 20px))}
   .home-books,.grid,.howto .steps{grid-template-columns:1fr}
+  .home-hero{margin:18px auto 42px}
+  .home-copy h1{font-size:32px;line-height:1.2}
+  .home-copy p{font-size:15px;line-height:1.45}
+  .home-book .img-wrap{height:220px}
+  .home-section--framed{
+    padding:38px 0 42px;
+  }
+  .home-section--framed > *{
+    width:min(1140px,calc(100vw - 20px));
+  }
+  .latest-books-cta,.howto .center-btn{margin-top:40px !important}
   .page-head h1{font-size:30px;line-height:1.2}
   .home-section h2{font-size:28px;line-height:1.25}
   .exchange-copy h1{font-size:34px}
-  .book .thumb{height:240px}
+  .exchange-head{margin:30px 0 24px}
+  .book .thumb{height:220px}
   .book-show-breadcrumb{margin:12px 0;font-size:10px}
   .book-show-media{min-height:320px}
   .book-show-panel h1{width:auto;font-size:34px;line-height:1.2}
@@ -657,13 +705,13 @@ h1,h2,h3{
   .thread-head,
   .thread-feed,
   .thread-form{
-    padding-left:18px;
-    padding-right:18px;
+    padding-left:0;
+    padding-right:0;
   }
   .thread-form .btn{
     width:100%;
   }
   .bubble{
-    max-width:100%;
+    max-width:92%;
   }
 }

@@ -5,6 +5,8 @@ use App\Core\Model;
 
 class User extends Model
 {
+  public const DEFAULT_AVATAR = '/assets/img/figma/mask-group-2.png';
+
   private static ?string $passwordColumn = null;
 
   private static function resolvePasswordColumn(): string
@@ -64,20 +66,34 @@ class User extends Model
   {
     $passwordColumn = self::resolvePasswordColumn();
     $stmt = self::db()->prepare("
-      INSERT INTO users (username, email, {$passwordColumn})
-      VALUES (:username, :email, :password_hash)
+      INSERT INTO users (username, email, avatar, bio, {$passwordColumn})
+      VALUES (:username, :email, :avatar, :bio, :password_hash)
     ");
     $stmt->execute([
       'username' => $username,
       'email' => $email,
+      'avatar' => self::DEFAULT_AVATAR,
+      'bio' => '',
       'password_hash' => $passwordHash,
     ]);
 
     return (int) self::db()->lastInsertId();
   }
 
-  public static function updateProfile(int $id, string $username, string $bio): void
+  public static function updateProfile(int $id, string $username, string $bio, ?string $passwordHash = null): void
   {
+    if ($passwordHash !== null) {
+      $passwordColumn = self::resolvePasswordColumn();
+      $stmt = self::db()->prepare("UPDATE users SET username = :username, bio = :bio, {$passwordColumn} = :password_hash WHERE id = :id");
+      $stmt->execute([
+        'id' => $id,
+        'username' => $username,
+        'bio' => $bio,
+        'password_hash' => $passwordHash,
+      ]);
+      return;
+    }
+
     $stmt = self::db()->prepare("UPDATE users SET username = :username, bio = :bio WHERE id = :id");
     $stmt->execute([
       'id' => $id,
