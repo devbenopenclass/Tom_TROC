@@ -25,9 +25,8 @@ $avatar = $base . $avatar . '?v=' . $avatarVersion;
     <?php else: ?>
       <p class="muted">Pas de bio.</p>
     <?php endif; ?>
-
     <?php if (!empty($_SESSION['user_id']) && (int)$_SESSION['user_id'] !== (int)$user['id']): ?>
-      <a class="btn" href="<?= $base ?>/messages/thread?user=<?= (int)$user['id'] ?>">Contacter</a>
+      <p class="muted">Pour contacter ce membre, ouvre d'abord la fiche d'un de ses livres.</p>
     <?php endif; ?>
   </div>
 </section>

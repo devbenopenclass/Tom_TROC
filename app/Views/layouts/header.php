@@ -10,6 +10,7 @@ $accountCssVersion = is_file($accountCssPath) ? (string)filemtime($accountCssPat
 $logoVersion = is_file($logoPath) ? (string)filemtime($logoPath) : '1';
 $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $isAccountPage = str_contains($requestPath, '/account');
+$isMessagesPage = str_contains($requestPath, '/messages');
 if ($isLogged) {
   $unreadCount = \App\Models\Message::unreadCount((int)$_SESSION['user_id']);
 }
@@ -25,7 +26,7 @@ if ($isLogged) {
     <link rel="stylesheet" href="<?= $base ?>/assets/css/account-admin.css?v=<?= htmlspecialchars($accountCssVersion) ?>">
   <?php endif; ?>
 </head>
-<body class="<?= $isAccountPage ? 'account-admin-page' : '' ?>">
+<body class="<?= trim(($isAccountPage ? 'account-admin-page ' : '') . ($isMessagesPage ? 'messages-page' : '')) ?>">
 <header class="site-header <?= $isLogged ? 'is-auth' : '' ?>">
   <div class="shell header-row">
     <a class="brand" href="<?= $base ?>/" aria-label="Accueil TomTroc">
@@ -50,9 +51,7 @@ if ($isLogged) {
           <a class="icon-link" href="<?= $base ?>/messages">
             <img src="<?= $base ?>/assets/img/figma/icon-messagerie.svg" alt="">
             <span>Messagerie</span>
-            <?php if ($unreadCount > 0): ?>
-              <span class="notif"><?= $unreadCount > 99 ? '99+' : $unreadCount ?></span>
-            <?php endif; ?>
+            <span class="notif"><?= $unreadCount > 99 ? '99+' : $unreadCount ?></span>
           </a>
           <a class="icon-link" href="<?= $base ?>/account">
             <img src="<?= $base ?>/assets/img/figma/icon-mon-compte.svg" alt="">
@@ -70,4 +69,4 @@ if ($isLogged) {
   </div>
 </header>
 
-<main class="shell main-content">
+<main class="shell main-content<?= $isMessagesPage ? ' messages-main' : '' ?>">

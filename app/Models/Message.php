@@ -47,6 +47,19 @@ class Message extends Model
     return $stmt->fetchAll();
   }
 
+  public static function hasThread(int $me, int $other): bool
+  {
+    $stmt = self::db()->prepare("
+      SELECT COUNT(*) AS c
+      FROM messages
+      WHERE (sender_id = :me AND receiver_id = :other)
+         OR (sender_id = :other AND receiver_id = :me)
+    ");
+    $stmt->execute(['me' => $me, 'other' => $other]);
+    $row = $stmt->fetch();
+    return (int)($row['c'] ?? 0) > 0;
+  }
+
   public static function markThreadAsRead(int $me, int $other): void
   {
     try {

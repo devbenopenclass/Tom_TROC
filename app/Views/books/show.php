@@ -6,7 +6,7 @@ $status = (string)($book['status'] ?? 'available');
 $title = trim((string)($book['title'] ?? 'Livre'));
 $author = trim((string)($book['author'] ?? 'Auteur inconnu'));
 $owner = trim((string)($book['username'] ?? 'membre de la communaute'));
-$description = trim((string)($book['description'] ?? ''));
+$description = Book::detailDescription($book);
 $image = Book::imagePath($book, '/assets/img/figma/mask-group-1.png');
 if (!preg_match('#^https?://#i', $image)) {
   $assetFile = __DIR__ . '/../../../public' . $image;
@@ -17,15 +17,6 @@ $ownerAvatar = User::avatarPath($book);
 $ownerAvatarFile = __DIR__ . '/../../../public' . $ownerAvatar;
 $ownerAvatarVersion = is_file($ownerAvatarFile) ? (string)filemtime($ownerAvatarFile) : '1';
 $ownerAvatar = $base . $ownerAvatar . '?v=' . $ownerAvatarVersion;
-
-if ($description === '') {
-  $description = sprintf(
-    '"%s" est propose a l\'echange par %s. Ce livre de %s est disponible dans la bibliotheque Tom Troc.',
-    $title,
-    $owner,
-    $author
-  );
-}
 
 $paragraphs = preg_split("/\n\s*\n/", $description) ?: [$description];
 ?>
@@ -61,7 +52,7 @@ $paragraphs = preg_split("/\n\s*\n/", $description) ?: [$description];
       </a>
 
       <?php if (!empty($_SESSION['user_id']) && (int)$_SESSION['user_id'] !== (int)$book['user_id']): ?>
-        <p class="book-show-cta"><a class="btn" href="<?= $base ?>/messages/thread?user=<?= (int)$book['user_id'] ?>">Envoyer un message</a></p>
+        <p class="book-show-cta"><a class="btn" href="<?= $base ?>/messages/thread?user=<?= (int)$book['user_id'] ?>&book=<?= (int)$book['id'] ?>">Envoyer un message</a></p>
       <?php endif; ?>
     </article>
   </div>

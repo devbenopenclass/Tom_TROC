@@ -5,6 +5,28 @@ use App\Core\Model;
 
 class Book extends Model
 {
+  public static function detailDescription(array $book): string
+  {
+    $description = trim((string)($book['description'] ?? ''));
+
+    if ($description !== '') {
+      $paragraphCount = preg_match_all("/\n\s*\n/", $description) + 1;
+      if (mb_strlen($description) >= 320 || $paragraphCount >= 3) {
+        return $description;
+      }
+    }
+
+    $title = trim((string)($book['title'] ?? 'ce livre'));
+    $author = trim((string)($book['author'] ?? 'son auteur'));
+
+    return implode("\n\n", [
+      "J'ai récemment plongé dans les pages de '{$title}' et j'ai été marqué par la personnalité très forte de cette oeuvre signée {$author}. Ce livre va bien au-delà d'une simple lecture : il propose une vraie ambiance, un rythme et une sensibilité qui donnent envie d'y revenir.",
+      "Dès les premières pages, on découvre un univers travaillé, accessible et inspirant. La lecture avance naturellement, avec des idées, des images et des passages qui restent en mémoire longtemps après avoir refermé le livre.",
+      "Chaque chapitre invite à ralentir, à observer et à profiter pleinement du moment. C'est un livre qui trouve facilement sa place dans une bibliothèque partagée, parce qu'il donne envie d'échanger, de recommander et de discuter avec d'autres lecteurs.",
+      "'{$title}' est un titre que je recommande volontiers à toute personne curieuse de belles découvertes littéraires. Il plaira autant pour son fond que pour l'expérience de lecture qu'il propose."
+    ]);
+  }
+
   public static function imagePath(?array $book, string $fallback = '/assets/img/figma/mask-group.png'): string
   {
     $image = trim((string)($book['image'] ?? ''));
