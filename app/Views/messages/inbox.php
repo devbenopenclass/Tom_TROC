@@ -70,11 +70,16 @@
         <?php endif; ?>
       </div>
 
-      <form method="post" action="<?= $base ?>/messages/send" class="thread-form">
-        <input type="hidden" name="receiver_id" value="<?= (int)$other['id'] ?>">
-        <textarea name="content" rows="4" required placeholder="Écrire un message..."></textarea>
-        <button class="btn" type="submit">Envoyer</button>
-      </form>
+      <?php if (!empty($canCompose)): ?>
+        <form method="post" action="<?= $base ?>/messages/send" class="thread-form">
+          <input type="hidden" name="receiver_id" value="<?= (int)$other['id'] ?>">
+          <?php if (!empty($bookContext)): ?>
+            <input type="hidden" name="book_id" value="<?= (int)$bookContext['id'] ?>">
+          <?php endif; ?>
+          <textarea name="content" rows="4" required placeholder="Écrire un message..."></textarea>
+          <button class="btn" type="submit">Envoyer</button>
+        </form>
+      <?php endif; ?>
     <?php endif; ?>
   </section>
 </section>

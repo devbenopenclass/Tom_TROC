@@ -32,6 +32,19 @@ class Message extends Model
     $stmt->execute(['s' => $senderId, 'r' => $receiverId, 'c' => $content]);
   }
 
+  public static function hasThread(int $me, int $other): bool
+  {
+    $stmt = self::db()->prepare("
+      SELECT 1
+      FROM messages
+      WHERE (sender_id = :me AND receiver_id = :other)
+         OR (sender_id = :other AND receiver_id = :me)
+      LIMIT 1
+    ");
+    $stmt->execute(['me' => $me, 'other' => $other]);
+    return (bool)$stmt->fetchColumn();
+  }
+
   public static function thread(int $me, int $other): array
   {
     $stmt = self::db()->prepare("
