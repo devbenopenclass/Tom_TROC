@@ -6,6 +6,8 @@ use App\Core\Controller;
 use App\Models\User;
 use App\Models\Book;
 
+// Contrôleur de l'espace "Mon compte" :
+// affiche le profil connecté et enregistre ses modifications.
 class AccountController extends Controller
 {
   private function renderAccountPage(array $extra = []): void
@@ -34,6 +36,7 @@ class AccountController extends Controller
   public function updateProfile(): void
   {
     Auth::requireLogin();
+    $this->requireCsrf();
 
     $username = trim($_POST['username'] ?? '');
     $bio = trim($_POST['bio'] ?? '');

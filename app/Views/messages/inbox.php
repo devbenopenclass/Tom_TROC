@@ -1,4 +1,6 @@
+<?php use App\Core\Csrf; ?>
 <?php use App\Models\User; ?>
+<?php // Interface de messagerie : colonne des conversations, fil actif et zone de réponse. ?>
 
 <section class="messages-layout">
   <aside class="messages-sidebar card">
@@ -47,6 +49,7 @@
       $threadAvatar = $base . $threadAvatar . '?v=' . $threadAvatarVersion;
       ?>
       <header class="thread-head">
+        <a class="thread-back" href="<?= $base ?>/messages">← retour</a>
         <img src="<?= htmlspecialchars($threadAvatar) ?>" alt="">
         <div>
           <h2><?= htmlspecialchars($other['username']) ?></h2>
@@ -72,6 +75,7 @@
 
       <?php if (!empty($canCompose)): ?>
         <form method="post" action="<?= $base ?>/messages/send" class="thread-form">
+          <?= Csrf::input(); ?>
           <input type="hidden" name="receiver_id" value="<?= (int)$other['id'] ?>">
           <?php if (!empty($bookContext)): ?>
             <input type="hidden" name="book_id" value="<?= (int)$bookContext['id'] ?>">

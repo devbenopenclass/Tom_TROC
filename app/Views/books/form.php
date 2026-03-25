@@ -1,4 +1,6 @@
+<?php use App\Core\Csrf; ?>
 <?php $isEdit = (($mode ?? '') === 'edit'); ?>
+<?php // Formulaire de gestion d'un livre : ajout ou modification selon le mode courant. ?>
 
 <section class="edit-page">
   <a class="back-link" href="<?= $base ?>/account">← retour</a>
@@ -10,6 +12,7 @@
     <form method="post" enctype="multipart/form-data"
           action="<?= $isEdit ? $base . '/books/edit' : $base . '/books/create' ?>"
           class="edit-grid">
+      <?= Csrf::input(); ?>
 
       <?php if ($isEdit): ?>
         <input type="hidden" name="id" value="<?= (int)($book['id'] ?? 0) ?>">

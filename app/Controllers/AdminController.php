@@ -9,6 +9,8 @@ use App\Core\Session;
 use App\Models\Book;
 use App\Models\User;
 
+// Contrôleur d'administration : pilotage des livres et des membres
+// pour les écrans de gestion internes du projet.
 final class AdminController extends Controller
 {
     public function books(): void

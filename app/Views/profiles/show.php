@@ -1,5 +1,6 @@
 <?php use App\Models\Book; ?>
 <?php use App\Models\User; ?>
+<?php // Profil public d'un membre : avatar, bio et livres visibles par les autres utilisateurs. ?>
 
 <?php
 $avatar = User::avatarPath($user);

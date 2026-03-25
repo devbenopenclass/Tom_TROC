@@ -3,8 +3,12 @@ namespace App\Models;
 
 use App\Core\Model;
 
+// Modèle métier des livres : lecture/écriture en base,
+// fallbacks de catalogue et helpers d'images / descriptions.
 class Book extends Model
 {
+  // Retourne l'image d'une carte livre.
+  // Priorité : mapping par titre, chemin image stocké, puis fallback global.
   public static function imagePath(?array $book, string $fallback = '/assets/img/figma/mask-group.png'): string
   {
     $image = trim((string)($book['image'] ?? ''));
@@ -24,6 +28,17 @@ class Book extends Model
     return $fallback;
   }
 
+  // Certaines fiches détail utilisent un visuel différent de la carte.
+  // Cette méthode permet de brancher une image dédiée par titre.
+  public static function detailImagePath(?array $book, string $fallback = '/assets/img/figma/mask-group.png'): string
+  {
+    // Les fiches détail reprennent le même univers visuel que les cartes
+    // du catalogue pour rester cohérentes avec la maquette "Single livre".
+    return self::imagePath($book, $fallback);
+  }
+
+  // Récupère les derniers livres ajoutés pour la page d'accueil.
+  // Si la base est vide ou indisponible, on tombe sur le catalogue démo.
   public static function latest(int $limit = 4): array
   {
     try {
@@ -45,6 +60,8 @@ class Book extends Model
     return array_slice(self::fallbackCatalog(), 0, $limit);
   }
 
+  // Retourne la liste publique des livres à l'échange,
+  // avec filtre texte sur titre, auteur ou pseudo vendeur.
   public static function exchangeList(?string $q = null): array
   {
     try {
@@ -77,6 +94,8 @@ class Book extends Model
     return self::filterFallbackCatalog($q);
   }
 
+  // Charge une fiche livre unique.
+  // En secours, on cherche aussi dans le catalogue de démonstration.
   public static function find(int $id): ?array
   {
     try {
@@ -104,6 +123,7 @@ class Book extends Model
     return null;
   }
 
+  // Bibliothèque privée d'un utilisateur, utilisée dans "Mon compte" et les profils.
   public static function byUser(int $userId): array
   {
     $stmt = self::db()->prepare("SELECT * FROM books WHERE user_id = :uid ORDER BY created_at DESC");
@@ -111,6 +131,7 @@ class Book extends Model
     return $stmt->fetchAll();
   }
 
+  // Création d'un livre depuis le formulaire membre.
   public static function create(array $data): int
   {
     $stmt = self::db()->prepare("
@@ -121,6 +142,7 @@ class Book extends Model
     return (int) self::db()->lastInsertId();
   }
 
+  // Mise à jour sécurisée : seul le propriétaire du livre peut modifier sa ligne.
   public static function update(int $id, int $userId, array $data): void
   {
     $data['id'] = $id;
@@ -134,12 +156,16 @@ class Book extends Model
     $stmt->execute($data);
   }
 
+  // Suppression sécurisée : seulement pour le propriétaire connecté.
   public static function delete(int $id, int $userId): void
   {
     $stmt = self::db()->prepare("DELETE FROM books WHERE id = :id AND user_id = :uid");
     $stmt->execute(['id' => $id, 'uid' => $userId]);
   }
 
+  // Génère le texte long des fiches détail.
+  // Les titres connus ont un texte dédié ; sinon on recycle la description
+  // en base ou on génère un texte générique cohérent.
   public static function detailDescription(array $book): string
   {
     $map = [
@@ -183,6 +209,7 @@ class Book extends Model
     );
   }
 
+  // Filtre le catalogue de secours en cas d'absence de base de données.
   private static function filterFallbackCatalog(?string $q = null): array
   {
     $books = self::fallbackCatalog();
@@ -204,6 +231,8 @@ class Book extends Model
     }));
   }
 
+  // Bibliothèque factice utilisée pour garder le site présentable
+  // même si les données locales sont absentes.
   private static function fallbackCatalog(): array
   {
     static $books = null;
@@ -234,6 +263,7 @@ class Book extends Model
     return $books;
   }
 
+  // Construit une entrée de livre de démonstration homogène.
   private static function fallbackBook(
     int $id,
     int $userId,
@@ -261,6 +291,8 @@ class Book extends Model
     ];
   }
 
+  // Valide et normalise un chemin image venant de la base.
+  // On accepte soit un asset déjà public, soit une image uploadée.
   private static function normalizeImagePath(string $image): ?string
   {
     if (preg_match('#^https?://#i', $image)) {
@@ -288,6 +320,7 @@ class Book extends Model
     return null;
   }
 
+  // Associe certains titres connus à une couverture précise du projet.
   private static function fallbackImageByTitle(string $title): ?string
   {
     $map = [
@@ -313,6 +346,7 @@ class Book extends Model
     return $map[$key] ?? null;
   }
 
+  // Nettoie un titre pour créer une clé stable de matching.
   private static function normalizeTitleKey(string $value): string
   {
     $value = trim($value);
@@ -320,6 +354,7 @@ class Book extends Model
     return preg_replace('/[^a-z0-9]+/i', '', $value);
   }
 
+  // Compatibilité mbstring/non-mbstring pour compter les caractères.
   private static function stringLength(string $value): int
   {
     return function_exists('mb_strlen') ? mb_strlen($value) : strlen($value);

@@ -1,9 +1,12 @@
+<?php use App\Core\Csrf; ?>
+<?php // Vue de connexion : formulaire de login avec email/pseudo et mot de passe. ?>
 <section class="login-page full-bleed">
   <div class="login-left">
     <h1>Connexion</h1>
     <?php if (!empty($error)): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
 
     <form method="post" action="<?= $base ?>/login" class="login-form">
+      <?= Csrf::input(); ?>
       <label>Email ou pseudo</label>
       <input name="email" type="text" required>
 

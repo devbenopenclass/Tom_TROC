@@ -5,6 +5,8 @@ use App\Core\Controller;
 use App\Models\User;
 use App\Models\Book;
 
+// Contrôleur des profils publics : affiche un membre
+// et la bibliothèque rattachée à son compte.
 class ProfileController extends Controller
 {
   public function show(): void

@@ -1,3 +1,5 @@
+<?php use App\Core\Csrf; ?>
+<?php // Ancienne vue d'édition rapide du profil : pseudo et bio uniquement. ?>
 <section class="page-head">
   <div>
     <p class="kicker">Profil</p>
@@ -11,6 +13,7 @@
   <?php if (!empty($error)): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
 
   <form method="post" action="<?= $base ?>/account/profile" class="form form-wide">
+    <?= Csrf::input(); ?>
     <label class="mini-label">Pseudo</label>
     <input name="username" value="<?= htmlspecialchars($me['username'] ?? '') ?>" required>
 

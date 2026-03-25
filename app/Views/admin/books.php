@@ -1,4 +1,5 @@
 <?php
+// Vue d'administration des livres : liste, statut et actions de modération.
 use App\Core\Csrf;
 use App\Core\View;
 ?>

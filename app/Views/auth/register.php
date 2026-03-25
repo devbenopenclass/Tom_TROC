@@ -1,3 +1,5 @@
+<?php use App\Core\Csrf; ?>
+<?php // Vue d'inscription : création d'un nouveau compte membre. ?>
 <section class="page-head">
   <div>
     <p class="kicker">TomTroc</p>
@@ -12,6 +14,7 @@
     <?php if (!empty($error)): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
 
     <form method="post" action="<?= $base ?>/register" class="form form-wide">
+      <?= Csrf::input(); ?>
       <label class="mini-label">Pseudo</label>
       <input name="username" required>
 

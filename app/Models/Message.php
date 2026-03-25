@@ -4,8 +4,12 @@ namespace App\Models;
 use App\Core\Model;
 use PDOException;
 
+// Modèle de messagerie interne : conversations, messages,
+// compteur de non lus et création des fils de discussion.
 class Message extends Model
 {
+  // Calcule le badge affiché dans le header.
+  // Si l'ancien schéma SQL n'a pas `is_read`, on renvoie 0 au lieu de casser.
   public static function unreadCount(int $me): int
   {
     try {
@@ -23,6 +27,7 @@ class Message extends Model
     }
   }
 
+  // Insère un message simple dans la table messages.
   public static function send(int $senderId, int $receiverId, string $content): void
   {
     $stmt = self::db()->prepare("
@@ -32,6 +37,8 @@ class Message extends Model
     $stmt->execute(['s' => $senderId, 'r' => $receiverId, 'c' => $content]);
   }
 
+  // Vérifie si deux membres ont déjà un historique d'échange.
+  // Cela permet d'autoriser les réponses même sans nouveau contexte livre.
   public static function hasThread(int $me, int $other): bool
   {
     $stmt = self::db()->prepare("
@@ -45,6 +52,8 @@ class Message extends Model
     return (bool)$stmt->fetchColumn();
   }
 
+  // Charge tout le fil de discussion entre deux membres,
+  // enrichi avec les pseudos et avatars des deux côtés.
   public static function thread(int $me, int $other): array
   {
     $stmt = self::db()->prepare("
@@ -60,6 +69,7 @@ class Message extends Model
     return $stmt->fetchAll();
   }
 
+  // Marque comme lus les messages reçus dans le fil actif.
   public static function markThreadAsRead(int $me, int $other): void
   {
     try {
@@ -76,6 +86,8 @@ class Message extends Model
     }
   }
 
+  // Construit la colonne de gauche de la messagerie :
+  // une ligne par conversation avec dernier message + compteur non lu.
   public static function inbox(int $me): array
   {
     try {
@@ -133,6 +145,7 @@ class Message extends Model
     }
   }
 
+  // Liste des autres membres contactables, avec nombre de livres.
   public static function contacts(int $me): array
   {
     $stmt = self::db()->prepare("

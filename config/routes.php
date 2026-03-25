@@ -1,4 +1,6 @@
 <?php
+// Table de routage principale du site.
+// Chaque URL HTTP est reliée ici à une méthode de contrôleur.
 declare(strict_types=1);
 
 return [

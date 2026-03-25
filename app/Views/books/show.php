@@ -1,6 +1,7 @@
 <?php use App\Core\Auth; ?>
 <?php use App\Models\Book; ?>
 <?php use App\Models\User; ?>
+<?php // Fiche détail d'un livre : image, description, propriétaire et accès à la messagerie. ?>
 
 <?php
 $status = (string)($book['status'] ?? 'available');
@@ -8,7 +9,7 @@ $title = trim((string)($book['title'] ?? 'Livre'));
 $author = trim((string)($book['author'] ?? 'Auteur inconnu'));
 $owner = trim((string)($book['username'] ?? 'membre de la communaute'));
 $description = \App\Models\Book::detailDescription($book);
-$image = Book::imagePath($book, '/assets/img/figma/mask-group-1.png');
+$image = Book::detailImagePath($book, '/assets/img/figma/mask-group-1.png');
 if (!preg_match('#^https?://#i', $image)) {
   $assetFile = __DIR__ . '/../../../public' . $image;
   $imageVersion = is_file($assetFile) ? (string)filemtime($assetFile) : '1';

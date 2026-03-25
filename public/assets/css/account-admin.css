@@ -1,3 +1,5 @@
+/* Styles dédiés à la page "Mon compte" :
+   cartes profil, formulaire latéral et tableau de bibliothèque. */
 .account-admin {
   background: #FFFFFF;
   width: 100vw;
@@ -246,6 +248,17 @@
   object-fit: cover;
 }
 
+.account-books__mobile-label {
+  display: none;
+  margin-bottom: 6px;
+  font-size: 10px;
+  line-height: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #7d7d7d;
+}
+
 .account-books__desc {
   color: #3f3f3f;
   font-style: italic;
@@ -334,6 +347,8 @@
 
 @media (max-width: 900px) {
   .account-admin {
+    width: 100%;
+    margin-left: 0;
     padding: 26px 0 48px;
   }
 
@@ -396,6 +411,10 @@
     display: none;
   }
 
+  .account-books__mobile-label {
+    display: block;
+  }
+
   .account-books__photo img {
     width: 70px;
     height: 70px;
@@ -409,6 +428,8 @@
 
 @media (max-width: 560px) {
   .account-admin {
+    width: 100%;
+    margin-left: 0;
     padding: 18px 0 40px;
   }
 

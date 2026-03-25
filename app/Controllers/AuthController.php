@@ -4,6 +4,8 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Models\User;
 
+// Contrôleur d'authentification : formulaires d'inscription,
+// connexion, déconnexion et validation des identifiants.
 class AuthController extends Controller
 {
   public function registerForm(): void
@@ -13,6 +15,8 @@ class AuthController extends Controller
 
   public function register(): void
   {
+    $this->requireCsrf();
+
     $username = trim($_POST['username'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $password = (string)($_POST['password'] ?? '');
@@ -31,6 +35,7 @@ class AuthController extends Controller
     $hash = password_hash($password, PASSWORD_BCRYPT);
     $id = User::create($username, $email, $hash);
 
+    session_regenerate_id(true);
     $_SESSION['user_id'] = $id;
     $this->redirect('/account');
   }
@@ -42,6 +47,8 @@ class AuthController extends Controller
 
   public function login(): void
   {
+    $this->requireCsrf();
+
     $login = trim($_POST['email'] ?? '');
     $password = (string)($_POST['password'] ?? '');
 
@@ -51,12 +58,15 @@ class AuthController extends Controller
       return;
     }
 
+    session_regenerate_id(true);
     $_SESSION['user_id'] = (int)$user['id'];
     $this->redirect('/account');
   }
 
   public function logout(): void
   {
+    $this->requireCsrf();
+    $_SESSION = [];
     session_destroy();
     $this->redirect('/');
   }

@@ -1,5 +1,7 @@
+<?php use App\Core\Csrf; ?>
 <?php use App\Models\Book; ?>
 <?php use App\Models\User; ?>
+<?php // Tableau de bord "Mon compte" : profil, informations personnelles et bibliothèque du membre connecté. ?>
 
 <?php
 $avatar = User::avatarPath($me, '/assets/img/figma/mask-group-2.png');
@@ -48,6 +50,7 @@ if (!empty($me['created_at'])) {
         <?php if (!empty($error)): ?><p class="account-form__message account-form__message--error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
         <?php if (!empty($success)): ?><p class="account-form__message account-form__message--success"><?= htmlspecialchars($success) ?></p><?php endif; ?>
         <form method="post" action="<?= $base ?>/account/profile" class="account-form">
+          <?= Csrf::input(); ?>
           <label class="account-form__field">
             <span>Adresse email</span>
             <input value="<?= htmlspecialchars($me['email'] ?? '') ?>" readonly>
@@ -106,21 +109,32 @@ if (!empty($me['created_at'])) {
           ?>
           <div class="account-books__row">
             <div class="account-books__photo">
+              <span class="account-books__mobile-label">Photo</span>
               <img src="<?= htmlspecialchars($cover) ?>" alt="">
             </div>
             <div>
+              <span class="account-books__mobile-label">Titre</span>
               <a href="<?= $base ?>/books/show?id=<?= (int)$b['id'] ?>"><?= htmlspecialchars($b['title']) ?></a>
             </div>
-            <div><?= htmlspecialchars($b['author']) ?></div>
-            <div class="account-books__desc"><?= htmlspecialchars($desc) ?></div>
             <div>
+              <span class="account-books__mobile-label">Auteur</span>
+              <?= htmlspecialchars($b['author']) ?>
+            </div>
+            <div class="account-books__desc">
+              <span class="account-books__mobile-label">Description</span>
+              <?= htmlspecialchars($desc) ?>
+            </div>
+            <div>
+              <span class="account-books__mobile-label">Disponibilité</span>
               <span class="status-pill <?= $isAvailable ? 'status-pill--ok' : 'status-pill--off' ?>">
                 <?= $isAvailable ? 'disponible' : 'non dispo.' ?>
               </span>
             </div>
             <div class="account-books__actions">
+              <span class="account-books__mobile-label">Action</span>
               <a href="<?= $base ?>/books/edit?id=<?= (int)$b['id'] ?>">Éditer</a>
               <form action="<?= $base ?>/books/delete" method="post" class="inline">
+                <?= Csrf::input(); ?>
                 <input type="hidden" name="id" value="<?= (int)$b['id'] ?>">
                 <button type="submit" onclick="return confirm('Supprimer ?')">Supprimer</button>
               </form>

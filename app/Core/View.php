@@ -1,8 +1,12 @@
 <?php
 namespace App\Core;
 
+// Moteur de rendu très simple : charge l'entête, la vue demandée
+// et le pied de page en injectant les données fournies.
 class View
 {
+  // Rend une vue complète avec layout commun.
+  // Les données du contrôleur deviennent des variables locales dans la vue.
   public function render(string $view, array $data = []): void
   {
     extract($data);

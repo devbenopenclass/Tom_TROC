@@ -1,3 +1,4 @@
+<?php // Pied de page commun du site : liens légaux et logo décoratif. ?>
 </main>
 
 <footer class="site-footer">

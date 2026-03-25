@@ -1,4 +1,5 @@
 <?php
+// Vue d'administration des membres : tableau récapitulatif des comptes inscrits.
 use App\Core\View;
 ?>
 <section class="admin-wrap">

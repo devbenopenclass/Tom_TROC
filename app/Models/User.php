@@ -3,12 +3,17 @@ namespace App\Models;
 
 use App\Core\Model;
 
+// Modèle utilisateur : inscription, connexion, profil,
+// avatar et mise à jour des informations de compte.
 class User extends Model
 {
   public const DEFAULT_AVATAR = '/assets/img/figma/mask-group-2.png';
 
   private static ?string $passwordColumn = null;
 
+  // Certains environnements stockent le mot de passe dans `password`,
+  // d'autres dans `password_hash`. Cette méthode détecte la bonne colonne
+  // une seule fois et mémorise le résultat.
   private static function resolvePasswordColumn(): string
   {
     if (self::$passwordColumn !== null) {
@@ -26,6 +31,8 @@ class User extends Model
     return self::$passwordColumn;
   }
 
+  // Recherche un utilisateur par email uniquement,
+  // utile pour vérifier l'unicité à l'inscription.
   public static function findByEmail(string $email): ?array
   {
     $passwordColumn = self::resolvePasswordColumn();
@@ -40,6 +47,8 @@ class User extends Model
     return $u ?: null;
   }
 
+  // Recherche par identifiant de connexion :
+  // l'utilisateur peut se connecter avec son email ou son pseudo.
   public static function findByLogin(string $login): ?array
   {
     $passwordColumn = self::resolvePasswordColumn();
@@ -54,6 +63,7 @@ class User extends Model
     return $u ?: null;
   }
 
+  // Retourne les informations publiques d'un utilisateur par son id.
   public static function find(int $id): ?array
   {
     $stmt = self::db()->prepare("SELECT id, username, email, avatar, bio, created_at FROM users WHERE id = :id");
@@ -62,6 +72,7 @@ class User extends Model
     return $u ?: null;
   }
 
+  // Crée un nouveau compte membre avec un avatar par défaut.
   public static function create(string $username, string $email, string $passwordHash): int
   {
     $passwordColumn = self::resolvePasswordColumn();
@@ -80,6 +91,8 @@ class User extends Model
     return (int) self::db()->lastInsertId();
   }
 
+  // Met à jour le profil ; si un mot de passe est fourni,
+  // on le sauvegarde en même temps que le pseudo et la bio.
   public static function updateProfile(int $id, string $username, string $bio, ?string $passwordHash = null): void
   {
     if ($passwordHash !== null) {
@@ -102,6 +115,8 @@ class User extends Model
     ]);
   }
 
+  // Retourne un avatar fiable : avatar utilisateur si le fichier existe,
+  // sinon image de secours.
   public static function avatarPath(?array $user, string $fallback = '/assets/img/figma/mask-group-3.png'): string
   {
     $avatar = trim((string)($user['avatar'] ?? ''));

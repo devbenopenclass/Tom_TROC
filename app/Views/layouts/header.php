@@ -1,4 +1,8 @@
 <?php
+// Entête globale du site : calcule l'état de connexion,
+// les versions CSS/assets et construit la navigation principale.
+use App\Core\Csrf;
+
 $base = \App\Core\Url::baseUrl();
 $isLogged = !empty($_SESSION['user_id']);
 $unreadCount = 0;
@@ -61,6 +65,7 @@ if ($isLogged) {
           </a>
 
           <form action="<?= $base ?>/logout" method="post" class="inline logout-form">
+            <?= Csrf::input(); ?>
             <button class="text-link" type="submit">Déconnexion</button>
           </form>
         <?php else: ?>

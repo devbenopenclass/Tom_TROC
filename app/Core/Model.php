@@ -3,6 +3,8 @@ namespace App\Core;
 
 use PDO;
 
+// Modèle de base partagé : ouvre et mémorise la connexion PDO
+// utilisée par les modèles métiers du projet.
 class Model
 {
   protected static ?PDO $pdo = null;

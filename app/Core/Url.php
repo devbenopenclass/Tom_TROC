@@ -1,6 +1,8 @@
 <?php
 namespace App\Core;
 
+// Helper d'URL : calcule l'URL de base du projet
+// pour éviter les liens cassés sous /tomtroc.
 class Url
 {
   public static function baseUrl(): string

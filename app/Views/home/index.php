@@ -1,3 +1,4 @@
+<?php // Page d'accueil : hero, derniers livres, étapes de fonctionnement et valeurs du projet. ?>
 <section class="home-hero">
   <div class="home-copy">
     <h1>Rejoignez nos<br>lecteurs passionnés</h1>

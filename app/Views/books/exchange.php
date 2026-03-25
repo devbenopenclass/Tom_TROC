@@ -1,4 +1,5 @@
 <?php use App\Models\Book; ?>
+<?php // Catalogue public des livres : recherche et grille complète des ouvrages disponibles sur la plateforme. ?>
 
 <section class="exchange-head">
   <div class="exchange-copy">

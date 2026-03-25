@@ -4,6 +4,8 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Models\Book;
 
+// Contrôleur de la page d'accueil :
+// récupère les derniers livres et alimente le home.
 class HomeController extends Controller
 {
   public function index(): void

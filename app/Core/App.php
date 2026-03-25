@@ -1,6 +1,8 @@
 <?php
 namespace App\Core;
 
+// Coeur de l'application : charge les classes essentielles, enregistre
+// l'autoload et lance la résolution de la requête courante.
 require_once __DIR__ . '/Router.php';
 require_once __DIR__ . '/Controller.php';
 require_once __DIR__ . '/View.php';
@@ -18,6 +20,9 @@ spl_autoload_register(function (string $class) {
 
 class App
 {
+  // Point d'orchestration principal :
+  // on enregistre ici toutes les routes utilisées par le site
+  // avant de laisser le routeur résoudre la requête courante.
   public function run(): void
   {
     $router = new Router();
