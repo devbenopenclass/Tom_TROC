@@ -38,6 +38,36 @@ class Book extends Model
     return self::imagePath($book, $fallback);
   }
 
+  // Détermine si une vignette doit afficher un badge de disponibilité.
+  // Retourne la classe CSS et le libellé correspondant, ou null si aucun badge.
+  public static function cardStatusBadge(?array $book): ?array
+  {
+    return match ((string)($book['status'] ?? 'available')) {
+      'unavailable' => ['class' => 'book-status--off', 'label' => 'non dispo.'],
+      'reserved' => ['class' => 'book-status--reserved', 'label' => 'réservé'],
+      default => null,
+    };
+  }
+
+  // Retourne le libellé lisible d'un statut livre.
+  public static function statusLabel(?string $status): string
+  {
+    return match ((string)($status ?? 'available')) {
+      'unavailable' => 'indisponible',
+      'reserved' => 'réservé',
+      default => 'disponible',
+    };
+  }
+
+  // Retourne la variante visuelle du statut pour les pastilles de tableau.
+  public static function statusPillClass(?string $status): string
+  {
+    return match ((string)($status ?? 'available')) {
+      'available' => 'status-pill--ok',
+      default => 'status-pill--off',
+    };
+  }
+
   // Récupère les derniers livres ajoutés pour la page d'accueil.
   // Si la base est vide ou indisponible, on tombe sur le catalogue démo.
   public static function latest(int $limit = 4): array
@@ -47,6 +77,7 @@ class Book extends Model
         SELECT b.*, u.username
         FROM books b
         JOIN users u ON u.id = b.user_id
+        WHERE " . User::activeSqlCondition('u') . "
         ORDER BY b.created_at DESC
         LIMIT {$limit}
       ");
@@ -71,7 +102,8 @@ class Book extends Model
           SELECT b.*, u.username
           FROM books b
           JOIN users u ON u.id = b.user_id
-          WHERE b.title LIKE :q OR b.author LIKE :q OR u.username LIKE :q
+          WHERE " . User::activeSqlCondition('u') . "
+            AND (b.title LIKE :q OR b.author LIKE :q OR u.username LIKE :q)
           ORDER BY b.created_at DESC
         ");
         $stmt->execute(['q' => "%{$q}%"]);
@@ -81,6 +113,7 @@ class Book extends Model
           SELECT b.*, u.username
           FROM books b
           JOIN users u ON u.id = b.user_id
+          WHERE " . User::activeSqlCondition('u') . "
           ORDER BY b.created_at DESC
         ");
         $books = $stmt->fetchAll();
@@ -105,6 +138,7 @@ class Book extends Model
         FROM books b
         JOIN users u ON u.id = b.user_id
         WHERE b.id = :id
+          AND " . User::activeSqlCondition('u') . "
         LIMIT 1
       ");
       $stmt->execute(['id' => $id]);
@@ -219,10 +253,10 @@ class Book extends Model
       return $books;
     }
 
-    $needle = mb_strtolower($q);
+    $needle = self::toLower($q);
 
     return array_values(array_filter($books, static function (array $book) use ($needle): bool {
-      $haystack = mb_strtolower(
+      $haystack = self::toLower(
         ($book['title'] ?? '') . ' ' .
         ($book['author'] ?? '') . ' ' .
         ($book['username'] ?? '')
@@ -345,8 +379,14 @@ class Book extends Model
   private static function normalizeTitleKey(string $value): string
   {
     $value = trim($value);
-    $value = function_exists('mb_strtolower') ? mb_strtolower($value) : strtolower($value);
+    $value = self::toLower($value);
     return preg_replace('/[^a-z0-9]+/i', '', $value);
+  }
+
+  // Compatibilité mbstring/non-mbstring pour normaliser la casse.
+  private static function toLower(string $value): string
+  {
+    return function_exists('mb_strtolower') ? mb_strtolower($value) : strtolower($value);
   }
 
   // Compatibilité mbstring/non-mbstring pour compter les caractères.

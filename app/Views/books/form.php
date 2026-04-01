@@ -57,7 +57,7 @@ $statusOptions = [
           >
         <?php endforeach; ?>
 
-        <label for="book-description">Commentaire</label>
+        <label for="book-description">Description</label>
         <textarea id="book-description" name="description" rows="11"><?= htmlspecialchars($book['description'] ?? '') ?></textarea>
 
         <label for="book-status">Disponibilité</label>

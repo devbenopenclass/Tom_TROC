@@ -136,7 +136,7 @@ h1,h2,h3{
   background:var(--surface);border-radius:10px;overflow:hidden;
   box-shadow:0 4px 24px rgba(0,0,0,.04);
 }
-.home-book .img-wrap{height:6cm}
+.home-book .img-wrap{position:relative;height:6cm}
 .home-book .img-wrap img{width:100%;height:100%;object-fit:cover}
 .home-book .txt{
   height:3cm;
@@ -233,7 +233,15 @@ h1,h2,h3{
 .book-status{
   position:absolute;top:12px;right:12px;z-index:1;
   display:inline-flex;align-items:center;justify-content:center;
-  min-height:24px;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:500;
+  min-height:30px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:500;
+  color:#fff;
+  box-shadow:0 8px 18px rgba(0,0,0,.08);
+}
+.book-status--off{
+  background:#c97d83;
+}
+.book-status--reserved{
+  background:#b68c43;
 }
 
 /* Single book */

@@ -32,13 +32,14 @@
 
     $cards = [];
     if (!empty($latest)) {
-      foreach (array_slice($latest, 0, 4) as $i => $b) {
+      foreach (array_slice($latest, 0, 4) as $b) {
         $cards[] = [
           'title' => $b['title'] ?? '',
           'author' => $b['author'] ?? '',
           'owner' => $b['username'] ?? '',
           'img' => Url::asset(Book::imagePath($b)),
           'id' => (int)($b['id'] ?? 0),
+          'status' => (string)($b['status'] ?? 'available'),
         ];
       }
     }
@@ -47,6 +48,7 @@
     if (count($cards) < 4) {
       foreach (array_slice($fallback, 0, 4 - count($cards)) as $f) {
         $f['img'] = Url::asset(Book::imagePath($f));
+        $f['status'] = (string)($f['status'] ?? 'available');
         $cards[] = $f;
       }
     }
@@ -55,7 +57,13 @@
     <?php foreach ($cards as $c): ?>
       <?php $url = !empty($c['id']) ? ($base . '/books/show?id=' . (int)$c['id']) : ($base . '/books/exchange'); ?>
       <a class="home-book" href="<?= $url ?>">
-        <div class="img-wrap"><img src="<?= htmlspecialchars($c['img']) ?>" alt=""></div>
+        <div class="img-wrap">
+          <?php $badge = Book::cardStatusBadge($c); ?>
+          <?php if ($badge !== null): ?>
+            <span class="book-status <?= htmlspecialchars($badge['class']) ?>"><?= htmlspecialchars($badge['label']) ?></span>
+          <?php endif; ?>
+          <img src="<?= htmlspecialchars($c['img']) ?>" alt="">
+        </div>
         <div class="txt">
           <strong><?= htmlspecialchars($c['title']) ?></strong>
           <div><?= htmlspecialchars($c['author']) ?></div>

@@ -1,0 +1,7 @@
+Lien du dépôt GitHub :
+https://github.com/devbenopenclass/Tom_TROC
+
+Contenu du dépôt :
+- code complet du projet
+- README à la racine pour l'installation
+- fichier SQL de création et de données : storage/schema.sql

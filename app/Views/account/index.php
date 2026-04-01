@@ -114,7 +114,7 @@ if (!empty($me['created_at'])) {
         <?php foreach ($books as $b): ?>
           <?php
           $cover = Url::asset(Book::imagePath($b));
-          $isAvailable = ($b['status'] ?? '') === 'available';
+          $bookStatus = (string)($b['status'] ?? 'available');
           $desc = trim((string)($b['description'] ?? ''));
           if ($desc === '') {
             $desc = 'Aucune description.';
@@ -142,8 +142,8 @@ if (!empty($me['created_at'])) {
             </div>
             <div>
               <span class="account-books__mobile-label">Disponibilité</span>
-              <span class="status-pill <?= $isAvailable ? 'status-pill--ok' : 'status-pill--off' ?>">
-                <?= $isAvailable ? 'disponible' : 'indisponible' ?>
+              <span class="status-pill <?= htmlspecialchars(Book::statusPillClass($bookStatus)) ?>">
+                <?= htmlspecialchars(Book::statusLabel($bookStatus)) ?>
               </span>
             </div>
             <div class="account-books__actions">

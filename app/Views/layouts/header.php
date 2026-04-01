@@ -38,8 +38,6 @@ if (str_starts_with($normalizedPath, '/account/profile')) {
   $backFallback = '/books/exchange';
 } elseif (str_starts_with($normalizedPath, '/messages')) {
   $backFallback = '/account';
-} elseif (str_starts_with($normalizedPath, '/admin/members')) {
-  $backFallback = '/admin/books';
 } elseif (str_starts_with($normalizedPath, '/admin')) {
   $backFallback = '/account';
 }

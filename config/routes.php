@@ -33,6 +33,8 @@ return [
         '/account/profile' => 'AccountController@updateProfile',
         '/admin/books/status' => 'AdminController@updateBookStatus',
         '/admin/books/delete' => 'AdminController@deleteBook',
+        '/admin/members/delete' => 'AdminController@deleteMember',
+        '/admin/members/restore' => 'AdminController@restoreMember',
 
         '/books/create' => 'BookController@create',
         '/books/edit' => 'BookController@update',

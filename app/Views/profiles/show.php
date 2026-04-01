@@ -42,11 +42,14 @@ $avatar = Url::asset(User::avatarPath($user));
         <?php
         // Chaque carte reprend les mêmes helpers que le catalogue public.
         $image = Url::asset(Book::imagePath($b));
-        $status = (string)($b['status'] ?? 'available');
-        $statusLabel = $status === 'reserved' ? 'réservé' : ($status === 'unavailable' ? 'indisponible' : 'disponible');
+        $badge = Book::cardStatusBadge($b);
+        $statusLabel = Book::statusLabel($b['status'] ?? null);
         ?>
         <a class="book" href="<?= $base ?>/books/show?id=<?= (int)$b['id'] ?>">
           <div class="thumb">
+            <?php if ($badge !== null): ?>
+              <span class="book-status <?= htmlspecialchars($badge['class']) ?>"><?= htmlspecialchars($badge['label']) ?></span>
+            <?php endif; ?>
             <img src="<?= htmlspecialchars($image) ?>" alt="">
           </div>
           <div class="meta">

@@ -15,8 +15,11 @@ class Message extends Model
     try {
       $stmt = self::db()->prepare("
         SELECT COUNT(*) AS c
-        FROM messages
-        WHERE receiver_id = :me AND is_read = 0
+        FROM messages m
+        JOIN users u ON u.id = m.sender_id
+        WHERE receiver_id = :me
+          AND is_read = 0
+          AND " . User::activeSqlCondition('u') . "
       ");
       $stmt->execute(['me' => $me]);
       $row = $stmt->fetch();
@@ -41,6 +44,10 @@ class Message extends Model
   // Cela permet d'autoriser les réponses même sans nouveau contexte livre.
   public static function hasThread(int $me, int $other): bool
   {
+    if (User::find($other) === null) {
+      return false;
+    }
+
     $stmt = self::db()->prepare("
       SELECT 1
       FROM messages
@@ -56,13 +63,17 @@ class Message extends Model
   // enrichi avec les pseudos et avatars des deux côtés.
   public static function thread(int $me, int $other): array
   {
+    if (User::find($other) === null) {
+      return [];
+    }
+
     $stmt = self::db()->prepare("
       SELECT m.*, us.username AS sender_name, us.avatar AS sender_avatar, ur.username AS receiver_name, ur.avatar AS receiver_avatar
       FROM messages m
       JOIN users us ON us.id = m.sender_id
       JOIN users ur ON ur.id = m.receiver_id
-      WHERE (m.sender_id = :me AND m.receiver_id = :other)
-         OR (m.sender_id = :other AND m.receiver_id = :me)
+      WHERE ((m.sender_id = :me AND m.receiver_id = :other)
+         OR (m.sender_id = :other AND m.receiver_id = :me))
       ORDER BY m.created_at ASC
     ");
     $stmt->execute(['me' => $me, 'other' => $other]);
@@ -108,7 +119,7 @@ class Message extends Model
       SELECT u.id, u.username, u.email, u.avatar, COUNT(b.id) AS books_count
       FROM users u
       LEFT JOIN books b ON b.user_id = u.id
-      WHERE u.id <> :me
+      WHERE u.id <> :me AND " . User::activeSqlCondition('u') . "
       GROUP BY u.id, u.username, u.email, u.avatar
       ORDER BY books_count DESC, u.username ASC
     ");
@@ -138,6 +149,7 @@ class Message extends Model
       FROM messages m
       JOIN users u
         ON u.id = CASE WHEN m.sender_id = :me THEN m.receiver_id ELSE m.sender_id END
+       AND " . User::activeSqlCondition('u') . "
       JOIN (
         SELECT
           MAX(id) AS last_message_id

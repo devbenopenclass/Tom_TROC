@@ -14,21 +14,79 @@ use PDO;
 final class AdminController extends Controller
 {
     private const BOOKS_PATH = '/admin/books';
+    private const MEMBERS_PATH = '/admin/members';
     private const ALLOWED_BOOK_STATUSES = ['available', 'unavailable', 'reserved'];
+    private const ALLOWED_BOOK_SORTS = ['recent', 'title_asc', 'title_desc'];
 
     public function books(): void
     {
         $this->requireAdmin();
+        User::purgeExpiredDeleted();
 
-        $stmt = $this->db()->query(
-            'SELECT b.*, u.username, u.email
+        $q = trim((string)($_GET['q'] ?? ''));
+        $status = $this->normalizeBookStatusFilter((string)($_GET['status'] ?? 'all'));
+        $sort = $this->normalizeBookSort((string)($_GET['sort'] ?? 'recent'));
+
+        $sql = 'SELECT b.*, u.username, u.email
              FROM books b
              JOIN users u ON u.id = b.user_id
-             ORDER BY b.created_at DESC, b.id DESC'
-        );
+             WHERE ' . User::activeSqlCondition('u');
+        $params = [];
+
+        if ($q !== '') {
+            $sql .= '
+             AND (b.title LIKE :q OR b.author LIKE :q OR u.username LIKE :q)';
+            $params['q'] = "%{$q}%";
+        }
+
+        if ($status !== 'all') {
+            $sql .= '
+             AND b.status = :status';
+            $params['status'] = $status;
+        }
+
+        $sql .= match ($sort) {
+            'title_asc' => '
+             ORDER BY b.title ASC, b.id DESC',
+            'title_desc' => '
+             ORDER BY b.title DESC, b.id DESC',
+            default => '
+             ORDER BY b.created_at DESC, b.id DESC',
+        };
+
+        $stmt = $this->db()->prepare($sql);
+        $stmt->execute($params);
 
         $this->render('admin/books', [
             'books' => $stmt->fetchAll(),
+            'q' => $q,
+            'statusFilter' => $status,
+            'sortFilter' => $sort,
+        ]);
+    }
+
+    public function members(): void
+    {
+        $this->requireAdmin();
+        User::purgeExpiredDeleted();
+
+        $stmt = $this->db()->prepare(
+            'SELECT
+                u.id,
+                u.username,
+                u.email,
+                u.created_at,
+                u.deleted_at,
+                COUNT(b.id) AS books_count
+             FROM users u
+             LEFT JOIN books b ON b.user_id = u.id
+             GROUP BY u.id, u.username, u.email, u.created_at, u.deleted_at
+             ORDER BY (u.deleted_at IS NULL) DESC, u.username ASC, u.id ASC'
+        );
+        $stmt->execute();
+
+        $this->render('admin/members', [
+            'members' => $stmt->fetchAll(),
         ]);
     }
 
@@ -40,7 +98,7 @@ final class AdminController extends Controller
         $id = (int)($_POST['id'] ?? 0);
         $status = $this->normalizeBookStatus((string)($_POST['status'] ?? 'available'));
         if ($id <= 0) {
-            $this->redirect(self::BOOKS_PATH);
+            $this->redirectBooks();
         }
 
         $stmt = $this->db()->prepare('UPDATE books SET status = :status WHERE id = :id');
@@ -49,7 +107,7 @@ final class AdminController extends Controller
             'status' => $status,
         ]);
 
-        $this->redirect(self::BOOKS_PATH);
+        $this->redirectBooks();
     }
 
     public function deleteBook(): void
@@ -59,35 +117,45 @@ final class AdminController extends Controller
 
         $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) {
-            $this->redirect(self::BOOKS_PATH);
+            $this->redirectBooks();
         }
 
         $stmt = $this->db()->prepare('DELETE FROM books WHERE id = :id');
         $stmt->execute(['id' => $id]);
 
-        $this->redirect(self::BOOKS_PATH);
+        $this->redirectBooks();
     }
 
-    public function members(): void
+    public function deleteMember(): void
     {
         $this->requireAdmin();
+        $this->requireCsrf();
 
-        $stmt = $this->db()->query(
-            'SELECT
-                u.id,
-                u.username,
-                u.email,
-                u.created_at,
-                COUNT(b.id) AS books_count
-             FROM users u
-             LEFT JOIN books b ON b.user_id = u.id
-             GROUP BY u.id, u.username, u.email, u.created_at
-             ORDER BY u.created_at DESC, u.id DESC'
-        );
+        $id = (int)($_POST['id'] ?? 0);
+        $currentUserId = (int)(Auth::id() ?? 0);
 
-        $this->render('admin/members', [
-            'members' => $stmt->fetchAll(),
-        ]);
+        if ($id <= 0 || $id === $currentUserId || User::isAdmin($id)) {
+            $this->redirectMembers();
+            return;
+        }
+
+        User::softDelete($id);
+        $this->redirectMembers();
+    }
+
+    public function restoreMember(): void
+    {
+        $this->requireAdmin();
+        $this->requireCsrf();
+
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id <= 0) {
+            $this->redirectMembers();
+            return;
+        }
+
+        User::restore($id);
+        $this->redirectMembers();
     }
 
     private function requireAdmin(): void
@@ -109,8 +177,30 @@ final class AdminController extends Controller
         return Model::connection();
     }
 
+    private function redirectBooks(): void
+    {
+        $this->redirect(self::BOOKS_PATH);
+    }
+
+    private function redirectMembers(): void
+    {
+        $this->redirect(self::MEMBERS_PATH);
+    }
+
     private function normalizeBookStatus(string $status): string
     {
         return in_array($status, self::ALLOWED_BOOK_STATUSES, true) ? $status : 'available';
+    }
+
+    private function normalizeBookStatusFilter(string $status): string
+    {
+        return $status === 'all' || in_array($status, self::ALLOWED_BOOK_STATUSES, true)
+            ? $status
+            : 'all';
+    }
+
+    private function normalizeBookSort(string $sort): string
+    {
+        return in_array($sort, self::ALLOWED_BOOK_SORTS, true) ? $sort : 'recent';
     }
 }

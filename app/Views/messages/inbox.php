@@ -48,7 +48,6 @@
       $threadAvatar = Url::asset(User::avatarPath($other));
       ?>
       <header class="thread-head">
-        <a class="thread-back" href="<?= $base ?>/messages">← retour</a>
         <img src="<?= htmlspecialchars($threadAvatar) ?>" alt="">
         <div>
           <h2><?= htmlspecialchars($other['username']) ?></h2>

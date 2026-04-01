@@ -14,7 +14,7 @@ use App\Models\Book;
         <p class="admin-head__intro">Gérez ici la liste des livres, leur disponibilité et les actions de modération.</p>
       </div>
       <div class="admin-head__actions">
-        <a class="admin-head__link" href="<?= $base ?>/admin/members">Liste des membres</a>
+        <a class="admin-head__link" href="<?= $base ?>/admin/members">Gestion des membres</a>
       </div>
     </div>
 
@@ -37,6 +37,30 @@ use App\Models\Book;
       </article>
     </div>
 
+    <form method="get" action="<?= $base ?>/admin/books" class="admin-search admin-search--books">
+      <input
+        type="search"
+        name="q"
+        value="<?= View::e($q ?? '') ?>"
+        placeholder="Recherche rapide par livre, auteur ou membre"
+      >
+
+      <select name="status" aria-label="Filtrer par disponibilité">
+        <option value="all" <?= ($statusFilter ?? 'all') === 'all' ? 'selected' : '' ?>>Toutes les disponibilités</option>
+        <option value="available" <?= ($statusFilter ?? '') === 'available' ? 'selected' : '' ?>>Disponible</option>
+        <option value="unavailable" <?= ($statusFilter ?? '') === 'unavailable' ? 'selected' : '' ?>>Indisponible</option>
+        <option value="reserved" <?= ($statusFilter ?? '') === 'reserved' ? 'selected' : '' ?>>Réservé</option>
+      </select>
+
+      <select name="sort" aria-label="Trier la liste">
+        <option value="recent" <?= ($sortFilter ?? 'recent') === 'recent' ? 'selected' : '' ?>>Plus récents</option>
+        <option value="title_asc" <?= ($sortFilter ?? '') === 'title_asc' ? 'selected' : '' ?>>Titre A à Z</option>
+        <option value="title_desc" <?= ($sortFilter ?? '') === 'title_desc' ? 'selected' : '' ?>>Titre Z à A</option>
+      </select>
+
+      <button type="submit">Appliquer</button>
+    </form>
+
     <!-- Tableau principal de modération : une ligne = un livre. -->
     <div class="admin-table-wrap" id="books-list">
       <div class="admin-table">
@@ -53,7 +77,8 @@ use App\Models\Book;
         <?php
           // L'admin réutilise la même logique d'image que le catalogue public.
           $img = Url::asset(Book::imagePath($book, '/assets/img/logo.png'));
-          $isAvailable = ($book['status'] ?? '') === 'available';
+          $bookStatus = (string)($book['status'] ?? 'available');
+          $isAvailable = $bookStatus === 'available';
         ?>
         <div class="admin-table__row">
           <div class="admin-table__photo">
@@ -66,8 +91,8 @@ use App\Models\Book;
             <span class="admin-table__muted"><?= View::e($book['email'] ?? '') ?></span>
           </div>
           <div>
-            <span class="status-pill <?= $isAvailable ? 'status-pill--ok' : 'status-pill--off' ?>">
-              <?= $isAvailable ? 'disponible' : 'indisponible' ?>
+            <span class="status-pill <?= View::e(Book::statusPillClass($bookStatus)) ?>">
+              <?= View::e(Book::statusLabel($bookStatus)) ?>
             </span>
           </div>
           <div class="admin-table__actions">
@@ -94,5 +119,6 @@ use App\Models\Book;
       <?php endif; ?>
       </div>
     </div>
+
   </div>
 </section>

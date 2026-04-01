@@ -21,9 +21,13 @@
     <?php foreach ($books as $b): ?>
       <?php
       $image = Url::asset(Book::imagePath($b));
+      $badge = Book::cardStatusBadge($b);
       ?>
       <a class="book" href="<?= $base ?>/books/show?id=<?= (int)$b['id'] ?>">
         <div class="thumb">
+          <?php if ($badge !== null): ?>
+            <span class="book-status <?= htmlspecialchars($badge['class']) ?>"><?= htmlspecialchars($badge['label']) ?></span>
+          <?php endif; ?>
           <img src="<?= htmlspecialchars($image) ?>" alt="">
         </div>
         <div class="meta">

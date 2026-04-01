@@ -9,7 +9,7 @@ use App\Core\Url;
 class User extends Model
 {
   public const DEFAULT_AVATAR = '/assets/img/figma/mask-group-2.png';
-  private const PUBLIC_FIELDS = 'id, username, email, avatar, bio, created_at';
+  private const PUBLIC_FIELDS = 'id, username, email, avatar, bio, created_at, deleted_at';
 
   private static ?string $passwordColumn = null;
   private static ?array $userColumns = null;
@@ -55,6 +55,16 @@ class User extends Model
     return in_array($column, self::userColumns(), true);
   }
 
+  public static function supportsSoftDelete(): bool
+  {
+    return self::hasColumn('deleted_at');
+  }
+
+  public static function activeSqlCondition(string $alias = 'users'): string
+  {
+    return self::supportsSoftDelete() ? "{$alias}.deleted_at IS NULL" : '1=1';
+  }
+
   private static function adminConfig(): array
   {
     $config = require __DIR__ . '/../../config/config.php';
@@ -86,7 +96,7 @@ class User extends Model
     $stmt = self::db()->prepare("
       SELECT " . self::PUBLIC_FIELDS . ", {$passwordColumn} AS password_hash
       FROM users
-      WHERE email = :email
+      WHERE email = :email AND " . self::activeSqlCondition('users') . "
       LIMIT 1
     ");
     $stmt->execute(['email' => $email]);
@@ -102,7 +112,8 @@ class User extends Model
     $stmt = self::db()->prepare("
       SELECT " . self::PUBLIC_FIELDS . ", {$passwordColumn} AS password_hash
       FROM users
-      WHERE email = :login OR username = :login
+      WHERE (email = :login OR username = :login)
+        AND " . self::activeSqlCondition('users') . "
       LIMIT 1
     ");
     $stmt->execute(['login' => $login]);
@@ -113,10 +124,41 @@ class User extends Model
   // Retourne les informations publiques d'un utilisateur par son id.
   public static function find(int $id): ?array
   {
+    $stmt = self::db()->prepare("
+      SELECT " . self::PUBLIC_FIELDS . "
+      FROM users
+      WHERE id = :id AND " . self::activeSqlCondition('users')
+    );
+    $stmt->execute(['id' => $id]);
+    $u = $stmt->fetch();
+    return $u ?: null;
+  }
+
+  public static function findWithDeleted(int $id): ?array
+  {
     $stmt = self::db()->prepare("SELECT " . self::PUBLIC_FIELDS . " FROM users WHERE id = :id");
     $stmt->execute(['id' => $id]);
     $u = $stmt->fetch();
     return $u ?: null;
+  }
+
+  public static function isDeleted(?array $user): bool
+  {
+    return !empty($user['deleted_at']);
+  }
+
+  public static function restoreDaysLeft(?array $user): ?int
+  {
+    if (!self::isDeleted($user)) {
+      return null;
+    }
+
+    $deletedAt = strtotime((string)($user['deleted_at'] ?? ''));
+    if ($deletedAt === false) {
+      return null;
+    }
+
+    return max(0, (int)ceil(($deletedAt + (30 * 86400) - time()) / 86400));
   }
 
   public static function adminSessionData(int $id): array
@@ -208,6 +250,60 @@ class User extends Model
 
     $stmt = self::db()->prepare('UPDATE users SET ' . implode(', ', $fields) . ' WHERE id = :id');
     $stmt->execute($params);
+  }
+
+  // Masque un membre pendant 30 jours avant suppression définitive.
+  public static function softDelete(int $id): void
+  {
+    if (!self::supportsSoftDelete()) {
+      self::delete($id);
+      return;
+    }
+
+    $stmt = self::db()->prepare('UPDATE users SET deleted_at = NOW() WHERE id = :id AND deleted_at IS NULL');
+    $stmt->execute(['id' => $id]);
+  }
+
+  // Restaure un membre tant que la fenêtre de 30 jours n'est pas dépassée.
+  public static function restore(int $id): bool
+  {
+    if (!self::supportsSoftDelete()) {
+      return false;
+    }
+
+    $stmt = self::db()->prepare("
+      UPDATE users
+      SET deleted_at = NULL
+      WHERE id = :id
+        AND deleted_at IS NOT NULL
+        AND deleted_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+    ");
+    $stmt->execute(['id' => $id]);
+
+    return $stmt->rowCount() > 0;
+  }
+
+  // Purge définitivement les comptes supprimés depuis plus de 30 jours.
+  public static function purgeExpiredDeleted(): void
+  {
+    if (!self::supportsSoftDelete()) {
+      return;
+    }
+
+    $stmt = self::db()->prepare("
+      DELETE FROM users
+      WHERE deleted_at IS NOT NULL
+        AND deleted_at < DATE_SUB(NOW(), INTERVAL 30 DAY)
+    ");
+    $stmt->execute();
+  }
+
+  // Suppression définitive d'un membre par son identifiant.
+  // Les clés étrangères gèrent ensuite le nettoyage des livres et messages liés.
+  public static function delete(int $id): void
+  {
+    $stmt = self::db()->prepare('DELETE FROM users WHERE id = :id');
+    $stmt->execute(['id' => $id]);
   }
 
   // Retourne un avatar fiable : avatar utilisateur si le fichier existe,

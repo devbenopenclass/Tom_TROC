@@ -64,15 +64,55 @@
   font-weight: 600;
 }
 
+.admin-search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 24px;
+}
+
+.admin-search input {
+  flex: 1;
+  min-height: 48px;
+  border: 1px solid rgba(255, 255, 255, .28);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .92);
+  color: #171717;
+  padding: 0 18px;
+  font-size: 15px;
+}
+
+.admin-search select {
+  min-height: 48px;
+  border: 1px solid rgba(255, 255, 255, .28);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .92);
+  color: #171717;
+  padding: 0 18px;
+  font-size: 15px;
+}
+
+.admin-search input::placeholder {
+  color: #7f7f7f;
+}
+
+.admin-search button {
+  min-height: 48px;
+  border: 1px solid #d7d7d7;
+  border-radius: 999px;
+  background: #fff;
+  color: #0a8a5c;
+  padding: 0 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .admin-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
   margin-bottom: 28px;
-}
-
-.admin-summary--members {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .admin-summary__card {
@@ -207,12 +247,35 @@
 
 .admin-table--members .admin-table__head,
 .admin-table--members .admin-table__row {
-  grid-template-columns: 90px 1fr 1.3fr 1fr 180px;
+  grid-template-columns: 90px 1fr 1.3fr 1fr 220px;
 }
 
 .admin-table__empty {
   padding: 18px;
   color: #666;
+}
+
+.admin-members-block {
+  margin-top: 36px;
+}
+
+.admin-members-block__head {
+  margin-bottom: 18px;
+}
+
+.admin-members-block__head h2 {
+  margin: 8px 0 0;
+  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+  color: #f1f1f1;
+  font-size: 32px;
+  font-weight: 400;
+}
+
+.admin-members-block__head p {
+  margin: 10px 0 0;
+  color: rgba(255, 255, 255, .78);
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 @media (max-width: 1100px) {
@@ -229,12 +292,16 @@
     justify-content: flex-start;
   }
 
+  .admin-search {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .admin-head h1 {
     font-size: 34px;
   }
 
-  .admin-summary,
-  .admin-summary--members {
+  .admin-summary {
     grid-template-columns: 1fr;
   }
 
