@@ -1,4 +1,5 @@
 <?php use App\Core\Auth; ?>
+<?php use App\Core\Url; ?>
 <?php use App\Models\Book; ?>
 <?php use App\Models\User; ?>
 <?php // Fiche détail d'un livre : image, description, propriétaire et accès à la messagerie. ?>
@@ -7,18 +8,10 @@
 $status = (string)($book['status'] ?? 'available');
 $title = trim((string)($book['title'] ?? 'Livre'));
 $author = trim((string)($book['author'] ?? 'Auteur inconnu'));
-$owner = trim((string)($book['username'] ?? 'membre de la communaute'));
+$owner = trim((string)($book['username'] ?? 'membre de la communauté'));
 $description = \App\Models\Book::detailDescription($book);
-$image = Book::detailImagePath($book, '/assets/img/figma/mask-group-1.png');
-if (!preg_match('#^https?://#i', $image)) {
-  $assetFile = __DIR__ . '/../../../public' . $image;
-  $imageVersion = is_file($assetFile) ? (string)filemtime($assetFile) : '1';
-  $image = $base . $image . '?v=' . $imageVersion;
-}
-$ownerAvatar = User::avatarPath($book);
-$ownerAvatarFile = __DIR__ . '/../../../public' . $ownerAvatar;
-$ownerAvatarVersion = is_file($ownerAvatarFile) ? (string)filemtime($ownerAvatarFile) : '1';
-$ownerAvatar = $base . $ownerAvatar . '?v=' . $ownerAvatarVersion;
+$image = Url::asset(Book::detailImagePath($book, '/assets/img/figma/mask-group-1.png'));
+$ownerAvatar = Url::asset(User::avatarPath($book));
 $canMessageOwner = Auth::check();
 
 $paragraphs = preg_split("/\n\s*\n/", $description) ?: [$description];
@@ -48,7 +41,7 @@ $paragraphs = preg_split("/\n\s*\n/", $description) ?: [$description];
         <?php endforeach; ?>
       </div>
 
-      <p class="book-show-label">Propriétaire</p>
+      <p class="book-show-label">Membre</p>
       <a class="book-show-owner" href="<?= $base ?>/profiles/show?id=<?= (int)$book['user_id'] ?>">
         <img src="<?= htmlspecialchars($ownerAvatar) ?>" alt="">
         <strong><?= htmlspecialchars($owner) ?></strong>

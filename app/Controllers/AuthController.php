@@ -8,6 +8,8 @@ use App\Models\User;
 // connexion, déconnexion et validation des identifiants.
 class AuthController extends Controller
 {
+  private const ACCOUNT_PATH = '/account';
+
   public function registerForm(): void
   {
     $this->render('auth/register');
@@ -22,22 +24,18 @@ class AuthController extends Controller
     $password = (string)($_POST['password'] ?? '');
     $confirm = (string)($_POST['confirm'] ?? '');
 
-    if ($username === '' || $email === '' || $password === '' || $password !== $confirm) {
-      $this->render('auth/register', ['error' => 'Champs invalides ou mots de passe différents.']);
+    if ($this->hasInvalidRegistrationInput($username, $email, $password, $confirm)) {
+      $this->renderAuthError('auth/register', 'Champs invalides ou mots de passe différents.');
       return;
     }
 
     if (User::findByEmail($email)) {
-      $this->render('auth/register', ['error' => 'Email déjà utilisé.']);
+      $this->renderAuthError('auth/register', 'Email déjà utilisé.');
       return;
     }
 
-    $hash = password_hash($password, PASSWORD_BCRYPT);
-    $id = User::create($username, $email, $hash);
-
-    session_regenerate_id(true);
-    $_SESSION['user_id'] = $id;
-    $this->redirect('/account');
+    $this->loginUser(User::create($username, $email, password_hash($password, PASSWORD_BCRYPT)));
+    $this->redirect(self::ACCOUNT_PATH);
   }
 
   public function loginForm(): void
@@ -54,13 +52,12 @@ class AuthController extends Controller
 
     $user = User::findByLogin($login);
     if (!$user || !password_verify($password, $user['password_hash'])) {
-      $this->render('auth/login', ['error' => 'Identifiants invalides.']);
+      $this->renderAuthError('auth/login', 'Identifiants invalides.');
       return;
     }
 
-    session_regenerate_id(true);
-    $_SESSION['user_id'] = (int)$user['id'];
-    $this->redirect('/account');
+    $this->loginUser((int)$user['id']);
+    $this->redirect(self::ACCOUNT_PATH);
   }
 
   public function logout(): void
@@ -69,5 +66,21 @@ class AuthController extends Controller
     $_SESSION = [];
     session_destroy();
     $this->redirect('/');
+  }
+
+  private function hasInvalidRegistrationInput(string $username, string $email, string $password, string $confirm): bool
+  {
+    return $username === '' || $email === '' || $password === '' || $password !== $confirm;
+  }
+
+  private function renderAuthError(string $view, string $message): void
+  {
+    $this->render($view, ['error' => $message]);
+  }
+
+  private function loginUser(int $userId): void
+  {
+    session_regenerate_id(true);
+    $_SESSION['user_id'] = $userId;
   }
 }

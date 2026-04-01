@@ -1,31 +1,39 @@
 <?php use App\Core\Csrf; ?>
 <?php // Vue d'inscription : création d'un nouveau compte membre. ?>
+<?php
+$errorMessage = trim((string)($error ?? ''));
+$fields = [
+  ['label' => 'Pseudo', 'name' => 'username', 'type' => 'text', 'autocomplete' => 'username'],
+  ['label' => 'Email', 'name' => 'email', 'type' => 'email', 'autocomplete' => 'email'],
+  ['label' => 'Mot de passe', 'name' => 'password', 'type' => 'password', 'autocomplete' => 'new-password'],
+  ['label' => 'Confirmer', 'name' => 'confirm', 'type' => 'password', 'autocomplete' => 'new-password'],
+];
+?>
 <section class="page-head">
   <div>
     <p class="kicker">TomTroc</p>
     <h1>Inscription</h1>
-    <p>Crée ton profil et commence tes échanges.</p>
+    <p>Crée ton compte et commence tes échanges.</p>
   </div>
   <img src="<?= $base ?>/assets/img/figma/group-10.svg" alt="Décor coeur">
 </section>
 
 <section class="auth-wrap">
   <article class="auth-panel">
-    <?php if (!empty($error)): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
+    <?php if ($errorMessage !== ''): ?><p class="error"><?= htmlspecialchars($errorMessage) ?></p><?php endif; ?>
 
     <form method="post" action="<?= $base ?>/register" class="form form-wide">
       <?= Csrf::input(); ?>
-      <label class="mini-label">Pseudo</label>
-      <input name="username" required>
-
-      <label class="mini-label">Email</label>
-      <input name="email" type="email" required>
-
-      <label class="mini-label">Mot de passe</label>
-      <input name="password" type="password" required>
-
-      <label class="mini-label">Confirmer</label>
-      <input name="confirm" type="password" required>
+      <?php foreach ($fields as $field): ?>
+        <label class="mini-label" for="register-<?= htmlspecialchars($field['name']) ?>"><?= htmlspecialchars($field['label']) ?></label>
+        <input
+          id="register-<?= htmlspecialchars($field['name']) ?>"
+          name="<?= htmlspecialchars($field['name']) ?>"
+          type="<?= htmlspecialchars($field['type']) ?>"
+          autocomplete="<?= htmlspecialchars($field['autocomplete']) ?>"
+          required
+        >
+      <?php endforeach; ?>
 
       <button class="btn" type="submit">Créer le compte</button>
     </form>

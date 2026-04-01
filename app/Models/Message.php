@@ -91,55 +91,11 @@ class Message extends Model
   public static function inbox(int $me): array
   {
     try {
-      $stmt = self::db()->prepare("
-        SELECT
-          CASE WHEN m.sender_id = :me THEN m.receiver_id ELSE m.sender_id END AS other_id,
-          u.username AS other_username,
-          u.avatar AS other_avatar,
-          m.content AS last_message,
-          m.created_at AS last_at,
-          COALESCE(unread.unread_count, 0) AS unread_count
-        FROM messages m
-        JOIN users u
-          ON u.id = CASE WHEN m.sender_id = :me THEN m.receiver_id ELSE m.sender_id END
-        JOIN (
-          SELECT
-            MAX(id) AS last_message_id
-          FROM messages
-          WHERE sender_id = :me OR receiver_id = :me
-          GROUP BY CASE WHEN sender_id = :me THEN receiver_id ELSE sender_id END
-        ) latest ON latest.last_message_id = m.id
-        LEFT JOIN (
-          SELECT sender_id, COUNT(*) AS unread_count
-          FROM messages
-          WHERE receiver_id = :me AND is_read = 0
-          GROUP BY sender_id
-        ) unread ON unread.sender_id = CASE WHEN m.sender_id = :me THEN m.receiver_id ELSE m.sender_id END
-        ORDER BY m.created_at DESC, m.id DESC
-      ");
+      $stmt = self::db()->prepare(self::inboxQuery(true));
       $stmt->execute(['me' => $me]);
       return $stmt->fetchAll();
     } catch (PDOException $e) {
-      $stmt = self::db()->prepare("
-        SELECT
-          CASE WHEN m.sender_id = :me THEN m.receiver_id ELSE m.sender_id END AS other_id,
-          u.username AS other_username,
-          u.avatar AS other_avatar,
-          m.content AS last_message,
-          m.created_at AS last_at,
-          0 AS unread_count
-        FROM messages m
-        JOIN users u
-          ON u.id = CASE WHEN m.sender_id = :me THEN m.receiver_id ELSE m.sender_id END
-        JOIN (
-          SELECT
-            MAX(id) AS last_message_id
-          FROM messages
-          WHERE sender_id = :me OR receiver_id = :me
-          GROUP BY CASE WHEN sender_id = :me THEN receiver_id ELSE sender_id END
-        ) latest ON latest.last_message_id = m.id
-        ORDER BY m.created_at DESC, m.id DESC
-      ");
+      $stmt = self::db()->prepare(self::inboxQuery(false));
       $stmt->execute(['me' => $me]);
       return $stmt->fetchAll();
     }
@@ -158,5 +114,39 @@ class Message extends Model
     ");
     $stmt->execute(['me' => $me]);
     return $stmt->fetchAll();
+  }
+
+  private static function inboxQuery(bool $withUnreadCount): string
+  {
+    $unreadSelect = $withUnreadCount ? 'COALESCE(unread.unread_count, 0)' : '0';
+    $unreadJoin = $withUnreadCount ? "
+        LEFT JOIN (
+          SELECT sender_id, COUNT(*) AS unread_count
+          FROM messages
+          WHERE receiver_id = :me AND is_read = 0
+          GROUP BY sender_id
+        ) unread ON unread.sender_id = CASE WHEN m.sender_id = :me THEN m.receiver_id ELSE m.sender_id END" : '';
+
+    return "
+      SELECT
+        CASE WHEN m.sender_id = :me THEN m.receiver_id ELSE m.sender_id END AS other_id,
+        u.username AS other_username,
+        u.avatar AS other_avatar,
+        m.content AS last_message,
+        m.created_at AS last_at,
+        {$unreadSelect} AS unread_count
+      FROM messages m
+      JOIN users u
+        ON u.id = CASE WHEN m.sender_id = :me THEN m.receiver_id ELSE m.sender_id END
+      JOIN (
+        SELECT
+          MAX(id) AS last_message_id
+        FROM messages
+        WHERE sender_id = :me OR receiver_id = :me
+        GROUP BY CASE WHEN sender_id = :me THEN receiver_id ELSE sender_id END
+      ) latest ON latest.last_message_id = m.id
+      {$unreadJoin}
+      ORDER BY m.created_at DESC, m.id DESC
+    ";
   }
 }

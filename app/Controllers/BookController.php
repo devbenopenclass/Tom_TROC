@@ -9,6 +9,9 @@ use App\Models\Book;
 // formulaire d'ajout/édition et suppression.
 class BookController extends Controller
 {
+  private const ACCOUNT_PATH = '/account';
+  private const AVAILABLE_STATUSES = ['available', 'unavailable', 'reserved'];
+
   // Affiche le catalogue public des livres avec le moteur de recherche.
   public function exchange(): void
   {
@@ -35,89 +38,62 @@ class BookController extends Controller
   // Ouvre le formulaire d'ajout d'un livre pour le membre connecté.
   public function createForm(): void
   {
-    Auth::requireLogin();
+    $this->requireBookLogin();
     $this->render('books/form', ['mode' => 'create']);
   }
 
   // Valide les champs du formulaire puis crée le livre en base.
   public function create(): void
   {
-    Auth::requireLogin();
+    $this->requireBookLogin();
     $this->requireCsrf();
 
-    $data = [
-      'user_id' => Auth::id(),
-      'title' => trim($_POST['title'] ?? ''),
-      'author' => trim($_POST['author'] ?? ''),
-      'image' => null,
-      'description' => trim($_POST['description'] ?? ''),
-      'status' => $_POST['status'] ?? 'available',
-    ];
+    $data = $this->bookPayloadForCreate();
 
     if ($data['title'] === '' || $data['author'] === '') {
-      $this->render('books/form', ['mode' => 'create', 'error' => 'Titre et auteur sont obligatoires.']);
+      $this->renderBookFormError('create', 'Titre et auteur sont obligatoires.');
       return;
     }
 
-    if (!empty($_FILES['image']['name'])) {
-      $data['image'] = $this->handleUpload($_FILES['image']);
-    }
-
+    $data['image'] = $this->uploadedBookImage() ?? $data['image'];
     Book::create($data);
-    $this->redirect('/account');
+    $this->redirect(self::ACCOUNT_PATH);
   }
 
   // Charge le formulaire d'édition d'un livre existant.
   // On bloque l'accès si le livre n'appartient pas au membre.
   public function editForm(): void
   {
-    Auth::requireLogin();
-
-    $id = (int)($_GET['id'] ?? 0);
-    $book = $id ? Book::find($id) : null;
-
-    if (!$book || (int)$book['user_id'] !== Auth::id()) {
-      http_response_code(403);
-      echo "Accès interdit";
-      return;
-    }
-
+    $this->requireBookLogin();
+    $book = $this->findOwnedBook((int)($_GET['id'] ?? 0));
     $this->render('books/form', ['mode' => 'edit', 'book' => $book]);
   }
 
   // Enregistre les modifications d'un livre existant.
   public function update(): void
   {
-    Auth::requireLogin();
+    $this->requireBookLogin();
     $this->requireCsrf();
 
     $id = (int)($_POST['id'] ?? 0);
+    $this->findOwnedBook($id);
 
-    $data = [
-      'title' => trim($_POST['title'] ?? ''),
-      'author' => trim($_POST['author'] ?? ''),
-      'image' => $_POST['existing_image'] ?? null,
-      'description' => trim($_POST['description'] ?? ''),
-      'status' => $_POST['status'] ?? 'available',
-    ];
+    $data = $this->bookPayloadForUpdate();
+    $data['image'] = $this->uploadedBookImage() ?? $data['image'];
 
-    if (!empty($_FILES['image']['name'])) {
-      $data['image'] = $this->handleUpload($_FILES['image']);
-    }
-
-    Book::update($id, Auth::id(), $data);
-    $this->redirect('/account');
+    Book::update($id, $this->currentUserId(), $data);
+    $this->redirect(self::ACCOUNT_PATH);
   }
 
   // Supprime un livre de la bibliothèque du membre connecté.
   public function delete(): void
   {
-    Auth::requireLogin();
+    $this->requireBookLogin();
     $this->requireCsrf();
 
     $id = (int)($_POST['id'] ?? 0);
-    Book::delete($id, Auth::id());
-    $this->redirect('/account');
+    Book::delete($id, $this->currentUserId());
+    $this->redirect(self::ACCOUNT_PATH);
   }
 
   // Gère l'upload d'une couverture utilisateur dans public/assets/uploads.
@@ -139,5 +115,72 @@ class BookController extends Controller
     if (!move_uploaded_file($file['tmp_name'], $dest)) return null;
 
     return '/assets/uploads/' . $name;
+  }
+
+  private function requireBookLogin(): void
+  {
+    Auth::requireLogin();
+  }
+
+  private function currentUserId(): int
+  {
+    return (int) Auth::id();
+  }
+
+  private function bookPayloadForCreate(): array
+  {
+    return [
+      'user_id' => $this->currentUserId(),
+      'title' => trim($_POST['title'] ?? ''),
+      'author' => trim($_POST['author'] ?? ''),
+      'image' => null,
+      'description' => trim($_POST['description'] ?? ''),
+      'status' => $this->normalizeStatus((string)($_POST['status'] ?? 'available')),
+    ];
+  }
+
+  private function bookPayloadForUpdate(): array
+  {
+    return [
+      'title' => trim($_POST['title'] ?? ''),
+      'author' => trim($_POST['author'] ?? ''),
+      'image' => $_POST['existing_image'] ?? null,
+      'description' => trim($_POST['description'] ?? ''),
+      'status' => $this->normalizeStatus((string)($_POST['status'] ?? 'available')),
+    ];
+  }
+
+  private function uploadedBookImage(): ?string
+  {
+    if (empty($_FILES['image']['name'])) {
+      return null;
+    }
+
+    return $this->handleUpload($_FILES['image']);
+  }
+
+  private function normalizeStatus(string $status): string
+  {
+    return in_array($status, self::AVAILABLE_STATUSES, true) ? $status : 'available';
+  }
+
+  private function findOwnedBook(int $id): array
+  {
+    $book = $id > 0 ? Book::find($id) : null;
+    if ($book && (int)($book['user_id'] ?? 0) === $this->currentUserId()) {
+      return $book;
+    }
+
+    http_response_code(403);
+    echo 'Accès interdit';
+    exit;
+  }
+
+  private function renderBookFormError(string $mode, string $message): void
+  {
+    $this->render('books/form', [
+      'mode' => $mode,
+      'error' => $message,
+    ]);
   }
 }

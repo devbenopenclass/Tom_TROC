@@ -5,6 +5,12 @@ namespace App\Core;
 // et le pied de page en injectant les données fournies.
 class View
 {
+  // Echappe une valeur pour un affichage HTML sûr dans les vues.
+  public static function e(?string $value): string
+  {
+    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+  }
+
   // Rend une vue complète avec layout commun.
   // Les données du contrôleur deviennent des variables locales dans la vue.
   public function render(string $view, array $data = []): void

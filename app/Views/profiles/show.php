@@ -1,19 +1,17 @@
+<?php use App\Core\Url; ?>
 <?php use App\Models\Book; ?>
 <?php use App\Models\User; ?>
 <?php // Profil public d'un membre : avatar, bio et livres visibles par les autres utilisateurs. ?>
 
 <?php
-$avatar = User::avatarPath($user);
-$avatarFile = __DIR__ . '/../../../public' . $avatar;
-$avatarVersion = is_file($avatarFile) ? (string)filemtime($avatarFile) : '1';
-$avatar = $base . $avatar . '?v=' . $avatarVersion;
+$avatar = Url::asset(User::avatarPath($user));
 ?>
 
 <section class="page-head">
   <div>
     <p class="kicker">Profil public</p>
     <h1><?= htmlspecialchars($user['username']) ?></h1>
-    <p>Bibliothèque partagée et informations du membre.</p>
+    <p>Profil public et bibliothèque partagée.</p>
   </div>
   <img src="<?= $base ?>/assets/img/figma/icon-mon-compte.svg" alt="Icône profil">
 </section>
@@ -34,19 +32,16 @@ $avatar = $base . $avatar . '?v=' . $avatarVersion;
 </section>
 
 <section class="card">
-  <h2>Livres du profil</h2>
+  <h2>Bibliothèque</h2>
   <?php if (empty($books)): ?>
-    <p class="muted">Aucun livre.</p>
+    <p class="muted">Aucun livre dans cette bibliothèque.</p>
   <?php else: ?>
     <div class="grid">
       <?php foreach ($books as $b): ?>
         <?php
-        $image = Book::imagePath($b);
-        if (!preg_match('#^https?://#i', $image)) {
-          $assetFile = __DIR__ . '/../../../public' . $image;
-          $imageVersion = is_file($assetFile) ? (string)filemtime($assetFile) : '1';
-          $image = $base . $image . '?v=' . $imageVersion;
-        }
+        $image = Url::asset(Book::imagePath($b));
+        $status = (string)($b['status'] ?? 'available');
+        $statusLabel = $status === 'reserved' ? 'réservé' : ($status === 'unavailable' ? 'indisponible' : 'disponible');
         ?>
         <a class="book" href="<?= $base ?>/books/show?id=<?= (int)$b['id'] ?>">
           <div class="thumb">
@@ -55,7 +50,7 @@ $avatar = $base . $avatar . '?v=' . $avatarVersion;
           <div class="meta">
             <strong><?= htmlspecialchars($b['title']) ?></strong>
             <div class="muted"><?= htmlspecialchars($b['author']) ?></div>
-            <div class="muted">statut : <?= htmlspecialchars($b['status']) ?></div>
+            <div class="muted">Disponibilité : <?= htmlspecialchars($statusLabel) ?></div>
           </div>
         </a>
       <?php endforeach; ?>

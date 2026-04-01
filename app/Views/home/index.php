@@ -78,7 +78,7 @@
 
   <div class="steps">
     <div class="step">Inscrivez-vous gratuitement sur notre plateforme.</div>
-    <div class="step">Ajoutez les livres que vous souhaitez échanger à votre profil.</div>
+    <div class="step">Ajoutez les livres que vous souhaitez échanger à votre bibliothèque.</div>
     <div class="step">Parcourez les livres disponibles chez d'autres membres.</div>
     <div class="step">Proposez un échange et discutez avec d'autres passionnés de lecture.</div>
   </div>

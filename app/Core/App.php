@@ -20,46 +20,24 @@ spl_autoload_register(function (string $class) {
 
 class App
 {
-  // Point d'orchestration principal :
-  // on enregistre ici toutes les routes utilisées par le site
-  // avant de laisser le routeur résoudre la requête courante.
   public function run(): void
   {
     $router = new Router();
-
-    // Home
-    $router->get('/', 'HomeController@index');
-
-    // Auth
-    $router->get('/register', 'AuthController@registerForm');
-    $router->post('/register', 'AuthController@register');
-    $router->get('/login', 'AuthController@loginForm');
-    $router->post('/login', 'AuthController@login');
-    $router->post('/logout', 'AuthController@logout');
-
-    // Account
-    $router->get('/account', 'AccountController@index');
-    $router->get('/account/profile', 'AccountController@editProfileForm');
-    $router->post('/account/profile', 'AccountController@updateProfile');
-
-    // Books
-    $router->get('/books/exchange', 'BookController@exchange');
-    $router->get('/books/exchangege', 'BookController@exchange');
-    $router->get('/books/show', 'BookController@show');        // ?id=1
-    $router->get('/books/create', 'BookController@createForm');
-    $router->post('/books/create', 'BookController@create');
-    $router->get('/books/edit', 'BookController@editForm');    // ?id=1
-    $router->post('/books/edit', 'BookController@update');
-    $router->post('/books/delete', 'BookController@delete');
-
-    // Profiles
-    $router->get('/profiles/show', 'ProfileController@show');  // ?id=2
-
-    // Messages
-    $router->get('/messages', 'MessageController@inbox');
-    $router->get('/messages/thread', 'MessageController@thread'); // ?user=2
-    $router->post('/messages/send', 'MessageController@send');
-
+    $this->registerRoutes($router);
     $router->dispatch();
+  }
+
+  // Charge la table de routage centrale pour éviter les définitions dupliquées.
+  private function registerRoutes(Router $router): void
+  {
+    $routes = require __DIR__ . '/../../config/routes.php';
+
+    foreach (($routes['GET'] ?? []) as $path => $handler) {
+      $router->get((string) $path, (string) $handler);
+    }
+
+    foreach (($routes['POST'] ?? []) as $path => $handler) {
+      $router->post((string) $path, (string) $handler);
+    }
   }
 }

@@ -6,7 +6,7 @@ use App\Core\View;
   <div class="site-shell">
     <div class="admin-head">
       <h1>Membres</h1>
-      <a class="admin-head__link" href="<?= BASE_URL ?>/admin/books">Gérer les livres</a>
+      <a class="admin-head__link" href="<?= $base ?>/admin/books">Gérer les livres</a>
     </div>
 
     <div class="admin-table admin-table--members">

@@ -7,13 +7,15 @@ use App\Models\User;
 use App\Models\Book;
 
 // Contrôleur de l'espace "Mon compte" :
-// affiche le profil connecté et enregistre ses modifications.
+// affiche le compte connecté et enregistre ses modifications.
 class AccountController extends Controller
 {
+  private const MIN_PASSWORD_LENGTH = 6;
+
   private function renderAccountPage(array $extra = []): void
   {
-    $me = User::find(Auth::id());
-    $books = Book::byUser(Auth::id());
+    $me = User::find($this->currentUserId());
+    $books = Book::byUser($this->currentUserId());
     $this->render('account/index', array_merge([
       'me' => $me,
       'books' => $books,
@@ -22,67 +24,71 @@ class AccountController extends Controller
 
   public function index(): void
   {
-    Auth::requireLogin();
+    $this->requireAccountLogin();
     $this->renderAccountPage();
   }
 
   public function editProfileForm(): void
   {
-    Auth::requireLogin();
-    $me = User::find(Auth::id());
+    $this->requireAccountLogin();
+    $me = User::find($this->currentUserId());
     $this->render('account/profile_edit', ['me' => $me]);
   }
 
   public function updateProfile(): void
   {
-    Auth::requireLogin();
+    $this->requireAccountLogin();
     $this->requireCsrf();
 
     $username = trim($_POST['username'] ?? '');
     $bio = trim($_POST['bio'] ?? '');
     $password = trim($_POST['password'] ?? '');
     $passwordConfirm = trim($_POST['password_confirm'] ?? '');
+    $formData = [
+      'username' => $username,
+      'bio' => $bio,
+    ];
 
     if ($username === '') {
-      $this->renderAccountPage([
-        'error' => 'Le pseudo est obligatoire.',
-        'form' => [
-          'username' => $username,
-          'bio' => $bio,
-        ],
-      ]);
+      $this->renderAccountError('Le pseudo est obligatoire.', $formData);
       return;
     }
 
-    if ($password !== '' && mb_strlen($password) < 6) {
-      $this->renderAccountPage([
-        'error' => 'Le mot de passe doit contenir au moins 6 caractères.',
-        'form' => [
-          'username' => $username,
-          'bio' => $bio,
-        ],
-      ]);
+    if ($password !== '' && mb_strlen($password) < self::MIN_PASSWORD_LENGTH) {
+      $this->renderAccountError('Le mot de passe doit contenir au moins 6 caractères.', $formData);
       return;
     }
 
     if ($password !== $passwordConfirm) {
-      $this->renderAccountPage([
-        'error' => 'La confirmation du mot de passe ne correspond pas.',
-        'form' => [
-          'username' => $username,
-          'bio' => $bio,
-        ],
-      ]);
+      $this->renderAccountError('La confirmation du mot de passe ne correspond pas.', $formData);
       return;
     }
 
     $passwordHash = $password !== '' ? password_hash($password, PASSWORD_BCRYPT) : null;
 
-    User::updateProfile(Auth::id(), $username, $bio, $passwordHash);
+    User::updateProfile($this->currentUserId(), $username, $bio, $passwordHash);
     $this->renderAccountPage([
       'success' => $passwordHash !== null
-        ? 'Profil mis à jour. Le mot de passe a bien été modifié.'
-        : 'Profil mis à jour.',
+        ? 'Compte mis à jour. Le mot de passe a bien été modifié.'
+        : 'Compte mis à jour.',
+    ]);
+  }
+
+  private function requireAccountLogin(): void
+  {
+    Auth::requireLogin();
+  }
+
+  private function currentUserId(): int
+  {
+    return (int) Auth::id();
+  }
+
+  private function renderAccountError(string $message, array $formData): void
+  {
+    $this->renderAccountPage([
+      'error' => $message,
+      'form' => $formData,
     ]);
   }
 }

@@ -1,4 +1,5 @@
 <?php use App\Core\Csrf; ?>
+<?php use App\Core\Url; ?>
 <?php use App\Models\User; ?>
 <?php // Interface de messagerie : colonne des conversations, fil actif et zone de réponse. ?>
 
@@ -11,10 +12,7 @@
       <div class="conversation-list">
         <?php foreach ($items as $item): ?>
           <?php
-          $avatar = User::avatarPath($item);
-          $avatarFile = __DIR__ . '/../../../public' . $avatar;
-          $avatarVersion = is_file($avatarFile) ? (string)filemtime($avatarFile) : '1';
-          $avatar = $base . $avatar . '?v=' . $avatarVersion;
+          $avatar = Url::asset(User::avatarPath($item));
           $isActive = (int)($activeUserId ?? 0) === (int)$item['other_id'];
           ?>
           <a class="conversation-item <?= $isActive ? 'is-active' : '' ?>" href="<?= $base ?>/messages?user=<?= (int)$item['other_id'] ?>">
@@ -43,10 +41,7 @@
       </div>
     <?php else: ?>
       <?php
-      $threadAvatar = User::avatarPath($other);
-      $threadAvatarFile = __DIR__ . '/../../../public' . $threadAvatar;
-      $threadAvatarVersion = is_file($threadAvatarFile) ? (string)filemtime($threadAvatarFile) : '1';
-      $threadAvatar = $base . $threadAvatar . '?v=' . $threadAvatarVersion;
+      $threadAvatar = Url::asset(User::avatarPath($other));
       ?>
       <header class="thread-head">
         <a class="thread-back" href="<?= $base ?>/messages">← retour</a>

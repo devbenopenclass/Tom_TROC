@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use App\Core\Model;
+use App\Core\Url;
 
 // Modèle métier des livres : lecture/écriture en base,
 // fallbacks de catalogue et helpers d'images / descriptions.
@@ -61,7 +62,7 @@ class Book extends Model
   }
 
   // Retourne la liste publique des livres à l'échange,
-  // avec filtre texte sur titre, auteur ou pseudo vendeur.
+  // avec filtre texte sur titre, auteur ou pseudo du membre.
   public static function exchangeList(?string $q = null): array
   {
     try {
@@ -142,7 +143,7 @@ class Book extends Model
     return (int) self::db()->lastInsertId();
   }
 
-  // Mise à jour sécurisée : seul le propriétaire du livre peut modifier sa ligne.
+  // Mise à jour sécurisée : seul le membre qui a ajouté le livre peut modifier sa ligne.
   public static function update(int $id, int $userId, array $data): void
   {
     $data['id'] = $id;
@@ -156,7 +157,7 @@ class Book extends Model
     $stmt->execute($data);
   }
 
-  // Suppression sécurisée : seulement pour le propriétaire connecté.
+  // Suppression sécurisée : seulement pour le membre connecté qui a ajouté le livre.
   public static function delete(int $id, int $userId): void
   {
     $stmt = self::db()->prepare("DELETE FROM books WHERE id = :id AND user_id = :uid");
@@ -300,21 +301,15 @@ class Book extends Model
     }
 
     $path = '/' . ltrim($image, '/');
-    $publicPath = realpath(__DIR__ . '/../../public');
-    if ($publicPath === false) {
-      return null;
-    }
-
     if (str_starts_with($path, '/assets/')) {
-      $candidate = $publicPath . $path;
-      if (is_file($candidate)) {
+      if (Url::publicFileExists($path)) {
         return $path;
       }
     }
 
-    $uploadsCandidate = $publicPath . '/assets/uploads/' . ltrim(basename($image), '/');
-    if (is_file($uploadsCandidate)) {
-      return '/assets/uploads/' . basename($image);
+    $uploadsPath = '/assets/uploads/' . ltrim(basename($image), '/');
+    if (Url::publicFileExists($uploadsPath)) {
+      return $uploadsPath;
     }
 
     return null;

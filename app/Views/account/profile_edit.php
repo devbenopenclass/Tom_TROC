@@ -1,30 +1,44 @@
 <?php use App\Core\Csrf; ?>
-<?php // Ancienne vue d'édition rapide du profil : pseudo et bio uniquement. ?>
+<?php // Vue d'édition rapide du compte : pseudo, bio et mot de passe. ?>
+<?php
+$errorMessage = trim((string)($error ?? ''));
+$username = (string)($me['username'] ?? '');
+$bio = (string)($me['bio'] ?? '');
+$passwordFields = [
+  ['label' => 'Nouveau mot de passe', 'name' => 'password', 'placeholder' => 'Laisser vide pour ne pas changer'],
+  ['label' => 'Confirmation du mot de passe', 'name' => 'password_confirm', 'placeholder' => 'Confirmer le mot de passe'],
+];
+?>
 <section class="page-head">
   <div>
-    <p class="kicker">Profil</p>
-    <h1>Modifier mon profil</h1>
-    <p>Mets à jour ton pseudo et ta bio.</p>
+    <p class="kicker">Mon compte</p>
+    <h1>Modifier mon compte</h1>
+    <p>Mets à jour ton pseudo, ta bio et ton mot de passe.</p>
   </div>
   <img src="<?= $base ?>/assets/img/figma/vector-2.svg" alt="Décor">
 </section>
 
 <section class="card">
-  <?php if (!empty($error)): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
+  <?php if ($errorMessage !== ''): ?><p class="error"><?= htmlspecialchars($errorMessage) ?></p><?php endif; ?>
 
   <form method="post" action="<?= $base ?>/account/profile" class="form form-wide">
     <?= Csrf::input(); ?>
-    <label class="mini-label">Pseudo</label>
-    <input name="username" value="<?= htmlspecialchars($me['username'] ?? '') ?>" required>
+    <label class="mini-label" for="profile-username">Pseudo</label>
+    <input id="profile-username" name="username" value="<?= htmlspecialchars($username) ?>" autocomplete="username" required>
 
-    <label class="mini-label">Bio</label>
-    <textarea name="bio" rows="6"><?= htmlspecialchars($me['bio'] ?? '') ?></textarea>
+    <label class="mini-label" for="profile-bio">Bio</label>
+    <textarea id="profile-bio" name="bio" rows="6"><?= htmlspecialchars($bio) ?></textarea>
 
-    <label class="mini-label">Nouveau mot de passe</label>
-    <input type="password" name="password" placeholder="Laisser vide pour ne pas changer">
-
-    <label class="mini-label">Confirmation du mot de passe</label>
-    <input type="password" name="password_confirm" placeholder="Confirmer le mot de passe">
+    <?php foreach ($passwordFields as $field): ?>
+      <label class="mini-label" for="profile-<?= htmlspecialchars($field['name']) ?>"><?= htmlspecialchars($field['label']) ?></label>
+      <input
+        id="profile-<?= htmlspecialchars($field['name']) ?>"
+        type="password"
+        name="<?= htmlspecialchars($field['name']) ?>"
+        autocomplete="new-password"
+        placeholder="<?= htmlspecialchars($field['placeholder']) ?>"
+      >
+    <?php endforeach; ?>
 
     <button class="btn" type="submit">Enregistrer</button>
   </form>

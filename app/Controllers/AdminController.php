@@ -3,86 +3,123 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Core\Auth;
 use App\Core\Controller;
-use App\Core\Csrf;
-use App\Core\Session;
-use App\Models\Book;
-use App\Models\User;
+use PDO;
 
-// Contrôleur d'administration : pilotage des livres et des membres
-// pour les écrans de gestion internes du projet.
+// Contrôleur d'administration : version alignée avec le framework actuel.
+// Il évite les dépendances à d'anciens helpers absents du projet.
 final class AdminController extends Controller
 {
+    private const BOOKS_PATH = '/admin/books';
+    private const ALLOWED_BOOK_STATUSES = ['available', 'unavailable', 'reserved'];
+
     public function books(): void
     {
         $this->requireAdmin();
 
-        $bookModel = new Book();
-        $books = $bookModel->allWithOwner();
+        $stmt = $this->db()->query(
+            'SELECT b.*, u.username, u.email
+             FROM books b
+             JOIN users u ON u.id = b.user_id
+             ORDER BY b.created_at DESC, b.id DESC'
+        );
 
-        $this->view('admin/books', [
-            'books' => $books,
-            'bodyClass' => 'admin-page',
+        $this->render('admin/books', [
+            'books' => $stmt->fetchAll(),
         ]);
     }
 
     public function updateBookStatus(): void
     {
         $this->requireAdmin();
-
-        if (!Csrf::verify($_POST['_csrf'] ?? null)) {
-            http_response_code(419);
-            echo 'CSRF token invalide';
-            return;
-        }
+        $this->requireCsrf();
 
         $id = (int)($_POST['id'] ?? 0);
-        $status = (string)($_POST['status'] ?? 'available');
-        if ($id <= 0 || !in_array($status, ['available', 'unavailable'], true)) {
-            Session::flash('error', 'Données invalides.');
-            $this->redirect('/admin/books');
+        $status = $this->normalizeBookStatus((string)($_POST['status'] ?? 'available'));
+        if ($id <= 0) {
+            $this->redirect(self::BOOKS_PATH);
         }
 
-        $bookModel = new Book();
-        $bookModel->adminSetStatus($id, $status);
+        $stmt = $this->db()->prepare('UPDATE books SET status = :status WHERE id = :id');
+        $stmt->execute([
+            'id' => $id,
+            'status' => $status,
+        ]);
 
-        Session::flash('success', 'Disponibilité du livre mise à jour.');
-        $this->redirect('/admin/books');
+        $this->redirect(self::BOOKS_PATH);
     }
 
     public function deleteBook(): void
     {
         $this->requireAdmin();
-
-        if (!Csrf::verify($_POST['_csrf'] ?? null)) {
-            http_response_code(419);
-            echo 'CSRF token invalide';
-            return;
-        }
+        $this->requireCsrf();
 
         $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) {
-            Session::flash('error', 'Livre invalide.');
-            $this->redirect('/admin/books');
+            $this->redirect(self::BOOKS_PATH);
         }
 
-        $bookModel = new Book();
-        $bookModel->adminDelete($id);
+        $stmt = $this->db()->prepare('DELETE FROM books WHERE id = :id');
+        $stmt->execute(['id' => $id]);
 
-        Session::flash('success', 'Livre supprimé.');
-        $this->redirect('/admin/books');
+        $this->redirect(self::BOOKS_PATH);
     }
 
     public function members(): void
     {
         $this->requireAdmin();
 
-        $userModel = new User();
-        $members = $userModel->allMembers();
+        $stmt = $this->db()->query(
+            'SELECT
+                u.id,
+                u.username,
+                u.email,
+                u.created_at,
+                COUNT(b.id) AS books_count
+             FROM users u
+             LEFT JOIN books b ON b.user_id = u.id
+             GROUP BY u.id, u.username, u.email, u.created_at
+             ORDER BY u.created_at DESC, u.id DESC'
+        );
 
-        $this->view('admin/members', [
-            'members' => $members,
-            'bodyClass' => 'admin-page',
+        $this->render('admin/members', [
+            'members' => $stmt->fetchAll(),
         ]);
+    }
+
+    private function requireAdmin(): void
+    {
+        Auth::requireLogin();
+
+        $isAdmin = (bool)($_SESSION['is_admin'] ?? false)
+            || (($_SESSION['user_role'] ?? null) === 'admin');
+
+        if (!$isAdmin) {
+            http_response_code(403);
+            echo 'Accès administrateur requis';
+            exit;
+        }
+    }
+
+    private function db(): PDO
+    {
+        $dbConf = require __DIR__ . '/../../config/database.php';
+        $db = $dbConf['db'];
+
+        return new PDO(
+            sprintf('mysql:host=%s;dbname=%s;charset=%s', $db['host'], $db['name'], $db['charset']),
+            $db['user'],
+            $db['pass'],
+            [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            ]
+        );
+    }
+
+    private function normalizeBookStatus(string $status): string
+    {
+        return in_array($status, self::ALLOWED_BOOK_STATUSES, true) ? $status : 'available';
     }
 }

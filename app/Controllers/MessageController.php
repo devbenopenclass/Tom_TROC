@@ -11,6 +11,8 @@ use App\Models\User;
 // prépare le contexte livre et gère l'envoi des messages.
 class MessageController extends Controller
 {
+  private const MESSAGES_PATH = '/messages';
+
   // Prépare toute la page de messagerie :
   // conversations, fil actif, contexte livre et droit de réponse.
   public function inbox(): void
@@ -29,16 +31,11 @@ class MessageController extends Controller
     $otherUser = null;
     $messages = [];
     // Le contexte livre est utilisé seulement pour démarrer un premier message
-    // depuis une fiche livre et garder l'échange rattaché au bon propriétaire.
+    // depuis une fiche livre et garder l'échange rattaché au bon membre.
     $bookContext = null;
     $bookId = (int)($_GET['book'] ?? 0);
     if ($other > 0) {
-      foreach ($contacts as $contact) {
-        if ((int)$contact['id'] === $other) {
-          $otherUser = $contact;
-          break;
-        }
-      }
+      $otherUser = $this->findContact($contacts, $other);
       if (!$otherUser && $other === (int)$me) {
         $self = User::find((int)$me);
         if ($self) {
@@ -49,12 +46,7 @@ class MessageController extends Controller
       if ($otherUser) {
         Message::markThreadAsRead($me, $other);
         $messages = Message::thread($me, $other);
-        if ($bookId > 0) {
-          $book = Book::find($bookId);
-          if ($book && (int)$book['user_id'] === (int)$other) {
-            $bookContext = $book;
-          }
-        }
+        $bookContext = $this->resolveBookContext($bookId, $other);
       }
     }
 
@@ -88,7 +80,7 @@ class MessageController extends Controller
       $query['book'] = $bookId;
     }
 
-    $this->redirect('/messages' . (!empty($query) ? '?' . http_build_query($query) : ''));
+    $this->redirect(self::MESSAGES_PATH . (!empty($query) ? '?' . http_build_query($query) : ''));
   }
 
   // Envoie un message :
@@ -103,29 +95,53 @@ class MessageController extends Controller
     $content = trim($_POST['content'] ?? '');
 
     if ($receiver <= 0 || $content === '') {
-      $this->redirect('/messages');
+      $this->redirect(self::MESSAGES_PATH);
       return;
     }
 
     $hasThread = Message::hasThread((int)Auth::id(), $receiver);
     if (!$hasThread) {
       if ($bookId <= 0) {
-        $this->redirect('/messages');
+        $this->redirect(self::MESSAGES_PATH);
         return;
       }
 
-      $book = Book::find($bookId);
-      if (!$book || (int)$book['user_id'] !== $receiver) {
-        $this->redirect('/messages');
+      if ($this->resolveBookContext($bookId, $receiver) === null) {
+        $this->redirect(self::MESSAGES_PATH);
         return;
       }
     }
 
     Message::send(Auth::id(), $receiver, $content);
-    $redirect = '/messages/thread?user=' . $receiver;
+    $redirect = self::MESSAGES_PATH . '/thread?user=' . $receiver;
     if ($bookId > 0) {
       $redirect .= '&book=' . $bookId;
     }
     $this->redirect($redirect);
+  }
+
+  private function findContact(array $contacts, int $otherId): ?array
+  {
+    foreach ($contacts as $contact) {
+      if ((int)($contact['id'] ?? 0) === $otherId) {
+        return $contact;
+      }
+    }
+
+    return null;
+  }
+
+  private function resolveBookContext(int $bookId, int $ownerId): ?array
+  {
+    if ($bookId <= 0) {
+      return null;
+    }
+
+    $book = Book::find($bookId);
+    if (!$book || (int)($book['user_id'] ?? 0) !== $ownerId) {
+      return null;
+    }
+
+    return $book;
   }
 }

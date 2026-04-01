@@ -1,13 +1,29 @@
 <?php use App\Core\Csrf; ?>
+<?php use App\Core\Url; ?>
 <?php $isEdit = (($mode ?? '') === 'edit'); ?>
 <?php // Formulaire de gestion d'un livre : ajout ou modification selon le mode courant. ?>
+<?php
+$errorMessage = trim((string)($error ?? ''));
+$book = $book ?? [];
+$status = (string)($book['status'] ?? 'available');
+$imagePath = !empty($book['image']) ? Url::asset((string)$book['image']) : Url::asset('/assets/img/figma/mask-group.png');
+$textFields = [
+  ['label' => 'Titre', 'name' => 'title', 'value' => (string)($book['title'] ?? ''), 'required' => true],
+  ['label' => 'Auteur', 'name' => 'author', 'value' => (string)($book['author'] ?? ''), 'required' => true],
+];
+$statusOptions = [
+  'available' => 'disponible',
+  'unavailable' => 'indisponible',
+  'reserved' => 'réservé',
+];
+?>
 
 <section class="edit-page">
   <a class="back-link" href="<?= $base ?>/account">← retour</a>
   <h1><?= $isEdit ? 'Modifier les informations' : 'Ajouter un livre' ?></h1>
 
   <section class="edit-panel">
-    <?php if (!empty($error)): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
+    <?php if ($errorMessage !== ''): ?><p class="error"><?= htmlspecialchars($errorMessage) ?></p><?php endif; ?>
 
     <form method="post" enctype="multipart/form-data"
           action="<?= $isEdit ? $base . '/books/edit' : $base . '/books/create' ?>"
@@ -20,34 +36,33 @@
       <?php endif; ?>
 
       <div class="edit-photo-col">
-        <label>Photo</label>
+        <label for="book-image">Photo</label>
         <div class="photo-box">
-          <?php if (!empty($book['image'])): ?>
-            <img src="<?= htmlspecialchars($book['image']) ?>" alt="Photo livre">
-          <?php else: ?>
-            <img src="<?= $base ?>/assets/img/figma/mask-group.png" alt="Photo livre">
-          <?php endif; ?>
+          <img src="<?= htmlspecialchars($imagePath) ?>" alt="Photo livre">
         </div>
         <label class="photo-link" for="book-image">Modifier la photo</label>
         <input id="book-image" type="file" name="image" accept="image/*">
       </div>
 
       <div class="edit-fields-col">
-        <label>Titre</label>
-        <input name="title" required value="<?= htmlspecialchars($book['title'] ?? '') ?>">
+        <?php foreach ($textFields as $field): ?>
+          <label for="book-<?= htmlspecialchars($field['name']) ?>"><?= htmlspecialchars($field['label']) ?></label>
+          <input
+            id="book-<?= htmlspecialchars($field['name']) ?>"
+            name="<?= htmlspecialchars($field['name']) ?>"
+            value="<?= htmlspecialchars($field['value']) ?>"
+            <?= $field['required'] ? 'required' : '' ?>
+          >
+        <?php endforeach; ?>
 
-        <label>Auteur</label>
-        <input name="author" required value="<?= htmlspecialchars($book['author'] ?? '') ?>">
+        <label for="book-description">Commentaire</label>
+        <textarea id="book-description" name="description" rows="11"><?= htmlspecialchars($book['description'] ?? '') ?></textarea>
 
-        <label>Commentaire</label>
-        <textarea name="description" rows="11"><?= htmlspecialchars($book['description'] ?? '') ?></textarea>
-
-        <label>Disponibilité</label>
-        <?php $s = $book['status'] ?? 'available'; ?>
-        <select name="status">
-          <option value="available" <?= $s==='available'?'selected':'' ?>>disponible</option>
-          <option value="unavailable" <?= $s==='unavailable'?'selected':'' ?>>indisponible</option>
-          <option value="reserved" <?= $s==='reserved'?'selected':'' ?>>réservé</option>
+        <label for="book-status">Disponibilité</label>
+        <select id="book-status" name="status">
+          <?php foreach ($statusOptions as $value => $label): ?>
+            <option value="<?= htmlspecialchars($value) ?>" <?= $status === $value ? 'selected' : '' ?>><?= htmlspecialchars($label) ?></option>
+          <?php endforeach; ?>
         </select>
 
         <button class="btn" type="submit">Valider</button>

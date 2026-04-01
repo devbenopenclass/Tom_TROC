@@ -2,12 +2,14 @@
 namespace App\Models;
 
 use App\Core\Model;
+use App\Core\Url;
 
 // Modèle utilisateur : inscription, connexion, profil,
 // avatar et mise à jour des informations de compte.
 class User extends Model
 {
   public const DEFAULT_AVATAR = '/assets/img/figma/mask-group-2.png';
+  private const PUBLIC_FIELDS = 'id, username, email, avatar, bio, created_at';
 
   private static ?string $passwordColumn = null;
 
@@ -37,7 +39,7 @@ class User extends Model
   {
     $passwordColumn = self::resolvePasswordColumn();
     $stmt = self::db()->prepare("
-      SELECT id, username, email, avatar, bio, created_at, {$passwordColumn} AS password_hash
+      SELECT " . self::PUBLIC_FIELDS . ", {$passwordColumn} AS password_hash
       FROM users
       WHERE email = :email
       LIMIT 1
@@ -53,7 +55,7 @@ class User extends Model
   {
     $passwordColumn = self::resolvePasswordColumn();
     $stmt = self::db()->prepare("
-      SELECT id, username, email, avatar, bio, created_at, {$passwordColumn} AS password_hash
+      SELECT " . self::PUBLIC_FIELDS . ", {$passwordColumn} AS password_hash
       FROM users
       WHERE email = :login OR username = :login
       LIMIT 1
@@ -66,7 +68,7 @@ class User extends Model
   // Retourne les informations publiques d'un utilisateur par son id.
   public static function find(int $id): ?array
   {
-    $stmt = self::db()->prepare("SELECT id, username, email, avatar, bio, created_at FROM users WHERE id = :id");
+    $stmt = self::db()->prepare("SELECT " . self::PUBLIC_FIELDS . " FROM users WHERE id = :id");
     $stmt->execute(['id' => $id]);
     $u = $stmt->fetch();
     return $u ?: null;
@@ -122,8 +124,7 @@ class User extends Model
     $avatar = trim((string)($user['avatar'] ?? ''));
     if ($avatar !== '') {
       $path = '/' . ltrim($avatar, '/');
-      $publicPath = realpath(__DIR__ . '/../../public');
-      if ($publicPath !== false && is_file($publicPath . $path)) {
+      if (Url::publicFileExists($path)) {
         return $path;
       }
     }

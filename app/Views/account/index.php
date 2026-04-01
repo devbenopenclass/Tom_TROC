@@ -1,13 +1,11 @@
 <?php use App\Core\Csrf; ?>
+<?php use App\Core\Url; ?>
 <?php use App\Models\Book; ?>
 <?php use App\Models\User; ?>
 <?php // Tableau de bord "Mon compte" : profil, informations personnelles et bibliothèque du membre connecté. ?>
 
 <?php
-$avatar = User::avatarPath($me, '/assets/img/figma/mask-group-2.png');
-$avatarFile = __DIR__ . '/../../../public' . $avatar;
-$avatarVersion = is_file($avatarFile) ? (string)filemtime($avatarFile) : '1';
-$avatar = $base . $avatar . '?v=' . $avatarVersion;
+$avatar = Url::asset(User::avatarPath($me, '/assets/img/figma/mask-group-2.png'));
 $form = $form ?? [];
 $usernameValue = $form['username'] ?? ($me['username'] ?? '');
 $memberSince = '1 an';
@@ -31,7 +29,7 @@ if (!empty($me['created_at'])) {
         <div class="account-profile__identity">
           <h1 class="account-profile__name"><?= htmlspecialchars($me['username'] ?? '') ?></h1>
           <p class="account-profile__since">Membre depuis <?= htmlspecialchars($memberSince) ?></p>
-          <p class="account-profile__library">Bibliothèque</p>
+          <p class="account-profile__library">Ma bibliothèque</p>
           <p class="account-profile__count">
             <span class="account-profile__count-icon" aria-hidden="true">
               <svg viewBox="0 0 16 16" focusable="false">
@@ -92,12 +90,7 @@ if (!empty($me['created_at'])) {
       <?php else: ?>
         <?php foreach ($books as $b): ?>
           <?php
-          $cover = Book::imagePath($b);
-          if (!preg_match('#^https?://#i', $cover)) {
-            $coverFile = __DIR__ . '/../../../public' . $cover;
-            $coverVersion = is_file($coverFile) ? (string)filemtime($coverFile) : '1';
-            $cover = $base . $cover . '?v=' . $coverVersion;
-          }
+          $cover = Url::asset(Book::imagePath($b));
           $isAvailable = ($b['status'] ?? '') === 'available';
           $desc = trim((string)($b['description'] ?? ''));
           if ($desc === '') {
@@ -127,7 +120,7 @@ if (!empty($me['created_at'])) {
             <div>
               <span class="account-books__mobile-label">Disponibilité</span>
               <span class="status-pill <?= $isAvailable ? 'status-pill--ok' : 'status-pill--off' ?>">
-                <?= $isAvailable ? 'disponible' : 'non dispo.' ?>
+                <?= $isAvailable ? 'disponible' : 'indisponible' ?>
               </span>
             </div>
             <div class="account-books__actions">

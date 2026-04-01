@@ -9,35 +9,35 @@ return [
 
         '/register' => 'AuthController@registerForm',
         '/login' => 'AuthController@loginForm',
-        '/logout' => 'AuthController@logout',
 
-        '/books' => 'BookController@index',
+        '/books/exchange' => 'BookController@exchange',
+        '/books/exchangege' => 'BookController@exchange',
         '/books/show' => 'BookController@show',
+        '/books/create' => 'BookController@createForm',
+        '/books/edit' => 'BookController@editForm',
 
-        '/profile' => 'UserController@show',
+        '/profiles/show' => 'ProfileController@show',
 
         '/account' => 'AccountController@index',
+        '/account/profile' => 'AccountController@editProfileForm',
         '/admin/books' => 'AdminController@books',
         '/admin/members' => 'AdminController@members',
 
-        '/library' => 'BookController@myBooks',
-        '/library/create' => 'BookController@createForm',
-        '/library/edit' => 'BookController@editForm',
-
-        '/messages' => 'MessageController@index',
+        '/messages' => 'MessageController@inbox',
         '/messages/thread' => 'MessageController@thread',
     ],
     'POST' => [
         '/register' => 'AuthController@register',
         '/login' => 'AuthController@login',
+        '/logout' => 'AuthController@logout',
 
-        '/account' => 'AccountController@update',
+        '/account/profile' => 'AccountController@updateProfile',
         '/admin/books/status' => 'AdminController@updateBookStatus',
         '/admin/books/delete' => 'AdminController@deleteBook',
 
-        '/library/create' => 'BookController@store',
-        '/library/edit' => 'BookController@update',
-        '/library/delete' => 'BookController@delete',
+        '/books/create' => 'BookController@create',
+        '/books/edit' => 'BookController@update',
+        '/books/delete' => 'BookController@delete',
 
         '/messages/send' => 'MessageController@send',
     ],
