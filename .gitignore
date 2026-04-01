@@ -2,6 +2,8 @@
 !/public/assets/uploads/.gitkeep
 /storage/*
 !/storage/.gitkeep
+!/storage/schema.sql
+!/storage/Benjamin_Craige_B_1_sql_032026.sql
 /config/config.local.php
 /config/database.local.php
 .env
