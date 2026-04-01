@@ -34,6 +34,8 @@ LIEN_REPO.txt
 README.md
 ```
 
+Le dossier `storage` contient les fichiers SQL livrés avec le projet.
+
 ## Installation locale
 
 ### 1. Placer le projet dans le serveur web
@@ -52,24 +54,32 @@ Exemple :
 CREATE DATABASE tomtroc CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-### 3. Importer le schema SQL
+### 3. Importer le fichier SQL du projet
 
-Le fichier SQL du projet se trouve ici :
+Le depot contient deux fichiers SQL :
+
+- `storage/schema.sql` : structure seule
+- `storage/Benjamin_Craige_B_1_sql_032026.sql` : structure + quelques donnees de test
+
+Pour l'evaluation, il faut importer en priorite :
 
 ```text
-storage/schema.sql
+storage/Benjamin_Craige_B_1_sql_032026.sql
 ```
 
 Exemple :
 
 ```bash
-mysql -u root -p tomtroc < storage/schema.sql
+mysql -u root -p tomtroc < storage/Benjamin_Craige_B_1_sql_032026.sql
 ```
 
-Ce schema cree les tables principales du projet :
-- `users`
-- `books`
-- `messages`
+Ce fichier permet de recreer :
+- les tables principales du projet
+- quelques utilisateurs de test
+- quelques livres
+- quelques messages
+
+Le fichier `storage/schema.sql` peut etre utilise si vous souhaitez repartir d'une structure vide.
 
 ### 4. Configurer l'acces a la base
 
@@ -205,7 +215,6 @@ Pour tester un compte membre standard, le plus simple est de creer un compte via
 - `app/Models/Message.php`
 - `config/routes.php`
 - `config/config.php`
-- `storage/schema.sql`
 
 ## Assets utiles
 
@@ -221,3 +230,4 @@ Pour tester un compte membre standard, le plus simple est de creer un compte via
 - `README.md`
 - `LIEN_REPO.txt`
 - `storage/schema.sql`
+- `storage/Benjamin_Craige_B_1_sql_032026.sql`
