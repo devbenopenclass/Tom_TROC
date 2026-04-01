@@ -34,6 +34,7 @@ h1,h2,h3{
 .main-content{padding:50px 0 72px}
 .main-content--messages{padding-top:0}
 
+/* Header, navigation et actions globales. */
 .site-header{background:var(--bg);border-bottom:1px solid #ece9e4}
 .header-row{display:flex;align-items:center;gap:20px;min-height:80px}
 .brand{display:inline-flex;align-items:center}
@@ -150,6 +151,8 @@ h1,h2,h3{
 .home-book small{font-size:10px;color:var(--muted);font-style:italic}
 .center-btn{text-align:center;margin-top:38px}
 .latest-books-cta{margin-top:88px !important}
+.latest-books-cta--spaced{margin-top:120px !important}
+.center-btn--spaced{margin-top:120px}
 .howto .center-btn{margin-top:88px}
 
 .howto .steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
@@ -237,6 +240,43 @@ h1,h2,h3{
 .book-show{
   width:100vw;
   margin-left:calc(50% - 50vw);
+}
+
+.error-page{
+  display:grid;
+  place-items:center;
+  min-height:60vh;
+}
+
+.error-page__card{
+  width:min(560px,100%);
+  padding:44px 36px;
+  border:1px solid #ece5dc;
+  border-radius:24px;
+  background:#fff;
+  text-align:center;
+}
+
+.error-page__eyebrow{
+  margin:0 0 12px;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.2;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  font-weight:700;
+}
+
+.error-page__card h1{
+  margin:0 0 14px;
+  font-size:40px;
+  line-height:1.15;
+}
+
+.error-page__card p{
+  margin:0 0 24px;
+  font-size:16px;
+  line-height:1.5;
 }
 .book-show-breadcrumb{
   width:min(1440px,100vw);

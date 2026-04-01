@@ -22,6 +22,7 @@
 
   <div class="home-books">
     <?php
+    // Jeux de secours gardés pour le rendu de la maquette si la base est vide.
     $fallback = [
       ['title' => 'Esther', 'author' => 'Alabaster', 'owner' => 'CamilleDuCuir'],
       ['title' => 'The Kinfolk Table', 'author' => 'Nathan Williams', 'owner' => 'Nathalie'],
@@ -42,6 +43,7 @@
       }
     }
 
+    // On complète visuellement jusqu'à 4 cartes si nécessaire.
     if (count($cards) < 4) {
       foreach (array_slice($fallback, 0, 4 - count($cards)) as $f) {
         $f['img'] = Url::asset(Book::imagePath($f));
@@ -63,7 +65,7 @@
     <?php endforeach; ?>
   </div>
 
-  <p class="center-btn latest-books-cta" style="margin-top: 120px;"><a class="btn" href="<?= $base ?>/books/exchange">Voir tous les livres</a></p>
+  <p class="center-btn latest-books-cta latest-books-cta--spaced"><a class="btn" href="<?= $base ?>/books/exchange">Voir tous les livres</a></p>
 </section>
 
 <section class="home-section howto">
@@ -77,7 +79,7 @@
     <div class="step">Proposez un échange et discutez avec d'autres passionnés de lecture.</div>
   </div>
 
-  <p class="center-btn" style="margin-top: 120px;"><a class="btn btn-outline" href="<?= $base ?>/books/exchange">Voir tous les livres</a></p>
+  <p class="center-btn center-btn--spaced"><a class="btn btn-outline" href="<?= $base ?>/books/exchange">Voir tous les livres</a></p>
 </section>
 
 <section class="home-banner">

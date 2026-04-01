@@ -6,9 +6,11 @@
 
 <?php
 $avatar = Url::asset(User::avatarPath($me, '/assets/img/figma/mask-group-2.png'));
+$isAdmin = !empty($me['id']) && User::isAdmin((int)$me['id']);
 $form = $form ?? [];
 $usernameValue = $form['username'] ?? ($me['username'] ?? '');
 $memberSince = '1 an';
+// Transforme la date de création en ancienneté lisible.
 if (!empty($me['created_at'])) {
   $years = max(1, (int)date('Y') - (int)date('Y', strtotime((string)$me['created_at'])));
   $memberSince = $years . ' an' . ($years > 1 ? 's' : '');
@@ -82,6 +84,19 @@ if (!empty($me['created_at'])) {
         </form>
       </article>
     </div>
+
+    <?php if ($isAdmin): ?>
+      <section class="account-admin-tools">
+        <p class="account-admin-tools__eyebrow">Espace admin</p>
+        <div class="account-admin-tools__head">
+          <div>
+            <h2 class="account-admin-tools__title">Administration</h2>
+            <p class="account-admin-tools__intro">Retrouvez ici les accès rapides vers les pages de gestion du site.</p>
+          </div>
+          <a class="account-admin-tools__link" href="<?= $base ?>/admin/books">Ouvrir l’espace admin</a>
+        </div>
+      </section>
+    <?php endif; ?>
 
     <section class="account-books">
       <div class="account-books__head">

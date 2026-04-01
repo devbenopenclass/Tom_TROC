@@ -4,6 +4,7 @@
 <?php // Profil public d'un membre : avatar, bio et livres visibles par les autres utilisateurs. ?>
 
 <?php
+// Le profil public réutilise la même règle d'avatar que le compte connecté.
 $avatar = Url::asset(User::avatarPath($user));
 ?>
 
@@ -39,6 +40,7 @@ $avatar = Url::asset(User::avatarPath($user));
     <div class="grid">
       <?php foreach ($books as $b): ?>
         <?php
+        // Chaque carte reprend les mêmes helpers que le catalogue public.
         $image = Url::asset(Book::imagePath($b));
         $status = (string)($b['status'] ?? 'available');
         $statusLabel = $status === 'reserved' ? 'réservé' : ($status === 'unavailable' ? 'indisponible' : 'disponible');

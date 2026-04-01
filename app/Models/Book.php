@@ -169,6 +169,11 @@ class Book extends Model
   // en base ou on génère un texte générique cohérent.
   public static function detailDescription(array $book): string
   {
+    $description = trim((string)($book['description'] ?? ''));
+    if ($description !== '') {
+      return $description;
+    }
+
     $map = [
       'esther' => "J'ai été immédiatement touché par l'atmosphère paisible d'Esther. Ce livre dégage une douceur rare, portée par des paysages calmes et une présence presque méditative.\n\nAu fil des pages, on découvre une oeuvre délicate, tournée vers l'introspection, la nature et les émotions discrètes. Tout y est simple, juste et profondément apaisant.\n\nC'est un livre que l'on ouvre pour ralentir, respirer et retrouver un peu de clarté. Il trouvera facilement sa place auprès des lecteurs en quête de beauté et de sérénité.\n\nEsther est une invitation à contempler autrement, avec plus de lenteur, plus d'attention, et beaucoup de sensibilité.",
       'thekinfolktable' => "J'ai récemment plongé dans les pages de 'The Kinfolk Table' et j'ai été enchanté par cette oeuvre captivante. Ce livre va bien au-delà d'une simple collection de recettes ; il célèbre l'art de partager des moments authentiques autour de la table.\n\nLes photographies magnifiques et le ton chaleureux captivent dès le départ, transportant le lecteur dans un voyage à travers des recettes et des histoires qui mettent en avant la beauté de la simplicité et de la convivialité.\n\nChaque page est une invitation à ralentir, à savourer et à créer des souvenirs durables avec les êtres chers.\n\n'The Kinfolk Table' incarne parfaitement l'esprit de la cuisine et de la camaraderie, et il est certain que ce livre trouvera une place spéciale dans le coeur de tout amoureux de la cuisine et des rencontres inspirantes.",
@@ -191,11 +196,6 @@ class Book extends Model
     $key = self::normalizeTitleKey((string)($book['title'] ?? ''));
     if (isset($map[$key])) {
       return $map[$key];
-    }
-
-    $description = trim((string)($book['description'] ?? ''));
-    if ($description !== '' && self::stringLength($description) > 80) {
-      return $description;
     }
 
     $title = trim((string)($book['title'] ?? 'Livre'));

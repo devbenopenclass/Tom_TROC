@@ -4,12 +4,14 @@ namespace App\Controllers;
 use App\Core\Auth;
 use App\Core\Controller;
 use App\Models\Book;
+use App\Models\User;
 
 // Contrôleur des livres : liste publique, fiche détail,
 // formulaire d'ajout/édition et suppression.
 class BookController extends Controller
 {
   private const ACCOUNT_PATH = '/account';
+  private const ADMIN_BOOKS_PATH = '/admin/books';
   private const AVAILABLE_STATUSES = ['available', 'unavailable', 'reserved'];
 
   // Affiche le catalogue public des livres avec le moteur de recherche.
@@ -27,8 +29,10 @@ class BookController extends Controller
     $book = $id ? Book::find($id) : null;
 
     if (!$book) {
-      http_response_code(404);
-      echo "Livre introuvable";
+      $this->renderStatusPage(404, 'errors/404', [
+        'title' => 'Livre introuvable',
+        'message' => "Le livre demandé n'existe pas ou n'est plus disponible.",
+      ]);
       return;
     }
 
@@ -65,7 +69,7 @@ class BookController extends Controller
   public function editForm(): void
   {
     $this->requireBookLogin();
-    $book = $this->findOwnedBook((int)($_GET['id'] ?? 0));
+    $book = $this->findEditableBook((int)($_GET['id'] ?? 0));
     $this->render('books/form', ['mode' => 'edit', 'book' => $book]);
   }
 
@@ -76,7 +80,7 @@ class BookController extends Controller
     $this->requireCsrf();
 
     $id = (int)($_POST['id'] ?? 0);
-    $book = $this->findOwnedBook($id);
+    $book = $this->findEditableBook($id);
 
     $data = $this->bookPayloadForUpdate();
     $error = $this->validateBookPayload($data);
@@ -86,6 +90,11 @@ class BookController extends Controller
     }
 
     $data['image'] = $this->uploadedBookImage() ?? $data['image'];
+
+    if ($this->isAdmin()) {
+      Book::update($id, (int)($book['user_id'] ?? 0), $data);
+      $this->redirect(self::ADMIN_BOOKS_PATH);
+    }
 
     Book::update($id, $this->currentUserId(), $data);
     $this->redirect(self::ACCOUNT_PATH);
@@ -189,6 +198,28 @@ class BookController extends Controller
     http_response_code(403);
     echo 'Accès interdit';
     exit;
+  }
+
+  private function findEditableBook(int $id): array
+  {
+    if ($this->isAdmin()) {
+      $book = $id > 0 ? Book::find($id) : null;
+      if ($book) {
+        return $book;
+      }
+
+      http_response_code(404);
+      echo 'Livre introuvable';
+      exit;
+    }
+
+    return $this->findOwnedBook($id);
+  }
+
+  private function isAdmin(): bool
+  {
+    $userId = Auth::id();
+    return $userId !== null && User::isAdmin((int)$userId);
   }
 
   private function renderBookFormError(string $mode, string $message, array $book = []): void

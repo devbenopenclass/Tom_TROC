@@ -6,6 +6,7 @@ use App\Core\Url;
 
 $base = Url::baseUrl();
 $isLogged = !empty($_SESSION['user_id']);
+$isAdmin = $isLogged && \App\Models\User::isAdmin((int)$_SESSION['user_id']);
 $unreadCount = 0;
 $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $normalizedPath = $requestPath;
@@ -15,10 +16,13 @@ if ($base !== '' && str_starts_with($normalizedPath, $base)) {
 $normalizedPath = '/' . ltrim($normalizedPath, '/');
 $isAccountPage = str_contains($requestPath, '/account');
 $isMessagesPage = str_contains($requestPath, '/messages');
+$isAdminPage = str_starts_with($normalizedPath, '/admin');
 if ($isLogged) {
   $unreadCount = \App\Models\Message::unreadCount((int)$_SESSION['user_id']);
 }
 
+// Point de retour par défaut selon la page courante.
+// Cela évite d'envoyer l'utilisateur vers une page incohérente.
 $backFallback = '/';
 if (str_starts_with($normalizedPath, '/account/profile')) {
   $backFallback = '/account';
@@ -40,7 +44,7 @@ if (str_starts_with($normalizedPath, '/account/profile')) {
   $backFallback = '/account';
 }
 
-$showBackMenu = $normalizedPath !== '/';
+$showBackMenu = $normalizedPath !== '/' && !$isAdminPage;
 ?>
 <!doctype html>
 <html lang="fr">
@@ -52,8 +56,11 @@ $showBackMenu = $normalizedPath !== '/';
   <?php if ($isAccountPage): ?>
     <link rel="stylesheet" href="<?= htmlspecialchars(Url::asset('/assets/css/account-admin.css')) ?>">
   <?php endif; ?>
+  <?php if ($isAdminPage): ?>
+    <link rel="stylesheet" href="<?= htmlspecialchars(Url::asset('/assets/css/admin.css')) ?>">
+  <?php endif; ?>
 </head>
-<body class="<?= trim(($isAccountPage ? 'account-admin-page ' : '') . ($isMessagesPage ? 'messages-page' : '')) ?>">
+<body class="<?= trim(($isAccountPage ? 'account-admin-page ' : '') . ($isMessagesPage ? 'messages-page ' : '') . ($isAdminPage ? 'admin-page' : '')) ?>">
 <header class="site-header <?= $isLogged ? 'is-auth' : '' ?>">
   <div class="shell header-row">
     <a class="brand" href="<?= $base ?>/" aria-label="Accueil TomTroc">
@@ -75,6 +82,9 @@ $showBackMenu = $normalizedPath !== '/';
 
       <div class="nav-group nav-right">
         <?php if ($isLogged): ?>
+          <?php if ($isAdmin): ?>
+            <a class="text-link" href="<?= $base ?>/admin/books"><strong>Administration</strong></a>
+          <?php endif; ?>
           <a class="icon-link" href="<?= $base ?>/messages">
             <img src="<?= $base ?>/assets/img/figma/icon-messagerie.svg" alt="">
             <span>Messagerie</span>

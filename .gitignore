@@ -3,4 +3,5 @@
 /storage/*
 !/storage/.gitkeep
 /config/config.local.php
+/config/database.local.php
 .env

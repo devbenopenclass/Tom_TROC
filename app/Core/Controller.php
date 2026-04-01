@@ -17,6 +17,12 @@ class Controller
     $this->view->render($view, $data);
   }
 
+  protected function renderStatusPage(int $status, string $view, array $data = []): void
+  {
+    http_response_code($status);
+    $this->render($view, $data);
+  }
+
   protected function redirect(string $path): void
   {
     header('Location: ' . Url::withBase($path));

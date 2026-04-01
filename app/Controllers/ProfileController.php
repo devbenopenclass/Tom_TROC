@@ -15,8 +15,10 @@ class ProfileController extends Controller
     $user = $id ? User::find($id) : null;
 
     if (!$user) {
-      http_response_code(404);
-      echo "Profil introuvable";
+      $this->renderStatusPage(404, 'errors/404', [
+        'title' => 'Profil introuvable',
+        'message' => "Le profil demandé n'existe pas ou n'est plus disponible.",
+      ]);
       return;
     }
 
