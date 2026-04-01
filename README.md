@@ -59,18 +59,18 @@ CREATE DATABASE tomtroc CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 Le depot contient deux fichiers SQL :
 
 - `storage/schema.sql` : structure seule
-- `storage/Benjamin_Craige_B_1_sql_032026.sql` : structure + quelques donnees de test
+- `storage/tomtroc_demo.sql` : structure + quelques donnees de test
 
 Pour l'evaluation, il faut importer en priorite :
 
 ```text
-storage/Benjamin_Craige_B_1_sql_032026.sql
+storage/tomtroc_demo.sql
 ```
 
 Exemple :
 
 ```bash
-mysql -u root -p tomtroc < storage/Benjamin_Craige_B_1_sql_032026.sql
+mysql -u root -p tomtroc < storage/tomtroc_demo.sql
 ```
 
 Ce fichier permet de recreer :
@@ -230,4 +230,4 @@ Pour tester un compte membre standard, le plus simple est de creer un compte via
 - `README.md`
 - `LIEN_REPO.txt`
 - `storage/schema.sql`
-- `storage/Benjamin_Craige_B_1_sql_032026.sql`
+- `storage/tomtroc_demo.sql`

@@ -4,7 +4,7 @@ https://github.com/devbenopenclass/Tom_TROC
 Contenu du dépôt :
 - code complet du projet
 - README à la racine pour l'installation
-- fichier SQL de création et de données : storage/Benjamin_Craige_B_1_sql_032026.sql
+- fichier SQL de création et de données : storage/tomtroc_demo.sql
 
 Compte admin actuellement relie a l'application :
 - `id` : `4`
