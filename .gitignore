@@ -3,6 +3,7 @@
 /storage/*
 !/storage/.gitkeep
 !/storage/schema.sql
-!/storage/Benjamin_Craige_B_1_sql_032026.sql
+!/storage/tomtroc_demo.sql
 /config/config.local.php
+/config/database.local.php
 .env

@@ -1,27 +1,25 @@
 # TomTroc
 
-TomTroc est un site de mise en relation autour de l'échange de livres, développé en PHP avec une architecture MVC.
+TomTroc est une application PHP MVC de partage et d'echange de livres entre membres.
 
-## Fonctionnalités
-
-- inscription et connexion
-- espace `Mon compte`
-- modification du pseudo, du mot de passe et de l'avatar
-- ajout, modification et suppression de livres
-- catalogue public avec recherche
-- fiche détail d'un livre
-- profil public d'un membre
-- messagerie entre membres
-- espace d'administration
+Le projet permet :
+- l'inscription et la connexion
+- la gestion d'un compte membre
+- l'ajout, la modification et la suppression de livres
+- un catalogue public avec recherche
+- une fiche detail par livre
+- un profil public par membre
+- une messagerie entre membres
+- un espace d'administration
 
 ## Stack technique
 
 - PHP 8.1+
 - MySQL ou MariaDB
 - Apache
-- HTML / CSS / JavaScript léger
+- HTML, CSS, JavaScript leger
 
-## Architecture du projet
+## Arborescence
 
 ```text
 app/
@@ -32,16 +30,11 @@ app/
 config/
 public/
 storage/
+LIEN_REPO.txt
 README.md
 ```
 
-Points importants :
-
-- `app/Core` contient le coeur du mini framework maison
-- `app/Controllers` contient la logique applicative
-- `app/Models` contient l'accès aux données
-- `app/Views` contient les vues PHP
-- `public` contient les assets publics
+Le dossier `storage` contient les fichiers SQL livrés avec le projet.
 
 ## Installation locale
 
@@ -53,7 +46,7 @@ Exemple avec XAMPP sous Linux :
 /opt/lampp/htdocs/tomtroc
 ```
 
-### 2. Créer la base de données
+### 2. Creer la base de donnees
 
 Exemple :
 
@@ -61,17 +54,44 @@ Exemple :
 CREATE DATABASE tomtroc CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-### 3. Configurer la connexion à la base
+### 3. Importer le fichier SQL du projet
 
-Le projet charge d'abord :
+Le depot contient deux fichiers SQL :
+
+- `storage/schema.sql` : structure seule
+- `storage/tomtroc_demo.sql` : structure + quelques donnees de test
+
+Pour l'evaluation, il faut importer en priorite :
+
+```text
+storage/tomtroc_demo.sql
+```
+
+Exemple :
+
+```bash
+mysql -u root -p tomtroc < storage/tomtroc_demo.sql
+```
+
+Ce fichier permet de recreer :
+- les tables principales du projet
+- quelques utilisateurs de test
+- quelques livres
+- quelques messages
+
+Le fichier `storage/schema.sql` peut etre utilise si vous souhaitez repartir d'une structure vide.
+
+### 4. Configurer l'acces a la base
+
+Le projet charge en priorite :
 
 ```text
 config/database.local.php
 ```
 
-Ce fichier est ignoré par Git et permet de garder les vrais accès en local.
+Ce fichier est a creer en local et n'est pas versionne.
 
-Exemple de contenu :
+Exemple :
 
 ```php
 <?php
@@ -86,13 +106,13 @@ return [
 ];
 ```
 
-Si `database.local.php` n'existe pas, le projet utilise les variables d'environnement définies dans :
+Si ce fichier n'existe pas, le projet utilise la configuration de secours dans :
 
 ```text
 config/database.php
 ```
 
-### 4. Vérifier l'URL de base
+### 5. Verifier l'URL de base
 
 Dans :
 
@@ -100,13 +120,13 @@ Dans :
 config/config.php
 ```
 
-la valeur actuelle est :
+la configuration actuelle est :
 
 ```php
 'base_url' => '/tomtroc'
 ```
 
-Elle convient à une installation du type :
+Elle correspond a une installation du type :
 
 ```text
 http://localhost/tomtroc/
@@ -120,9 +140,9 @@ http://localhost/tomtroc/
 http://localhost/tomtroc/
 ```
 
-### Depuis un téléphone sur le même réseau
+### Depuis un telephone sur le meme reseau
 
-Utiliser l'adresse IP locale de la machine qui héberge Apache :
+Utiliser l'adresse IP locale du PC qui heberge Apache :
 
 ```text
 http://IP_DU_PC/tomtroc/
@@ -135,6 +155,22 @@ http://192.168.4.133/tomtroc/
 ```
 
 `localhost` et `127.0.0.1` ne fonctionnent pas depuis un autre appareil.
+
+## Comptes de test
+
+Le depot ne contient pas de mot de passe en clair.
+
+Compte admin actuellement relie a l'application :
+- `id` : `4`
+- `username` : `ben`
+
+Le mot de passe doit etre defini dans la base locale utilisee pour les tests.
+
+Pour tester un compte membre standard, le plus simple est de creer un compte via :
+
+```text
+/register
+```
 
 ## Routes principales
 
@@ -161,21 +197,14 @@ http://192.168.4.133/tomtroc/
 - `/admin/books`
 - `/admin/members`
 
-## Assets importants
-
-- `public/assets/css/style.css`
-- `public/assets/css/account-admin.css`
-- `public/assets/css/admin.css`
-- `public/assets/img/exchange-covers`
-- `public/assets/img/figma`
-- `public/assets/uploads`
-
-## Fichiers utiles
+## Fichiers importants
 
 - `app/Core/App.php`
 - `app/Core/Router.php`
 - `app/Core/Url.php`
 - `app/Core/View.php`
+- `app/Core/Auth.php`
+- `app/Core/Csrf.php`
 - `app/Controllers/AuthController.php`
 - `app/Controllers/AccountController.php`
 - `app/Controllers/BookController.php`
@@ -187,9 +216,18 @@ http://192.168.4.133/tomtroc/
 - `config/routes.php`
 - `config/config.php`
 
-## Documentation du projet
+## Assets utiles
 
-- `DOCUMENTATION_PROJET.md`
-- `DATABASE.md`
-- `FLOWS_SITE.md`
-- `BASE_CONFORMITE_PROJET.md`
+- `public/assets/css/style.css`
+- `public/assets/css/account-admin.css`
+- `public/assets/css/admin.css`
+- `public/assets/img/exchange-covers`
+- `public/assets/img/figma`
+- `public/assets/uploads`
+
+## Livrables presents dans le depot
+
+- `README.md`
+- `LIEN_REPO.txt`
+- `storage/schema.sql`
+- `storage/tomtroc_demo.sql`
