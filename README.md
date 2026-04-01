@@ -1,204 +1,195 @@
-# Tom Troc
+# TomTroc
 
-Application PHP MVC pour l'échange de livres entre membres.
+TomTroc est un site de mise en relation autour de l'échange de livres, développé en PHP avec une architecture MVC.
 
-## Stack
+## Fonctionnalités
+
+- inscription et connexion
+- espace `Mon compte`
+- modification du pseudo, du mot de passe et de l'avatar
+- ajout, modification et suppression de livres
+- catalogue public avec recherche
+- fiche détail d'un livre
+- profil public d'un membre
+- messagerie entre membres
+- espace d'administration
+
+## Stack technique
 
 - PHP 8.1+
 - MySQL ou MariaDB
-- Apache recommandé
-- compatible aussi avec le serveur PHP intégré
+- Apache
+- HTML / CSS / JavaScript léger
 
-## Structure rapide
+## Architecture du projet
 
-- `public/` : point d'entrée web et assets publics
-- `app/` : coeur MVC
-- `config/` : configuration
-- `storage/schema.sql` : schéma SQL de départ
+```text
+app/
+  Controllers/
+  Core/
+  Models/
+  Views/
+config/
+public/
+storage/
+README.md
+```
 
-## Installation propre
+Points importants :
 
-### 1. Cloner ou copier le projet
+- `app/Core` contient le coeur du mini framework maison
+- `app/Controllers` contient la logique applicative
+- `app/Models` contient l'accès aux données
+- `app/Views` contient les vues PHP
+- `public` contient les assets publics
 
-Place le projet dans un dossier accessible par ton serveur web.
+## Installation locale
 
-Exemple XAMPP :
+### 1. Placer le projet dans le serveur web
 
-```bash
+Exemple avec XAMPP sous Linux :
+
+```text
 /opt/lampp/htdocs/tomtroc
 ```
 
 ### 2. Créer la base de données
 
-Crée une base nommée `tomtroc`.
-
-Exemple SQL :
+Exemple :
 
 ```sql
 CREATE DATABASE tomtroc CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-### 3. Importer le schéma
+### 3. Configurer la connexion à la base
 
-Importe :
-
-- [storage/schema.sql](/opt/lampp/htdocs/tomtroc/storage/schema.sql)
-
-Avec phpMyAdmin ou en ligne de commande.
-
-Exemple :
-
-```bash
-mysql -u root -p tomtroc < storage/schema.sql
-```
-
-### 4. Configurer la connexion
-
-Vérifie :
-
-- [config/database.php](/opt/lampp/htdocs/tomtroc/config/database.php)
-
-Paramètres attendus par défaut :
-
-- host : `127.0.0.1`
-- dbname : `tomtroc`
-- user : `root`
-- pass : ``
-
-### 5. Vérifier l'URL de base
-
-Fichier :
-
-- [config/config.php](/opt/lampp/htdocs/tomtroc/config/config.php)
-
-Si le projet tourne dans XAMPP sous :
+Le projet charge d'abord :
 
 ```text
-http://localhost/tomtroc
+config/database.local.php
 ```
 
-alors la valeur correcte est :
+Ce fichier est ignoré par Git et permet de garder les vrais accès en local.
+
+Exemple de contenu :
+
+```php
+<?php
+return [
+  'db' => [
+    'host' => '127.0.0.1',
+    'name' => 'tomtroc',
+    'user' => 'root',
+    'pass' => '',
+    'charset' => 'utf8mb4',
+  ],
+];
+```
+
+Si `database.local.php` n'existe pas, le projet utilise les variables d'environnement définies dans :
+
+```text
+config/database.php
+```
+
+### 4. Vérifier l'URL de base
+
+Dans :
+
+```text
+config/config.php
+```
+
+la valeur actuelle est :
 
 ```php
 'base_url' => '/tomtroc'
 ```
 
-Si tu pointes directement Apache sur `public/`, tu peux utiliser :
-
-```php
-'base_url' => ''
-```
-
-## Démarrage
-
-### Option A : avec Apache / XAMPP
-
-Configuration conseillée :
-
-- projet dans `htdocs/tomtroc`
-- Apache actif
-- `mod_rewrite` actif
-
-Ensuite ouvre :
+Elle convient à une installation du type :
 
 ```text
-http://localhost/tomtroc
+http://localhost/tomtroc/
 ```
 
-Le projet utilise :
+## Lancement
 
-- [index.php](/opt/lampp/htdocs/tomtroc/index.php) comme front controller racine
-- [.htaccess](/opt/lampp/htdocs/tomtroc/.htaccess) pour rediriger vers `public/`
-
-### Option B : avec le serveur PHP intégré
-
-Depuis la racine du projet :
-
-```bash
-php -S localhost:8000
-```
-
-Puis ouvre :
+### Depuis le navigateur local
 
 ```text
-http://localhost:8000
+http://localhost/tomtroc/
 ```
 
-## Vérifications si “la page est introuvable”
+### Depuis un téléphone sur le même réseau
 
-### Cas 1 : URL incorrecte
-
-Vérifie que tu ouvres bien :
+Utiliser l'adresse IP locale de la machine qui héberge Apache :
 
 ```text
-http://localhost/tomtroc
+http://IP_DU_PC/tomtroc/
 ```
 
-et non un sous-chemin faux.
+Exemple :
 
-### Cas 2 : Apache n'est pas démarré
+```text
+http://192.168.4.133/tomtroc/
+```
 
-Sous XAMPP, démarre Apache.
-
-### Cas 3 : `base_url` incorrect
-
-Vérifie :
-
-- [config/config.php](/opt/lampp/htdocs/tomtroc/config/config.php)
-
-Une mauvaise valeur casse les liens et peut donner des pages introuvables.
-
-### Cas 4 : mod_rewrite ou `.htaccess`
-
-Vérifie que :
-
-- Apache autorise `.htaccess`
-- `mod_rewrite` est actif
-
-Le fichier utilisé est :
-
-- [.htaccess](/opt/lampp/htdocs/tomtroc/.htaccess)
-
-### Cas 5 : base de données absente
-
-Le site peut continuer partiellement avec des fallbacks, mais certaines pages membres ou la messagerie risquent de ne pas fonctionner correctement si :
-
-- la base `tomtroc` n'existe pas
-- les tables ne sont pas importées
+`localhost` et `127.0.0.1` ne fonctionnent pas depuis un autre appareil.
 
 ## Routes principales
 
-- `/` : accueil
-- `/register` : inscription
-- `/login` : connexion
-- `/logout` : déconnexion
-- `/account` : mon compte
-- `/books/exchange` : catalogue
-- `/books/show?id=...` : fiche livre
-- `/messages` : messagerie
-- `/profiles/show?id=...` : profil public
+### Pages publiques
 
-## Fonctionnalités principales
+- `/`
+- `/register`
+- `/login`
+- `/books/exchange`
+- `/books/show?id=...`
+- `/profiles/show?id=...`
 
-- inscription / connexion
-- bibliothèque membre
-- catalogue public des livres
-- fiche détaillée par livre
-- messagerie entre membres
-- profil public
+### Espace membre
 
-## Documentation complémentaire
+- `/account`
+- `/account/profile`
+- `/books/create`
+- `/books/edit?id=...`
+- `/messages`
+- `/messages/thread?user=...`
 
-- architecture projet : [DOCUMENTATION_PROJET.md](/opt/lampp/htdocs/tomtroc/DOCUMENTATION_PROJET.md)
-- base de données : [DATABASE.md](/opt/lampp/htdocs/tomtroc/DATABASE.md)
-- flux du site : [FLOWS_SITE.md](/opt/lampp/htdocs/tomtroc/FLOWS_SITE.md)
+### Administration
 
-## Conseils de reprise
+- `/admin/books`
+- `/admin/members`
 
-Si tu reprends le projet plus tard, commence par :
+## Assets importants
 
-1. vérifier `config/database.php`
-2. vérifier `config/config.php`
-3. importer `storage/schema.sql`
-4. tester l'accueil
-5. tester ensuite `login`, `books/exchange`, `account` et `messages`
+- `public/assets/css/style.css`
+- `public/assets/css/account-admin.css`
+- `public/assets/css/admin.css`
+- `public/assets/img/exchange-covers`
+- `public/assets/img/figma`
+- `public/assets/uploads`
+
+## Fichiers utiles
+
+- `app/Core/App.php`
+- `app/Core/Router.php`
+- `app/Core/Url.php`
+- `app/Core/View.php`
+- `app/Controllers/AuthController.php`
+- `app/Controllers/AccountController.php`
+- `app/Controllers/BookController.php`
+- `app/Controllers/MessageController.php`
+- `app/Controllers/AdminController.php`
+- `app/Models/User.php`
+- `app/Models/Book.php`
+- `app/Models/Message.php`
+- `config/routes.php`
+- `config/config.php`
+
+## Documentation du projet
+
+- `DOCUMENTATION_PROJET.md`
+- `DATABASE.md`
+- `FLOWS_SITE.md`
+- `BASE_CONFORMITE_PROJET.md`
