@@ -73,9 +73,6 @@ Exemple :
 mysql -u root -p tomtroc < storage/Benjamin_Craige_B_1_sql_032026.sql
 ```
 
-Ce fichier correspond a l'export de la base locale de demonstration.
-Il suffit de l'importer dans une base vide nommee `tomtroc`.
-
 Ce fichier permet de recreer :
 - les tables principales du projet
 - quelques utilisateurs de test
