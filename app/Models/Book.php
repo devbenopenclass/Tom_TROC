@@ -320,7 +320,7 @@ class Book extends Model
   {
     $map = [
       'esther' => '/assets/img/exchange-covers/esther.png',
-      'thekinfolktable' => '/assets/img/exchange-covers/the-kinfolk-table.png',
+      'thekinfolktable' => '/assets/img/exchange-covers/the-kinfolk-tablePL.png',
       'wabisabi' => '/assets/img/exchange-covers/wabi-sabi.png',
       'milkhoney' => '/assets/img/exchange-covers/milk-and-honey.png',
       'delight' => '/assets/img/exchange-covers/delight.png',

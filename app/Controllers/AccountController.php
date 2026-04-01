@@ -11,6 +11,7 @@ use App\Models\Book;
 class AccountController extends Controller
 {
   private const MIN_PASSWORD_LENGTH = 6;
+  private const AVATAR_UPLOAD_DIR = '/assets/uploads';
 
   private function renderAccountPage(array $extra = []): void
   {
@@ -64,13 +65,23 @@ class AccountController extends Controller
       return;
     }
 
+    $avatarUpload = $this->uploadedAvatarPath();
+    if ($avatarUpload['error'] !== null) {
+      $this->renderAccountError($avatarUpload['error'], $formData);
+      return;
+    }
+
     $passwordHash = $password !== '' ? password_hash($password, PASSWORD_BCRYPT) : null;
 
-    User::updateProfile($this->currentUserId(), $username, $bio, $passwordHash);
+    User::updateProfile(
+      $this->currentUserId(),
+      $username,
+      $bio,
+      $passwordHash,
+      $avatarUpload['path']
+    );
     $this->renderAccountPage([
-      'success' => $passwordHash !== null
-        ? 'Compte mis à jour. Le mot de passe a bien été modifié.'
-        : 'Compte mis à jour.',
+      'success' => $this->profileSuccessMessage($passwordHash !== null, $avatarUpload['path'] !== null),
     ]);
   }
 
@@ -90,5 +101,54 @@ class AccountController extends Controller
       'error' => $message,
       'form' => $formData,
     ]);
+  }
+
+  private function uploadedAvatarPath(): array
+  {
+    if (empty($_FILES['avatar']['name'])) {
+      return ['path' => null, 'error' => null];
+    }
+
+    $file = $_FILES['avatar'];
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+      return ['path' => null, 'error' => "L'avatar n'a pas pu être envoyé."];
+    }
+
+    $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+    $tmpName = (string)($file['tmp_name'] ?? '');
+    $mime = $tmpName !== '' ? mime_content_type($tmpName) : false;
+    if (!is_string($mime) || !isset($allowed[$mime])) {
+      return ['path' => null, 'error' => 'Le format de l’avatar doit être JPG, PNG ou WebP.'];
+    }
+
+    $destinationDir = __DIR__ . '/../../public' . self::AVATAR_UPLOAD_DIR;
+    if (!is_dir($destinationDir) && !mkdir($destinationDir, 0777, true) && !is_dir($destinationDir)) {
+      return ['path' => null, 'error' => "Impossible d'enregistrer l'avatar pour le moment."];
+    }
+
+    $fileName = 'avatar-' . $this->currentUserId() . '-' . bin2hex(random_bytes(8)) . '.' . $allowed[$mime];
+    $destination = $destinationDir . '/' . $fileName;
+    if (!move_uploaded_file($tmpName, $destination)) {
+      return ['path' => null, 'error' => "Impossible d'enregistrer l'avatar pour le moment."];
+    }
+
+    return ['path' => self::AVATAR_UPLOAD_DIR . '/' . $fileName, 'error' => null];
+  }
+
+  private function profileSuccessMessage(bool $passwordChanged, bool $avatarChanged): string
+  {
+    if ($passwordChanged && $avatarChanged) {
+      return 'Compte mis à jour. Le mot de passe et l’avatar ont bien été modifiés.';
+    }
+
+    if ($passwordChanged) {
+      return 'Compte mis à jour. Le mot de passe a bien été modifié.';
+    }
+
+    if ($avatarChanged) {
+      return 'Compte mis à jour. L’avatar a bien été modifié.';
+    }
+
+    return 'Compte mis à jour.';
   }
 }

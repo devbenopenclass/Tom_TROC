@@ -47,8 +47,16 @@ if (!empty($me['created_at'])) {
         <h2 class="account-form__title">Vos informations personnelles</h2>
         <?php if (!empty($error)): ?><p class="account-form__message account-form__message--error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
         <?php if (!empty($success)): ?><p class="account-form__message account-form__message--success"><?= htmlspecialchars($success) ?></p><?php endif; ?>
-        <form method="post" action="<?= $base ?>/account/profile" class="account-form">
+        <form method="post" action="<?= $base ?>/account/profile" class="account-form" enctype="multipart/form-data">
           <?= Csrf::input(); ?>
+          <label class="account-form__field account-form__field--avatar">
+            <span>Avatar</span>
+            <div class="account-form__avatar-row">
+              <img class="account-form__avatar-preview" src="<?= htmlspecialchars($avatar) ?>" alt="Avatar actuel">
+              <input type="file" name="avatar" accept="image/png,image/jpeg,image/webp">
+            </div>
+          </label>
+
           <label class="account-form__field">
             <span>Adresse email</span>
             <input value="<?= htmlspecialchars($me['email'] ?? '') ?>" readonly>

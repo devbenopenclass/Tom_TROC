@@ -5,7 +5,6 @@
 <?php // Fiche détail d'un livre : image, description, propriétaire et accès à la messagerie. ?>
 
 <?php
-$status = (string)($book['status'] ?? 'available');
 $title = trim((string)($book['title'] ?? 'Livre'));
 $author = trim((string)($book['author'] ?? 'Auteur inconnu'));
 $owner = trim((string)($book['username'] ?? 'membre de la communauté'));

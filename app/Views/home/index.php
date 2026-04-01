@@ -1,3 +1,5 @@
+<?php use App\Core\Url; ?>
+<?php use App\Models\Book; ?>
 <?php // Page d'accueil : hero, derniers livres, étapes de fonctionnement et valeurs du projet. ?>
 <section class="home-hero">
   <div class="home-copy">
@@ -20,13 +22,6 @@
 
   <div class="home-books">
     <?php
-    $fixedImages = [
-      $base . '/assets/img/figma/latest-card-1.png',
-      $base . '/assets/img/figma/latest-card-2.png',
-      $base . '/assets/img/figma/latest-card-3.png',
-      $base . '/assets/img/figma/latest-card-4.png',
-    ];
-
     $fallback = [
       ['title' => 'Esther', 'author' => 'Alabaster', 'owner' => 'CamilleDuCuir'],
       ['title' => 'The Kinfolk Table', 'author' => 'Nathan Williams', 'owner' => 'Nathalie'],
@@ -41,16 +36,15 @@
           'title' => $b['title'] ?? '',
           'author' => $b['author'] ?? '',
           'owner' => $b['username'] ?? '',
-          'img' => $fixedImages[$i] ?? $fixedImages[0],
+          'img' => Url::asset(Book::imagePath($b)),
           'id' => (int)($b['id'] ?? 0),
         ];
       }
     }
 
     if (count($cards) < 4) {
-      $offset = count($cards);
-      foreach (array_slice($fallback, 0, 4 - $offset) as $j => $f) {
-        $f['img'] = $fixedImages[$offset + $j] ?? $fixedImages[0];
+      foreach (array_slice($fallback, 0, 4 - count($cards)) as $f) {
+        $f['img'] = Url::asset(Book::imagePath($f));
         $cards[] = $f;
       }
     }
@@ -87,7 +81,7 @@
 </section>
 
 <section class="home-banner">
-  <img src="<?= $base ?>/assets/img/figma/mask-group-1.png" alt="Bannière bibliothèque">
+  <img src="<?= htmlspecialchars(Url::asset('/assets/img/figma/mask-group-1.png')) ?>" alt="Bannière bibliothèque">
 </section>
 
 <section class="home-section values">

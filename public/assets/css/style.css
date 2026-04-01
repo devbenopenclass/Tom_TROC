@@ -102,7 +102,7 @@ h1,h2,h3{
 }
 .home-copy h1{font-size:36px;line-height:1.33;margin-bottom:16px}
 .home-copy p{font-size:16px;line-height:1.25;color:var(--text);max-width:330px;margin:0 0 34px}
-.home-hero-image img{width:404px;height:539px;object-fit:cover}
+.home-hero-image img{width:11cm;height:15cm;object-fit:cover}
 .home-hero-image figcaption{margin-top:8px;font-size:12px;font-style:italic;color:var(--muted);text-align:right}
 
 .home-section{margin:0 auto 88px}
@@ -119,16 +119,29 @@ h1,h2,h3{
   margin-left:auto;
   margin-right:auto;
 }
+.home-section--framed .home-books,
+.home-section--framed .latest-books-cta{
+  width:min(1280px,calc(100vw - 32px));
+}
 .home-section h2{font-size:32px;line-height:43px;text-align:center;margin-bottom:12px}
 .home-section>p{max-width:520px;margin:0 auto 28px;text-align:center;font-size:16px;color:var(--text)}
-.home-books{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px}
+.home-books{
+  display:grid;
+  grid-template-columns:repeat(4,5.5cm);
+  justify-content:center;
+  gap:24px;
+}
 .home-book{
   background:var(--surface);border-radius:10px;overflow:hidden;
   box-shadow:0 4px 24px rgba(0,0,0,.04);
 }
-.home-book .img-wrap{height:200px}
+.home-book .img-wrap{height:6cm}
 .home-book .img-wrap img{width:100%;height:100%;object-fit:cover}
-.home-book .txt{padding:14px}
+.home-book .txt{
+  height:3cm;
+  padding:14px;
+  overflow:hidden;
+}
 .home-book strong{
   display:block;margin-bottom:8px;font-size:16px;line-height:19px;
   font-family:Inter,"Segoe UI",Arial,sans-serif;font-weight:400;
@@ -145,7 +158,11 @@ h1,h2,h3{
   text-align:center;font-size:14px;line-height:17px;
 }
 .home-banner{width:100vw;margin-left:calc(50% - 50vw);margin-bottom:74px}
-.home-banner img{width:100%;height:230px;object-fit:cover}
+.home-banner img{
+  width:100%;
+  height:230px;
+  object-fit:cover;
+}
 .values{
   max-width:392px;
   position:relative;
@@ -386,6 +403,12 @@ h1,h2,h3{
   display:inline-block;margin-bottom:16px;color:var(--muted);
   font-size:14px;text-decoration:underline;text-underline-offset:2px;
 }
+.back-nav{margin:0 0 18px}
+.back-link--menu{
+  margin-bottom:0;
+  font-size:13px;
+  letter-spacing:.02em;
+}
 .edit-page h1{font-size:26px;line-height:35px;margin-bottom:22px}
 .edit-panel{background:#fff;border:1px solid #efefef;border-radius:20px;padding:40px}
 .edit-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:38px}
@@ -403,6 +426,23 @@ h1,h2,h3{
 }
 .edit-fields-col textarea{min-height:356px;line-height:1.35;resize:vertical}
 .edit-fields-col .btn{width:min(322px,100%);margin-top:10px}
+.profile-avatar-field{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  margin-bottom:16px;
+}
+.profile-avatar-field__preview{
+  width:88px;
+  height:88px;
+  border-radius:50%;
+  object-fit:cover;
+  background:#e2e2e2;
+  flex:0 0 auto;
+}
+.profile-avatar-field input[type=file]{
+  flex:1;
+}
 
 /* Messages */
 .thread{background:#fff;border:1px solid #f0f0f0;border-radius:10px;padding:16px;margin-bottom:18px}
@@ -695,8 +735,8 @@ h1,h2,h3{
   .thread-feed{padding:18px 20px 26px}
   .thread-form{grid-template-columns:1fr;padding:12px 20px 0}
   .thread-form .btn{width:100%;min-width:0}
-  .messages-layout:has(.thread-head) .messages-sidebar{display:none}
-  .messages-layout:not(:has(.thread-head)) .messages-thread{display:none}
+  .messages-layout--thread-open .messages-sidebar{display:none}
+  .messages-layout--list-open .messages-thread{display:none}
 }
 
 @media (max-width:560px){
@@ -779,7 +819,7 @@ h1,h2,h3{
   .account-books__row > div:nth-child(4),
   .account-books__row > div:nth-child(5),
   .account-books__row > div:nth-child(6){grid-column:1/-1}
-  .account-books__mobile-label{display:none}
+  .account-books__mobile-label{display:block}
   .account-books__desc{font-size:14px;line-height:1.25;margin-top:8px}
   .list-item{grid-template-columns:1fr}
   .actions{justify-content:flex-start}

@@ -12,6 +12,7 @@ class User extends Model
   private const PUBLIC_FIELDS = 'id, username, email, avatar, bio, created_at';
 
   private static ?string $passwordColumn = null;
+  private static ?array $userColumns = null;
 
   // Certains environnements stockent le mot de passe dans `password`,
   // d'autres dans `password_hash`. Cette méthode détecte la bonne colonne
@@ -31,6 +32,50 @@ class User extends Model
     }
 
     return self::$passwordColumn;
+  }
+
+  private static function userColumns(): array
+  {
+    if (self::$userColumns !== null) {
+      return self::$userColumns;
+    }
+
+    try {
+      $stmt = self::db()->query('SHOW COLUMNS FROM users');
+      self::$userColumns = array_map('strval', $stmt->fetchAll(\PDO::FETCH_COLUMN, 0));
+    } catch (\Throwable $e) {
+      self::$userColumns = [];
+    }
+
+    return self::$userColumns;
+  }
+
+  private static function hasColumn(string $column): bool
+  {
+    return in_array($column, self::userColumns(), true);
+  }
+
+  private static function adminConfig(): array
+  {
+    $config = require __DIR__ . '/../../config/config.php';
+    $app = $config['app'] ?? [];
+
+    return [
+      'ids' => array_values(array_unique(array_map('intval', (array)($app['admin_user_ids'] ?? [])))),
+      'emails' => array_values(array_unique(array_map(
+        static fn ($email): string => self::lowercase(trim((string)$email)),
+        (array)($app['admin_emails'] ?? [])
+      ))),
+    ];
+  }
+
+  private static function lowercase(string $value): string
+  {
+    if (function_exists('mb_strtolower')) {
+      return mb_strtolower($value);
+    }
+
+    return strtolower($value);
   }
 
   // Recherche un utilisateur par email uniquement,
@@ -74,6 +119,43 @@ class User extends Model
     return $u ?: null;
   }
 
+  public static function adminSessionData(int $id): array
+  {
+    $user = self::find($id);
+    $config = self::adminConfig();
+    $email = self::lowercase(trim((string)($user['email'] ?? '')));
+    $isAdmin = in_array($id, $config['ids'], true) || in_array($email, $config['emails'], true);
+    $role = null;
+
+    if (self::hasColumn('is_admin') || self::hasColumn('role')) {
+      $select = [];
+      if (self::hasColumn('is_admin')) {
+        $select[] = 'is_admin';
+      }
+      if (self::hasColumn('role')) {
+        $select[] = 'role';
+      }
+
+      $stmt = self::db()->prepare('SELECT ' . implode(', ', $select) . ' FROM users WHERE id = :id LIMIT 1');
+      $stmt->execute(['id' => $id]);
+      $row = $stmt->fetch() ?: [];
+
+      $isAdmin = $isAdmin || (bool)($row['is_admin'] ?? false);
+      $role = isset($row['role']) ? (string)$row['role'] : null;
+      $isAdmin = $isAdmin || $role === 'admin';
+    }
+
+    return [
+      'is_admin' => $isAdmin,
+      'user_role' => $role,
+    ];
+  }
+
+  public static function isAdmin(int $id): bool
+  {
+    return self::adminSessionData($id)['is_admin'];
+  }
+
   // Crée un nouveau compte membre avec un avatar par défaut.
   public static function create(string $username, string $email, string $passwordHash): int
   {
@@ -95,26 +177,37 @@ class User extends Model
 
   // Met à jour le profil ; si un mot de passe est fourni,
   // on le sauvegarde en même temps que le pseudo et la bio.
-  public static function updateProfile(int $id, string $username, string $bio, ?string $passwordHash = null): void
+  public static function updateProfile(
+    int $id,
+    string $username,
+    string $bio,
+    ?string $passwordHash = null,
+    ?string $avatarPath = null
+  ): void
   {
-    if ($passwordHash !== null) {
-      $passwordColumn = self::resolvePasswordColumn();
-      $stmt = self::db()->prepare("UPDATE users SET username = :username, bio = :bio, {$passwordColumn} = :password_hash WHERE id = :id");
-      $stmt->execute([
-        'id' => $id,
-        'username' => $username,
-        'bio' => $bio,
-        'password_hash' => $passwordHash,
-      ]);
-      return;
-    }
-
-    $stmt = self::db()->prepare("UPDATE users SET username = :username, bio = :bio WHERE id = :id");
-    $stmt->execute([
+    $fields = [
+      'username = :username',
+      'bio = :bio',
+    ];
+    $params = [
       'id' => $id,
       'username' => $username,
       'bio' => $bio,
-    ]);
+    ];
+
+    if ($avatarPath !== null) {
+      $fields[] = 'avatar = :avatar';
+      $params['avatar'] = $avatarPath;
+    }
+
+    if ($passwordHash !== null) {
+      $passwordColumn = self::resolvePasswordColumn();
+      $fields[] = "{$passwordColumn} = :password_hash";
+      $params['password_hash'] = $passwordHash;
+    }
+
+    $stmt = self::db()->prepare('UPDATE users SET ' . implode(', ', $fields) . ' WHERE id = :id');
+    $stmt->execute($params);
   }
 
   // Retourne un avatar fiable : avatar utilisateur si le fichier existe,

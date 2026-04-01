@@ -82,5 +82,15 @@ class AuthController extends Controller
   {
     session_regenerate_id(true);
     $_SESSION['user_id'] = $userId;
+
+    $adminSession = User::adminSessionData($userId);
+    $_SESSION['is_admin'] = $adminSession['is_admin'];
+
+    if ($adminSession['user_role'] !== null) {
+      $_SESSION['user_role'] = $adminSession['user_role'];
+      return;
+    }
+
+    unset($_SESSION['user_role']);
   }
 }

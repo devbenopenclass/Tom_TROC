@@ -3,7 +3,9 @@
 <?php use App\Models\User; ?>
 <?php // Interface de messagerie : colonne des conversations, fil actif et zone de réponse. ?>
 
-<section class="messages-layout">
+<?php $hasActiveThread = !empty($other); ?>
+
+<section class="messages-layout<?= $hasActiveThread ? ' messages-layout--thread-open' : ' messages-layout--list-open' ?>">
   <aside class="messages-sidebar card">
     <h2>Messagerie</h2>
     <?php if (empty($items)): ?>

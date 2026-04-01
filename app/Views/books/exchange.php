@@ -20,17 +20,7 @@
   <section class="grid">
     <?php foreach ($books as $b): ?>
       <?php
-      $status = (string)($b['status'] ?? 'available');
-      $statusClass = 'status-available';
-      $statusLabel = 'disponible';
       $image = Url::asset(Book::imagePath($b));
-      if ($status === 'reserved') {
-        $statusClass = 'status-reserved';
-        $statusLabel = 'réservé';
-      } elseif ($status === 'unavailable') {
-        $statusClass = 'status-unavailable';
-        $statusLabel = 'indisponible';
-      }
       ?>
       <a class="book" href="<?= $base ?>/books/show?id=<?= (int)$b['id'] ?>">
         <div class="thumb">

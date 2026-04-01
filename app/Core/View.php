@@ -15,15 +15,31 @@ class View
   // Les données du contrôleur deviennent des variables locales dans la vue.
   public function render(string $view, array $data = []): void
   {
-    extract($data);
-
     $viewFile = __DIR__ . '/../Views/' . $view . '.php';
     if (!file_exists($viewFile)) {
       throw new \RuntimeException("View not found: {$view}");
     }
 
-    require __DIR__ . '/../Views/layouts/header.php';
-    require $viewFile;
-    require __DIR__ . '/../Views/layouts/footer.php';
+    $viewData = $this->sanitizeViewData($data);
+
+    (static function (string $__viewFile, array $__viewData): void {
+      extract($__viewData, EXTR_SKIP);
+      require __DIR__ . '/../Views/layouts/header.php';
+      require $__viewFile;
+      require __DIR__ . '/../Views/layouts/footer.php';
+    })($viewFile, $viewData);
+  }
+
+  private function sanitizeViewData(array $data): array
+  {
+    $sanitized = [];
+
+    foreach ($data as $key => $value) {
+      if (is_string($key) && preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $key) === 1) {
+        $sanitized[$key] = $value;
+      }
+    }
+
+    return $sanitized;
   }
 }

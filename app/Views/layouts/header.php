@@ -8,11 +8,39 @@ $base = Url::baseUrl();
 $isLogged = !empty($_SESSION['user_id']);
 $unreadCount = 0;
 $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+$normalizedPath = $requestPath;
+if ($base !== '' && str_starts_with($normalizedPath, $base)) {
+  $normalizedPath = substr($normalizedPath, strlen($base)) ?: '/';
+}
+$normalizedPath = '/' . ltrim($normalizedPath, '/');
 $isAccountPage = str_contains($requestPath, '/account');
 $isMessagesPage = str_contains($requestPath, '/messages');
 if ($isLogged) {
   $unreadCount = \App\Models\Message::unreadCount((int)$_SESSION['user_id']);
 }
+
+$backFallback = '/';
+if (str_starts_with($normalizedPath, '/account/profile')) {
+  $backFallback = '/account';
+} elseif (str_starts_with($normalizedPath, '/account')) {
+  $backFallback = '/';
+} elseif (str_starts_with($normalizedPath, '/books/create') || str_starts_with($normalizedPath, '/books/edit')) {
+  $backFallback = '/account';
+} elseif (str_starts_with($normalizedPath, '/books/show')) {
+  $backFallback = '/books/exchange';
+} elseif (str_starts_with($normalizedPath, '/books/exchange')) {
+  $backFallback = '/';
+} elseif (str_starts_with($normalizedPath, '/profiles/show')) {
+  $backFallback = '/books/exchange';
+} elseif (str_starts_with($normalizedPath, '/messages')) {
+  $backFallback = '/account';
+} elseif (str_starts_with($normalizedPath, '/admin/members')) {
+  $backFallback = '/admin/books';
+} elseif (str_starts_with($normalizedPath, '/admin')) {
+  $backFallback = '/account';
+}
+
+$showBackMenu = $normalizedPath !== '/';
 ?>
 <!doctype html>
 <html lang="fr">
@@ -72,3 +100,12 @@ if ($isLogged) {
 </header>
 
 <main class="shell main-content<?= $isMessagesPage ? ' main-content--messages' : '' ?>">
+<?php if ($showBackMenu): ?>
+  <div class="back-nav">
+    <a
+      class="back-link back-link--menu"
+      href="<?= htmlspecialchars(Url::withBase($backFallback)) ?>"
+      onclick="if (window.history.length > 1) { event.preventDefault(); window.history.back(); }"
+    >← Retour</a>
+  </div>
+<?php endif; ?>

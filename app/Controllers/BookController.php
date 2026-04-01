@@ -49,9 +49,9 @@ class BookController extends Controller
     $this->requireCsrf();
 
     $data = $this->bookPayloadForCreate();
-
-    if ($data['title'] === '' || $data['author'] === '') {
-      $this->renderBookFormError('create', 'Titre et auteur sont obligatoires.');
+    $error = $this->validateBookPayload($data);
+    if ($error !== null) {
+      $this->renderBookFormError('create', $error, $data);
       return;
     }
 
@@ -76,9 +76,15 @@ class BookController extends Controller
     $this->requireCsrf();
 
     $id = (int)($_POST['id'] ?? 0);
-    $this->findOwnedBook($id);
+    $book = $this->findOwnedBook($id);
 
     $data = $this->bookPayloadForUpdate();
+    $error = $this->validateBookPayload($data);
+    if ($error !== null) {
+      $this->renderBookFormError('edit', $error, array_merge($book, $data, ['id' => $id]));
+      return;
+    }
+
     $data['image'] = $this->uploadedBookImage() ?? $data['image'];
 
     Book::update($id, $this->currentUserId(), $data);
@@ -159,6 +165,15 @@ class BookController extends Controller
     return $this->handleUpload($_FILES['image']);
   }
 
+  private function validateBookPayload(array $data): ?string
+  {
+    if ($data['title'] === '' || $data['author'] === '') {
+      return 'Titre et auteur sont obligatoires.';
+    }
+
+    return null;
+  }
+
   private function normalizeStatus(string $status): string
   {
     return in_array($status, self::AVAILABLE_STATUSES, true) ? $status : 'available';
@@ -176,11 +191,12 @@ class BookController extends Controller
     exit;
   }
 
-  private function renderBookFormError(string $mode, string $message): void
+  private function renderBookFormError(string $mode, string $message, array $book = []): void
   {
     $this->render('books/form', [
       'mode' => $mode,
       'error' => $message,
+      'book' => $book,
     ]);
   }
 }

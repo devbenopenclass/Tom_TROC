@@ -5,6 +5,8 @@ namespace App\Controllers;
 
 use App\Core\Auth;
 use App\Core\Controller;
+use App\Core\Model;
+use App\Models\User;
 use PDO;
 
 // Contrôleur d'administration : version alignée avec le framework actuel.
@@ -92,8 +94,8 @@ final class AdminController extends Controller
     {
         Auth::requireLogin();
 
-        $isAdmin = (bool)($_SESSION['is_admin'] ?? false)
-            || (($_SESSION['user_role'] ?? null) === 'admin');
+        $userId = Auth::id();
+        $isAdmin = $userId !== null && User::isAdmin((int)$userId);
 
         if (!$isAdmin) {
             http_response_code(403);
@@ -104,18 +106,7 @@ final class AdminController extends Controller
 
     private function db(): PDO
     {
-        $dbConf = require __DIR__ . '/../../config/database.php';
-        $db = $dbConf['db'];
-
-        return new PDO(
-            sprintf('mysql:host=%s;dbname=%s;charset=%s', $db['host'], $db['name'], $db['charset']),
-            $db['user'],
-            $db['pass'],
-            [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            ]
-        );
+        return Model::connection();
     }
 
     private function normalizeBookStatus(string $status): string

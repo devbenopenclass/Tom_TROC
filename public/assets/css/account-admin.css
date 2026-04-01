@@ -169,6 +169,10 @@
   gap: 10px;
 }
 
+.account-form__field--avatar {
+  gap: 12px;
+}
+
 .account-form__field span {
   font-size: 14px;
   line-height: 17px;
@@ -185,6 +189,27 @@
   line-height: 17px;
   font-family: inherit;
   color: #292929;
+}
+
+.account-form__avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.account-form__avatar-preview {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #d7dee3;
+  flex: 0 0 auto;
+}
+
+.account-form__field--avatar input[type=file] {
+  height: auto;
+  padding: 12px 14px;
+  background: #fff;
 }
 
 .account-form__field input:focus {

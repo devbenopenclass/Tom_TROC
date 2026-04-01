@@ -11,7 +11,6 @@ return [
         '/login' => 'AuthController@loginForm',
 
         '/books/exchange' => 'BookController@exchange',
-        '/books/exchangege' => 'BookController@exchange',
         '/books/show' => 'BookController@show',
         '/books/create' => 'BookController@createForm',
         '/books/edit' => 'BookController@editForm',

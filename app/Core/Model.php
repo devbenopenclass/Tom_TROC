@@ -9,6 +9,11 @@ class Model
 {
   protected static ?PDO $pdo = null;
 
+  public static function connection(): PDO
+  {
+    return self::db();
+  }
+
   protected static function db(): PDO
   {
     if (self::$pdo) return self::$pdo;
