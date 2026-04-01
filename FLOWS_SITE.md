@@ -35,12 +35,15 @@ flowchart TD
     A[Mon compte] --> B[Ajouter un livre]
     A --> C[Modifier un livre]
     A --> D[Supprimer un livre]
+    A --> H[Modifier le profil]
     B --> E[books/create]
     C --> F[books/edit]
     D --> G[books/delete]
+    H --> I[account/profile]
     E --> A
     F --> A
     G --> A
+    I --> A
 ```
 
 ## Flux messagerie
@@ -49,12 +52,11 @@ flowchart TD
 flowchart TD
     A[Fiche livre] --> B[Bouton Envoyer un message]
     B --> C[/messages/thread?user=...&book=...]
-    C --> D[Messagerie]
-    D --> E{Fil existant ?}
+    C --> D[Fil de discussion]
+    D --> E{Fil disponible ?}
     E -- Oui --> F[Réponse autorisée]
-    E -- Non --> G[Premier message avec contexte livre]
+    E -- Non --> G[Retour vers la messagerie]
     F --> H[Message envoyé]
-    G --> H
     H --> D
 ```
 
@@ -66,6 +68,21 @@ flowchart TD
     B --> C[Profil du propriétaire]
     C --> D[Voir sa bibliothèque]
     D --> B
+```
+
+## Flux administration
+
+```mermaid
+flowchart TD
+    A[Mon compte] --> B[Ouvrir l'espace admin]
+    B --> C[Administration des livres]
+    C --> D[Recherche / filtre / tri]
+    C --> E[Modifier un livre]
+    C --> F[Changer le statut]
+    C --> G[Supprimer un livre]
+    C --> H[Gestion des membres]
+    H --> I[Supprimer un membre]
+    H --> J[Restaurer un membre sous 30 jours]
 ```
 
 ## Flux technique simplifié MVC
@@ -90,3 +107,6 @@ flowchart LR
 - Fiche livre : [books/show.php](/opt/lampp/htdocs/tomtroc/app/Views/books/show.php)
 - Messagerie : [messages/inbox.php](/opt/lampp/htdocs/tomtroc/app/Views/messages/inbox.php)
 - Mon compte : [account/index.php](/opt/lampp/htdocs/tomtroc/app/Views/account/index.php)
+- Gestion du profil : [account/profile_edit.php](/opt/lampp/htdocs/tomtroc/app/Views/account/profile_edit.php)
+- Admin livres : [admin/books.php](/opt/lampp/htdocs/tomtroc/app/Views/admin/books.php)
+- Admin membres : [admin/members.php](/opt/lampp/htdocs/tomtroc/app/Views/admin/members.php)
