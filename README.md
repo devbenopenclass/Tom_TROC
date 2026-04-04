@@ -13,6 +13,7 @@ TomTroc est une application PHP MVC de partage et d'echange de livres entre memb
 - profil public d'un membre
 - messagerie entre membres
 - espace d'administration
+- attribution du role utilisateur ou administrateur par un admin
 - suppression des comptes par l'admin
 
 ## Stack technique
@@ -141,6 +142,7 @@ Administration :
 - `/admin/members`
 - `/admin/books/status`
 - `/admin/books/delete`
+- `/admin/members/role`
 - `/admin/members/delete`
 
 ## Administration
@@ -150,8 +152,30 @@ L'admin peut :
 - rechercher les livres
 - rechercher les membres
 - changer la disponibilite d'un livre
+- promouvoir un membre en administrateur
+- remettre un administrateur en utilisateur
 - supprimer un livre
 - supprimer n'importe quel compte membre
+
+## Roles
+
+Deux types de comptes sont geres par le projet :
+
+- `user` : compte membre standard
+- `admin` : compte ayant acces aux pages `/admin/books` et `/admin/members`
+
+Le changement de role se fait depuis l'espace d'administration des membres.
+
+## Base de donnees
+
+Le schema SQL principal definit trois tables :
+
+- `users`
+- `books`
+- `messages`
+
+La table `users` peut stocker un role de compte avec le champ `role`.
+Les relations entre tables sont definies avec des cles etrangeres et des suppressions en cascade.
 
 ## Assets utiles
 
