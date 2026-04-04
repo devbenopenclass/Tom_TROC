@@ -85,6 +85,19 @@ class AccountController extends Controller
     ]);
   }
 
+  public function deleteAccount(): void
+  {
+    $this->requireAccountLogin();
+    $this->requireCsrf();
+
+    User::delete($this->currentUserId());
+
+    $_SESSION = [];
+    session_destroy();
+
+    $this->redirect('/');
+  }
+
   private function requireAccountLogin(): void
   {
     Auth::requireLogin();

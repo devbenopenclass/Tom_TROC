@@ -22,6 +22,7 @@ require __DIR__ . '/_intro.php';
         <span>Email</span>
         <span>Inscription</span>
         <span>Livres deposés</span>
+        <span>Action</span>
       </div>
 
       <?php foreach (($members ?? []) as $member): ?>
@@ -31,6 +32,13 @@ require __DIR__ . '/_intro.php';
           <div><?= View::e($member['email'] ?? '') ?></div>
           <div><?= View::e(date('d/m/Y', strtotime((string)($member['created_at'] ?? 'now')))) ?></div>
           <div><?= (int)($member['books_count'] ?? 0) ?></div>
+          <div class="admin-table__actions">
+            <form method="post" action="<?= $base ?>/admin/members/delete<?= $adminAnchor ?>">
+              <?= \App\Core\Csrf::input(); ?>
+              <input type="hidden" name="id" value="<?= (int)$member['id'] ?>">
+              <button class="admin-table__danger" type="submit" onclick="return confirm('Supprimer ce compte ?')">Supprimer</button>
+            </form>
+          </div>
         </article>
       <?php endforeach; ?>
 

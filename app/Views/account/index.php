@@ -81,6 +81,11 @@ if (!empty($me['created_at'])) {
           <input type="hidden" name="bio" value="<?= htmlspecialchars($me['bio'] ?? '') ?>">
           <button class="btn btn-outline account-form__submit" type="submit">Enregistrer</button>
         </form>
+
+        <form method="post" action="<?= $base ?>/account/delete" class="account-delete">
+          <?= Csrf::input(); ?>
+          <button class="account-delete__button" type="submit" onclick="return confirm('Supprimer votre compte ?')">Supprimer mon compte</button>
+        </form>
       </article>
     </div>
 

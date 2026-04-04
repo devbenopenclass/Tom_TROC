@@ -228,6 +228,22 @@
   font-weight: 600;
 }
 
+.account-delete {
+  margin-top: 18px;
+}
+
+.account-delete__button {
+  width: 100%;
+  min-height: 50px;
+  border: 1px solid #d65858;
+  border-radius: 8px;
+  background: #fff7f7;
+  color: #d65858;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .account-books {
   margin-top: 32px;
   background: #faf9f7;

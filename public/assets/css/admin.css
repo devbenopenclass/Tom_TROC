@@ -267,7 +267,7 @@
 
 .admin-table--members .admin-table__head,
 .admin-table--members .admin-table__row {
-  grid-template-columns: 90px 1fr 1.3fr 1fr 180px;
+  grid-template-columns: 90px 1fr 1.3fr 1fr 180px 160px;
 }
 
 .admin-table__empty {

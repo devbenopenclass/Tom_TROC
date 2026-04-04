@@ -1,17 +1,19 @@
 # TomTroc
 
-TomTroc est une application PHP MVC de partage et d'échange de livres entre membres.
+TomTroc est une application PHP MVC de partage et d'echange de livres entre membres.
 
-## Fonctionnalités
+## Fonctionnalites
 
 - inscription et connexion
 - gestion du compte membre
+- suppression de son propre compte
 - ajout, modification et suppression de livres
 - catalogue public avec recherche
-- fiche détail d'un livre
+- fiche detail d'un livre
 - profil public d'un membre
 - messagerie entre membres
 - espace d'administration
+- suppression des comptes par l'admin
 
 ## Stack technique
 
@@ -21,7 +23,7 @@ TomTroc est une application PHP MVC de partage et d'échange de livres entre mem
 - HTML
 - CSS
 
-## Structure du projet
+## Structure
 
 ```text
 app/
@@ -36,7 +38,7 @@ README.md
 LIEN_REPO.txt
 ```
 
-## Fichiers importants
+## Fichiers principaux
 
 - `public/index.php`
 - `app/Core/App.php`
@@ -65,34 +67,34 @@ Exemple avec XAMPP :
 /opt/lampp/htdocs/tomtroc
 ```
 
-### 2. Créer la base de données
+### 2. Creer la base de donnees
 
 ```sql
 CREATE DATABASE tomtroc CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-### 3. Importer les données
+### 3. Importer les donnees
 
 Le dossier `storage/` contient :
 
 - `storage/schema.sql`
 - `storage/tomtroc_demo.sql`
 
-Pour avoir une base de démonstration complète :
+Pour charger la base de demonstration :
 
 ```bash
 mysql -u root -p tomtroc < storage/tomtroc_demo.sql
 ```
 
-### 4. Vérifier la configuration
+### 4. Verifier la configuration
 
 Fichiers de configuration :
 
 - `config/config.php`
 - `config/database.php`
-- `config/database.local.php` si utilisé en local
+- `config/database.local.php` si utilise en local
 
-L'URL de base actuelle est :
+URL de base actuelle :
 
 ```php
 'base_url' => '/tomtroc'
@@ -106,7 +108,7 @@ En local :
 http://localhost/tomtroc/
 ```
 
-Depuis un appareil du même réseau :
+Depuis un appareil du meme reseau :
 
 ```text
 http://IP_DU_PC/tomtroc/
@@ -127,6 +129,7 @@ Espace membre :
 
 - `/account`
 - `/account/profile`
+- `/account/delete`
 - `/books/create`
 - `/books/edit?id=...`
 - `/messages`
@@ -136,8 +139,21 @@ Administration :
 
 - `/admin/books`
 - `/admin/members`
+- `/admin/books/status`
+- `/admin/books/delete`
+- `/admin/members/delete`
 
-## Assets
+## Administration
+
+L'admin peut :
+
+- rechercher les livres
+- rechercher les membres
+- changer la disponibilite d'un livre
+- supprimer un livre
+- supprimer n'importe quel compte membre
+
+## Assets utiles
 
 - `public/assets/css/style.css`
 - `public/assets/css/account-admin.css`

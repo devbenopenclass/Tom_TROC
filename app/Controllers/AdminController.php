@@ -129,6 +129,28 @@ final class AdminController extends \App\Core\Controller
         ]);
     }
 
+    public function deleteMember(): void
+    {
+        $this->requireAdmin();
+        $this->requireCsrf();
+
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id <= 0) {
+            $this->redirect('/admin/members' . self::ADMIN_ANCHOR);
+        }
+
+        \App\Models\User::delete($id);
+
+        $currentUserId = \App\Core\Auth::id();
+        if ($currentUserId !== null && (int)$currentUserId === $id) {
+            $_SESSION = [];
+            session_destroy();
+            $this->redirect('/');
+        }
+
+        $this->redirect('/admin/members' . self::ADMIN_ANCHOR);
+    }
+
     private function requireAdmin(): void
     {
         \App\Core\Auth::requireLogin();
@@ -144,5 +166,5 @@ final class AdminController extends \App\Core\Controller
             echo 'Acces administrateur requis';
             exit;
         }
-            }
+    }
 }

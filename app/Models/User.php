@@ -210,6 +210,12 @@ class User extends Model
     $stmt->execute($params);
   }
 
+  public static function delete(int $id): void
+  {
+    $stmt = self::db()->prepare('DELETE FROM users WHERE id = :id');
+    $stmt->execute(['id' => $id]);
+  }
+
   // Retourne un avatar fiable : avatar utilisateur si le fichier existe,
   // sinon image de secours.
   public static function avatarPath(?array $user, string $fallback = '/assets/img/figma/mask-group-3.png'): string

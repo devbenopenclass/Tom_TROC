@@ -31,8 +31,10 @@ return [
         '/logout' => 'AuthController@logout',
 
         '/account/profile' => 'AccountController@updateProfile',
+        '/account/delete' => 'AccountController@deleteAccount',
         '/admin/books/status' => 'AdminController@updateBookStatus',
         '/admin/books/delete' => 'AdminController@deleteBook',
+        '/admin/members/delete' => 'AdminController@deleteMember',
 
         '/books/create' => 'BookController@create',
         '/books/edit' => 'BookController@update',
