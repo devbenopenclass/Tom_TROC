@@ -3,15 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Core\Auth;
-use App\Core\Controller;
-use App\Core\Model;
-use App\Models\User;
-use PDO;
-
-// Contrôleur d'administration : version alignée avec le framework actuel.
-// Il évite les dépendances à d'anciens helpers absents du projet.
-final class AdminController extends Controller
+final class AdminController extends \App\Core\Controller
 {
     private const BOOKS_PATH = '/admin/books';
     private const ALLOWED_BOOK_STATUSES = ['available', 'unavailable', 'reserved'];
@@ -20,15 +12,36 @@ final class AdminController extends Controller
     {
         $this->requireAdmin();
 
-        $stmt = $this->db()->query(
-            'SELECT b.*, u.username, u.email
-             FROM books b
-             JOIN users u ON u.id = b.user_id
-             ORDER BY b.created_at DESC, b.id DESC'
-        );
+        $query = trim((string)($_GET['q'] ?? ''));
+        $sql = implode("\n", [
+            'SELECT b.*, u.username, u.email',
+            'FROM books b',
+            'JOIN users u ON u.id = b.user_id',
+        ]);
+        $params = [];
+
+        if ($query !== '') {
+            $sql .= implode("\n", [
+                '',
+                'WHERE b.title LIKE :query',
+                '   OR b.author LIKE :query',
+                '   OR u.username LIKE :query',
+                '   OR u.email LIKE :query',
+            ]);
+            $params['query'] = '%' . $query . '%';
+        }
+
+        $sql .= implode("\n", [
+            '',
+            'ORDER BY b.created_at DESC, b.id DESC',
+        ]);
+
+        $stmt = \App\Core\Model::connection()->prepare($sql);
+        $stmt->execute($params);
 
         $this->render('admin/books', [
             'books' => $stmt->fetchAll(),
+            'query' => $query,
         ]);
     }
 
@@ -38,12 +51,15 @@ final class AdminController extends Controller
         $this->requireCsrf();
 
         $id = (int)($_POST['id'] ?? 0);
-        $status = $this->normalizeBookStatus((string)($_POST['status'] ?? 'available'));
+        $status = (string)($_POST['status'] ?? 'available');
+        if (!in_array($status, self::ALLOWED_BOOK_STATUSES, true)) {
+            $status = 'available';
+        }
         if ($id <= 0) {
             $this->redirect(self::BOOKS_PATH);
         }
 
-        $stmt = $this->db()->prepare('UPDATE books SET status = :status WHERE id = :id');
+        $stmt = \App\Core\Model::connection()->prepare('UPDATE books SET status = :status WHERE id = :id');
         $stmt->execute([
             'id' => $id,
             'status' => $status,
@@ -62,7 +78,7 @@ final class AdminController extends Controller
             $this->redirect(self::BOOKS_PATH);
         }
 
-        $stmt = $this->db()->prepare('DELETE FROM books WHERE id = :id');
+        $stmt = \App\Core\Model::connection()->prepare('DELETE FROM books WHERE id = :id');
         $stmt->execute(['id' => $id]);
 
         $this->redirect(self::BOOKS_PATH);
@@ -72,45 +88,58 @@ final class AdminController extends Controller
     {
         $this->requireAdmin();
 
-        $stmt = $this->db()->query(
-            'SELECT
-                u.id,
-                u.username,
-                u.email,
-                u.created_at,
-                COUNT(b.id) AS books_count
-             FROM users u
-             LEFT JOIN books b ON b.user_id = u.id
-             GROUP BY u.id, u.username, u.email, u.created_at
-             ORDER BY u.created_at DESC, u.id DESC'
-        );
+        $query = trim((string)($_GET['q'] ?? ''));
+        $sql = implode("\n", [
+            'SELECT',
+            '    u.id,',
+            '    u.username,',
+            '    u.email,',
+            '    u.created_at,',
+            '    COUNT(b.id) AS books_count',
+            'FROM users u',
+            'LEFT JOIN books b ON b.user_id = u.id',
+        ]);
+        $params = [];
+
+        if ($query !== '') {
+            $sql .= implode("\n", [
+                '',
+                'WHERE CAST(u.id AS CHAR) LIKE :query',
+                '   OR u.username LIKE :query',
+                '   OR u.email LIKE :query',
+            ]);
+            $params['query'] = '%' . $query . '%';
+        }
+
+        $sql .= implode("\n", [
+            '',
+            'GROUP BY u.id, u.username, u.email, u.created_at',
+            'ORDER BY u.created_at DESC, u.id DESC',
+        ]);
+
+        $stmt = \App\Core\Model::connection()->prepare($sql);
+        $stmt->execute($params);
 
         $this->render('admin/members', [
             'members' => $stmt->fetchAll(),
+            'query' => $query,
         ]);
     }
 
     private function requireAdmin(): void
     {
-        Auth::requireLogin();
+        \App\Core\Auth::requireLogin();
 
-        $userId = Auth::id();
-        $isAdmin = $userId !== null && User::isAdmin((int)$userId);
+        $userId = \App\Core\Auth::id();
+        $isAdmin = !empty($_SESSION['is_admin']);
+        if (!$isAdmin && $userId !== null) {
+            $isAdmin = \App\Models\User::isAdmin((int)$userId);
+        }
 
         if (!$isAdmin) {
             http_response_code(403);
-            echo 'Accès administrateur requis';
+            echo 'Acces administrateur requis';
             exit;
         }
-    }
-
-    private function db(): PDO
-    {
-        return Model::connection();
-    }
-
-    private function normalizeBookStatus(string $status): string
-    {
-        return in_array($status, self::ALLOWED_BOOK_STATUSES, true) ? $status : 'available';
-    }
+            }
 }

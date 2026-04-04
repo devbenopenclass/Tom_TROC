@@ -2,14 +2,20 @@
 // Vue d'administration des livres : liste, statut et actions de modération.
 use App\Core\Csrf;
 use App\Core\View;
-?>
-<section class="admin-wrap">
-  <div class="site-shell">
-    <div class="admin-head">
-      <h1>Administration des livres</h1>
-      <a class="admin-head__link" href="<?= $base ?>/admin/members">Voir les membres</a>
-    </div>
+use App\Models\Book;
 
+$adminTitle = 'Administration des livres';
+$adminDescription = "Gerez les ouvrages publies, controlez leur disponibilite et gardez une vue claire sur les membres qui alimentent la plateforme.";
+$adminActiveTab = 'books';
+$adminSectionEyebrow = 'Catalogue supervise';
+$adminSectionTitle = 'Livres publies par les membres';
+$adminSectionMeta = count($books ?? []) . ' livre' . (count($books ?? []) > 1 ? 's' : '') . ' visible' . (count($books ?? []) > 1 ? 's' : '');
+$adminSearchAction = $base . '/admin/books';
+$adminSearchPlaceholder = 'Titre, auteur, pseudo ou email';
+$adminQuery = (string)($query ?? '');
+
+require __DIR__ . '/_intro.php';
+?>
     <div class="admin-table">
       <div class="admin-table__head">
         <span>Photo</span>
@@ -22,12 +28,12 @@ use App\Core\View;
 
       <?php foreach (($books ?? []) as $book): ?>
         <?php
-          $img = !empty($book['image']) ? '/assets/uploads/' . $book['image'] : '/assets/img/logo.png';
+          $img = Url::asset(Book::imagePath($book));
           $isAvailable = ($book['status'] ?? '') === 'available';
         ?>
-        <div class="admin-table__row">
+        <article class="admin-table__row">
           <div class="admin-table__photo">
-            <img src="<?= $base . View::e($img) ?>" alt="">
+            <img src="<?= View::e($img) ?>" alt="Couverture de <?= View::e($book['title'] ?? 'ce livre') ?>">
           </div>
           <div><?= View::e($book['title'] ?? '') ?></div>
           <div><?= View::e($book['author'] ?? '') ?></div>
@@ -54,12 +60,12 @@ use App\Core\View;
               <button class="admin-table__danger" type="submit">Supprimer</button>
             </form>
           </div>
-        </div>
+        </article>
       <?php endforeach; ?>
 
       <?php if (empty($books)): ?>
         <div class="admin-table__empty">Aucun livre disponible.</div>
       <?php endif; ?>
     </div>
-  </div>
-</section>
+
+<?php require __DIR__ . '/_outro.php'; ?>

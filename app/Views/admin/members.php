@@ -1,36 +1,41 @@
 <?php
 // Vue d'administration des membres : tableau récapitulatif des comptes inscrits.
 use App\Core\View;
-?>
-<section class="admin-wrap">
-  <div class="site-shell">
-    <div class="admin-head">
-      <h1>Membres</h1>
-      <a class="admin-head__link" href="<?= $base ?>/admin/books">Gérer les livres</a>
-    </div>
 
+$adminTitle = 'Suivi des membres';
+$adminDescription = "Consultez les comptes inscrits, leur anciennete et le volume de livres deposes pour garder une vision claire de l'activite communautaire.";
+$adminActiveTab = 'members';
+$adminSectionEyebrow = 'Communaute';
+$adminSectionTitle = 'Membres inscrits sur la plateforme';
+$adminSectionMeta = count($members ?? []) . ' membre' . (count($members ?? []) > 1 ? 's' : '');
+$adminSearchAction = $base . '/admin/members';
+$adminSearchPlaceholder = 'Id, pseudo ou email';
+$adminQuery = (string)($query ?? '');
+
+require __DIR__ . '/_intro.php';
+?>
     <div class="admin-table admin-table--members">
       <div class="admin-table__head">
         <span>ID</span>
         <span>Pseudo</span>
         <span>Email</span>
         <span>Inscription</span>
-        <span>Livres déposés</span>
+        <span>Livres deposés</span>
       </div>
 
       <?php foreach (($members ?? []) as $member): ?>
-        <div class="admin-table__row">
+        <article class="admin-table__row">
           <div>#<?= (int)$member['id'] ?></div>
           <div><?= View::e($member['username'] ?? '') ?></div>
           <div><?= View::e($member['email'] ?? '') ?></div>
           <div><?= View::e(date('d/m/Y', strtotime((string)($member['created_at'] ?? 'now')))) ?></div>
           <div><?= (int)($member['books_count'] ?? 0) ?></div>
-        </div>
+        </article>
       <?php endforeach; ?>
 
       <?php if (empty($members)): ?>
         <div class="admin-table__empty">Aucun membre trouvé.</div>
       <?php endif; ?>
     </div>
-  </div>
-</section>
+
+<?php require __DIR__ . '/_outro.php'; ?>

@@ -15,6 +15,7 @@ if ($base !== '' && str_starts_with($normalizedPath, $base)) {
 $normalizedPath = '/' . ltrim($normalizedPath, '/');
 $isAccountPage = str_contains($requestPath, '/account');
 $isMessagesPage = str_contains($requestPath, '/messages');
+$isAdminPage = str_contains($requestPath, '/admin');
 if ($isLogged) {
   $unreadCount = \App\Models\Message::unreadCount((int)$_SESSION['user_id']);
 }
@@ -42,7 +43,7 @@ if (str_starts_with($normalizedPath, '/account/profile')) {
   $backFallback = '/account';
 }
 
-$showBackMenu = $normalizedPath !== '/';
+$showBackMenu = $normalizedPath !== '/' && !$isAdminPage;
 ?>
 <!doctype html>
 <html lang="fr">
@@ -54,8 +55,11 @@ $showBackMenu = $normalizedPath !== '/';
   <?php if ($isAccountPage): ?>
     <link rel="stylesheet" href="<?= htmlspecialchars(Url::asset('/assets/css/account-admin.css')) ?>">
   <?php endif; ?>
+  <?php if ($isAdminPage): ?>
+    <link rel="stylesheet" href="<?= htmlspecialchars(Url::asset('/assets/css/admin.css')) ?>">
+  <?php endif; ?>
 </head>
-<body class="<?= trim(($isAccountPage ? 'account-admin-page ' : '') . ($isMessagesPage ? 'messages-page' : '')) ?>">
+<body class="<?= trim(($isAccountPage ? 'account-admin-page ' : '') . ($isMessagesPage ? 'messages-page ' : '') . ($isAdminPage ? 'admin-page' : '')) ?>">
 <header class="site-header <?= $isLogged ? 'is-auth' : '' ?>">
   <div class="shell header-row">
     <a class="brand" href="<?= $base ?>/" aria-label="Accueil TomTroc">
@@ -88,6 +92,10 @@ $showBackMenu = $normalizedPath !== '/';
             <img src="<?= $base ?>/assets/img/figma/icon-mon-compte.svg" alt="">
             <span><strong>Mon compte</strong></span>
           </a>
+          <?php if (!empty($_SESSION['is_admin'])): ?>
+            <a class="text-link" href="<?= $base ?>/admin/books">Admin livres</a>
+            <a class="text-link" href="<?= $base ?>/admin/members">Membres</a>
+          <?php endif; ?>
 
           <form action="<?= $base ?>/logout" method="post" class="inline logout-form">
             <?= Csrf::input(); ?>
