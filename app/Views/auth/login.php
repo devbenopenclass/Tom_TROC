@@ -2,6 +2,7 @@
 <?php // Vue de connexion : formulaire de login avec email/pseudo et mot de passe. ?>
 <?php
 $errorMessage = trim((string)($error ?? ''));
+// Même approche que l'inscription pour éviter du HTML dupliqué.
 $fields = [
   ['label' => 'Email ou pseudo', 'name' => 'email', 'type' => 'text', 'autocomplete' => 'username'],
   ['label' => 'Mot de passe', 'name' => 'password', 'type' => 'password', 'autocomplete' => 'current-password'],

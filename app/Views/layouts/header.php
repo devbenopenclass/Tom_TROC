@@ -19,6 +19,8 @@ if ($isLogged) {
   $unreadCount = \App\Models\Message::unreadCount((int)$_SESSION['user_id']);
 }
 
+// Point de retour par défaut selon la page courante.
+// Cela évite d'envoyer l'utilisateur vers une page incohérente.
 $backFallback = '/';
 if (str_starts_with($normalizedPath, '/account/profile')) {
   $backFallback = '/account';

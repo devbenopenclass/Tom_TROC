@@ -13,6 +13,7 @@ $image = Url::asset(Book::detailImagePath($book, '/assets/img/figma/mask-group-1
 $ownerAvatar = Url::asset(User::avatarPath($book));
 $canMessageOwner = Auth::check();
 
+// Les doubles sauts de ligne créent des paragraphes séparés dans la fiche détail.
 $paragraphs = preg_split("/\n\s*\n/", $description) ?: [$description];
 ?>
 

@@ -2,6 +2,7 @@
 <?php // Vue d'inscription : création d'un nouveau compte membre. ?>
 <?php
 $errorMessage = trim((string)($error ?? ''));
+// Les champs sont décrits ici pour garder un formulaire compact et cohérent.
 $fields = [
   ['label' => 'Pseudo', 'name' => 'username', 'type' => 'text', 'autocomplete' => 'username'],
   ['label' => 'Email', 'name' => 'email', 'type' => 'email', 'autocomplete' => 'email'],

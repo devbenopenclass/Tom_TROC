@@ -9,6 +9,7 @@ $avatar = Url::asset(User::avatarPath($me, '/assets/img/figma/mask-group-2.png')
 $form = $form ?? [];
 $usernameValue = $form['username'] ?? ($me['username'] ?? '');
 $memberSince = '1 an';
+// Transforme la date de création en ancienneté lisible.
 if (!empty($me['created_at'])) {
   $years = max(1, (int)date('Y') - (int)date('Y', strtotime((string)$me['created_at'])));
   $memberSince = $years . ' an' . ($years > 1 ? 's' : '');
