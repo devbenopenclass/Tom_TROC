@@ -85,6 +85,11 @@ if (!empty($me['created_at'])) {
     </div>
 
     <section class="account-books">
+      <div class="account-books__toolbar">
+        <h2 class="account-books__title">Mes livres</h2>
+        <a class="btn account-books__add" href="<?= $base ?>/books/create">Ajouter un livre</a>
+      </div>
+
       <div class="account-books__head">
         <span>Photo</span>
         <span>Titre</span>
