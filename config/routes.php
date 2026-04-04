@@ -36,6 +36,7 @@ return [
         '/account/delete' => 'AccountController@deleteAccount',
         '/admin/books/status' => 'AdminController@updateBookStatus',
         '/admin/books/delete' => 'AdminController@deleteBook',
+        '/admin/members/role' => 'AdminController@updateMemberRole',
         '/admin/members/delete' => 'AdminController@deleteMember',
 
         '/books/create' => 'BookController@create',

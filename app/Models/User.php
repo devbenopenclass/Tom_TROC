@@ -10,6 +10,8 @@ class User extends Model
 {
   public const DEFAULT_AVATAR = '/assets/img/figma/mask-group-2.png';
   private const PUBLIC_FIELDS = 'id, username, email, avatar, bio, created_at';
+  private const ROLE_USER = 'user';
+  private const ROLE_ADMIN = 'admin';
 
   private static ?string $passwordColumn = null;
   private static ?array $userColumns = null;
@@ -154,6 +156,46 @@ class User extends Model
   public static function isAdmin(int $id): bool
   {
     return self::adminSessionData($id)['is_admin'];
+  }
+
+  public static function roleLabel(int $id): string
+  {
+    return self::isAdmin($id) ? self::ROLE_ADMIN : self::ROLE_USER;
+  }
+
+  public static function updateRole(int $id, string $role): void
+  {
+    $role = $role === self::ROLE_ADMIN ? self::ROLE_ADMIN : self::ROLE_USER;
+
+    if (!self::hasColumn('role') && !self::hasColumn('is_admin')) {
+      self::db()->exec("ALTER TABLE users ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'user' AFTER bio");
+      self::$userColumns = null;
+    }
+
+    if (self::hasColumn('role') && self::hasColumn('is_admin')) {
+      $stmt = self::db()->prepare('UPDATE users SET role = :role, is_admin = :is_admin WHERE id = :id');
+      $stmt->execute([
+        'id' => $id,
+        'role' => $role,
+        'is_admin' => $role === self::ROLE_ADMIN ? 1 : 0,
+      ]);
+      return;
+    }
+
+    if (self::hasColumn('role')) {
+      $stmt = self::db()->prepare('UPDATE users SET role = :role WHERE id = :id');
+      $stmt->execute([
+        'id' => $id,
+        'role' => $role,
+      ]);
+      return;
+    }
+
+    $stmt = self::db()->prepare('UPDATE users SET is_admin = :is_admin WHERE id = :id');
+    $stmt->execute([
+      'id' => $id,
+      'is_admin' => $role === self::ROLE_ADMIN ? 1 : 0,
+    ]);
   }
 
   // Crée un nouveau compte membre avec un avatar par défaut.
