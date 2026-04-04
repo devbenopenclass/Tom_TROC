@@ -8,6 +8,7 @@ final class AdminController extends \App\Core\Controller
     private const ADMIN_ANCHOR = '#admin-panel';
     private const BOOKS_PATH = '/admin/books#admin-panel';
     private const ALLOWED_BOOK_STATUSES = ['available', 'unavailable', 'reserved'];
+    private const ALLOWED_MEMBER_ROLES = ['user', 'admin'];
 
     public function books(): void
     {
@@ -122,11 +123,45 @@ final class AdminController extends \App\Core\Controller
         $stmt = \App\Core\Model::connection()->prepare($sql);
         $stmt->execute($params);
 
+        $members = $stmt->fetchAll();
+        foreach ($members as &$member) {
+            $member['role_label'] = \App\Models\User::roleLabel((int)$member['id']);
+            $member['is_current_admin'] = (int)($member['id'] ?? 0) === (int)(\App\Core\Auth::id() ?? 0);
+        }
+        unset($member);
+
         $this->render('admin/members', [
-            'members' => $stmt->fetchAll(),
+            'members' => $members,
             'query' => $query,
             'adminAnchor' => self::ADMIN_ANCHOR,
         ]);
+    }
+
+    public function updateMemberRole(): void
+    {
+        $this->requireAdmin();
+        $this->requireCsrf();
+
+        $id = (int)($_POST['id'] ?? 0);
+        $role = (string)($_POST['role'] ?? 'user');
+
+        if ($id <= 0 || !in_array($role, self::ALLOWED_MEMBER_ROLES, true)) {
+            $this->redirect('/admin/members' . self::ADMIN_ANCHOR);
+        }
+
+        $currentUserId = (int)(\App\Core\Auth::id() ?? 0);
+        if ($currentUserId > 0 && $currentUserId === $id && $role !== 'admin') {
+            $this->redirect('/admin/members' . self::ADMIN_ANCHOR);
+        }
+
+        \App\Models\User::updateRole($id, $role);
+
+        if ($currentUserId > 0 && $currentUserId === $id) {
+            $_SESSION['is_admin'] = $role === 'admin';
+            $_SESSION['user_role'] = $role;
+        }
+
+        $this->redirect('/admin/members' . self::ADMIN_ANCHOR);
     }
 
     public function deleteMember(): void

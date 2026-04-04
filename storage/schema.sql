@@ -13,6 +13,7 @@ CREATE TABLE users (
   password_hash VARCHAR(255) NOT NULL,
   avatar        VARCHAR(255) NULL,
   bio           TEXT         NULL,
+  role          VARCHAR(20)  NOT NULL DEFAULT 'user',
   deleted_at    DATETIME     NULL,
   created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at    DATETIME     NULL     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
