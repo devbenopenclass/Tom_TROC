@@ -57,7 +57,7 @@ use App\Models\User;
                   </form>
                 <?php endif; ?>
               <?php else: ?>
-                <form method="post" action="<?= $base ?>/admin/members/delete" onsubmit="return confirm('Supprimer ce membre, masquer son compte et ses livres pendant 30 jours ?');">
+                <form method="post" action="<?= $base ?>/admin/members/delete">
                   <?= Csrf::input(); ?>
                   <input type="hidden" name="id" value="<?= $memberId ?>">
                   <button class="admin-table__danger" type="submit">Supprimer le membre</button>

@@ -4,8 +4,6 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Models\User;
 
-// Contrôleur d'authentification : formulaires d'inscription,
-// connexion, déconnexion et validation des identifiants.
 class AuthController extends Controller
 {
   private const ACCOUNT_PATH = '/account';

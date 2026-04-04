@@ -2,7 +2,6 @@
 <?php use App\Core\Url; ?>
 <?php use App\Models\Book; ?>
 <?php use App\Models\User; ?>
-<?php // Fiche détail d'un livre : image, description, propriétaire et accès à la messagerie. ?>
 
 <?php
 $title = trim((string)($book['title'] ?? 'Livre'));
@@ -13,7 +12,6 @@ $image = Url::asset(Book::detailImagePath($book, '/assets/img/figma/mask-group-1
 $ownerAvatar = Url::asset(User::avatarPath($book));
 $canMessageOwner = Auth::check();
 
-// Les doubles sauts de ligne créent des paragraphes séparés dans la fiche détail.
 $paragraphs = preg_split("/\n\s*\n/", $description) ?: [$description];
 ?>
 

@@ -3,8 +3,6 @@ namespace App\Core;
 
 use App\Models\User;
 
-// Petit service d'authentification basé sur la session PHP.
-// Il centralise les vérifications "connecté / non connecté".
 class Auth
 {
   public static function check(): bool

@@ -2,18 +2,15 @@
 <?php use App\Core\Url; ?>
 <?php use App\Models\Book; ?>
 <?php $isEdit = (($mode ?? '') === 'edit'); ?>
-<?php // Formulaire de gestion d'un livre : ajout ou modification selon le mode courant. ?>
 <?php
 $errorMessage = trim((string)($error ?? ''));
 $book = $book ?? [];
 $status = (string)($book['status'] ?? 'available');
 $imagePath = Url::asset(Book::imagePath($book));
-// Les champs simples sont décrits ici pour éviter de répéter le même HTML.
 $textFields = [
   ['label' => 'Titre', 'name' => 'title', 'value' => (string)($book['title'] ?? ''), 'required' => true],
   ['label' => 'Auteur', 'name' => 'author', 'value' => (string)($book['author'] ?? ''), 'required' => true],
 ];
-// Les libellés restent centralisés pour garder le formulaire et l'admin cohérents.
 $statusOptions = [
   'available' => 'disponible',
   'unavailable' => 'indisponible',

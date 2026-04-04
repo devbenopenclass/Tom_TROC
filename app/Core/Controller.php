@@ -1,8 +1,6 @@
 <?php
 namespace App\Core;
 
-// Classe de base commune à tous les contrôleurs.
-// Elle instancie la vue et fournit un raccourci de rendu.
 class Controller
 {
   protected View $view;

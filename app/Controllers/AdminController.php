@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 namespace App\Controllers;
-
+public/index.php → app/Core/App.php → app/Core/Router.php → app/Core/View.php → app/Models/Book.php → app/Controllers/AuthController.php → app/Core/Csrf.php → app/Controllers/AdminController.php → storage/schema.sql
 use App\Core\Auth;
 use App\Core\Controller;
 use App\Core\Model;

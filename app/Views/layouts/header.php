@@ -1,6 +1,4 @@
 <?php
-// Entête globale du site : calcule l'état de connexion,
-// les versions CSS/assets et construit la navigation principale.
 use App\Core\Csrf;
 use App\Core\Url;
 
@@ -21,8 +19,6 @@ if ($isLogged) {
   $unreadCount = \App\Models\Message::unreadCount((int)$_SESSION['user_id']);
 }
 
-// Point de retour par défaut selon la page courante.
-// Cela évite d'envoyer l'utilisateur vers une page incohérente.
 $backFallback = '/';
 if (str_starts_with($normalizedPath, '/account/profile')) {
   $backFallback = '/account';
@@ -113,7 +109,6 @@ $showBackMenu = $normalizedPath !== '/' && !$isAdminPage;
     <a
       class="back-link back-link--menu"
       href="<?= htmlspecialchars(Url::withBase($backFallback)) ?>"
-      onclick="if (window.history.length > 1) { event.preventDefault(); window.history.back(); }"
     >← Retour</a>
   </div>
 <?php endif; ?>

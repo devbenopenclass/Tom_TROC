@@ -1,6 +1,5 @@
 <?php use App\Core\Url; ?>
 <?php use App\Models\Book; ?>
-<?php // Page d'accueil : hero, derniers livres, étapes de fonctionnement et valeurs du projet. ?>
 <section class="home-hero">
   <div class="home-copy">
     <h1>Rejoignez nos<br>lecteurs passionnés</h1>
@@ -22,7 +21,6 @@
 
   <div class="home-books">
     <?php
-    // Jeux de secours gardés pour le rendu de la maquette si la base est vide.
     $fallback = [
       ['title' => 'Esther', 'author' => 'Alabaster', 'owner' => 'CamilleDuCuir'],
       ['title' => 'The Kinfolk Table', 'author' => 'Nathan Williams', 'owner' => 'Nathalie'],
@@ -44,7 +42,6 @@
       }
     }
 
-    // On complète visuellement jusqu'à 4 cartes si nécessaire.
     if (count($cards) < 4) {
       foreach (array_slice($fallback, 0, 4 - count($cards)) as $f) {
         $f['img'] = Url::asset(Book::imagePath($f));

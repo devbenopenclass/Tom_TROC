@@ -17,7 +17,7 @@ Le projet permet :
 - PHP 8.1+
 - MySQL ou MariaDB
 - Apache
-- HTML, CSS, JavaScript leger
+- HTML et CSS
 
 ## Arborescence
 

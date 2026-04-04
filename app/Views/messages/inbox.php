@@ -1,9 +1,6 @@
 <?php use App\Core\Csrf; ?>
 <?php use App\Core\Url; ?>
 <?php use App\Models\User; ?>
-<?php // Interface de messagerie : colonne des conversations, fil actif et zone de réponse. ?>
-
-<?php // La classe d'état pilote le responsive mobile sans dépendre de :has(). ?>
 <?php $hasActiveThread = !empty($other); ?>
 
 <section class="messages-layout<?= $hasActiveThread ? ' messages-layout--thread-open' : ' messages-layout--list-open' ?>">
@@ -43,10 +40,7 @@
         <p class="muted">Choisis un membre à gauche pour commencer à discuter.</p>
       </div>
     <?php else: ?>
-      <?php
-      // L'entête du fil reprend l'avatar du membre actuellement sélectionné.
-      $threadAvatar = Url::asset(User::avatarPath($other));
-      ?>
+      <?php $threadAvatar = Url::asset(User::avatarPath($other)); ?>
       <header class="thread-head">
         <img src="<?= htmlspecialchars($threadAvatar) ?>" alt="">
         <div>

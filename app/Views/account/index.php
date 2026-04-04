@@ -2,7 +2,6 @@
 <?php use App\Core\Url; ?>
 <?php use App\Models\Book; ?>
 <?php use App\Models\User; ?>
-<?php // Tableau de bord "Mon compte" : profil, informations personnelles et bibliothèque du membre connecté. ?>
 
 <?php
 $avatar = Url::asset(User::avatarPath($me, '/assets/img/figma/mask-group-2.png'));
@@ -10,7 +9,6 @@ $isAdmin = !empty($me['id']) && User::isAdmin((int)$me['id']);
 $form = $form ?? [];
 $usernameValue = $form['username'] ?? ($me['username'] ?? '');
 $memberSince = '1 an';
-// Transforme la date de création en ancienneté lisible.
 if (!empty($me['created_at'])) {
   $years = max(1, (int)date('Y') - (int)date('Y', strtotime((string)$me['created_at'])));
   $memberSince = $years . ' an' . ($years > 1 ? 's' : '');
@@ -152,7 +150,7 @@ if (!empty($me['created_at'])) {
               <form action="<?= $base ?>/books/delete" method="post" class="inline">
                 <?= Csrf::input(); ?>
                 <input type="hidden" name="id" value="<?= (int)$b['id'] ?>">
-                <button type="submit" onclick="return confirm('Supprimer ?')">Supprimer</button>
+                <button type="submit">Supprimer</button>
               </form>
             </div>
           </div>

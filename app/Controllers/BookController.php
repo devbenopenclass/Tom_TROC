@@ -6,15 +6,12 @@ use App\Core\Controller;
 use App\Models\Book;
 use App\Models\User;
 
-// Contrôleur des livres : liste publique, fiche détail,
-// formulaire d'ajout/édition et suppression.
 class BookController extends Controller
 {
   private const ACCOUNT_PATH = '/account';
   private const ADMIN_BOOKS_PATH = '/admin/books';
   private const AVAILABLE_STATUSES = ['available', 'unavailable', 'reserved'];
 
-  // Affiche le catalogue public des livres avec le moteur de recherche.
   public function exchange(): void
   {
     $q = trim($_GET['q'] ?? '');
@@ -22,7 +19,6 @@ class BookController extends Controller
     $this->render('books/exchange', ['books' => $books, 'q' => $q]);
   }
 
-  // Affiche une seule fiche livre à partir de son id dans l'URL.
   public function show(): void
   {
     $id = (int)($_GET['id'] ?? 0);
@@ -39,14 +35,12 @@ class BookController extends Controller
     $this->render('books/show', ['book' => $book]);
   }
 
-  // Ouvre le formulaire d'ajout d'un livre pour le membre connecté.
   public function createForm(): void
   {
     $this->requireBookLogin();
     $this->render('books/form', ['mode' => 'create']);
   }
 
-  // Valide les champs du formulaire puis crée le livre en base.
   public function create(): void
   {
     $this->requireBookLogin();
@@ -64,8 +58,6 @@ class BookController extends Controller
     $this->redirect(self::ACCOUNT_PATH);
   }
 
-  // Charge le formulaire d'édition d'un livre existant.
-  // On bloque l'accès si le livre n'appartient pas au membre.
   public function editForm(): void
   {
     $this->requireBookLogin();
@@ -73,7 +65,6 @@ class BookController extends Controller
     $this->render('books/form', ['mode' => 'edit', 'book' => $book]);
   }
 
-  // Enregistre les modifications d'un livre existant.
   public function update(): void
   {
     $this->requireBookLogin();
@@ -100,7 +91,6 @@ class BookController extends Controller
     $this->redirect(self::ACCOUNT_PATH);
   }
 
-  // Supprime un livre de la bibliothèque du membre connecté.
   public function delete(): void
   {
     $this->requireBookLogin();
@@ -111,7 +101,6 @@ class BookController extends Controller
     $this->redirect(self::ACCOUNT_PATH);
   }
 
-  // Gère l'upload d'une couverture utilisateur dans public/assets/uploads.
   private function handleUpload(array $file): ?string
   {
     if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) return null;

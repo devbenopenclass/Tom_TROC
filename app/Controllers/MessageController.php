@@ -7,14 +7,10 @@ use App\Models\Book;
 use App\Models\Message;
 use App\Models\User;
 
-// Contrôleur de messagerie : ouvre les conversations,
-// prépare le contexte livre et gère l'envoi des messages.
 class MessageController extends Controller
 {
   private const MESSAGES_PATH = '/messages';
 
-  // Prépare toute la page de messagerie :
-  // conversations, fil actif, contexte livre et droit de réponse.
   public function inbox(): void
   {
     Auth::requireLogin();
@@ -22,7 +18,6 @@ class MessageController extends Controller
     $items = Message::inbox($me);
     $contacts = Message::contacts($me);
 
-    // Si aucun destinataire n'est demandé, on ouvre la première conversation disponible.
     $other = (int)($_GET['user'] ?? 0);
     if ($other <= 0 && !empty($items)) {
       $other = (int)$items[0]['other_id'];
@@ -30,8 +25,6 @@ class MessageController extends Controller
 
     $otherUser = null;
     $messages = [];
-    // Le contexte livre est utilisé seulement pour démarrer un premier message
-    // depuis une fiche livre et garder l'échange rattaché au bon membre.
     $bookContext = null;
     $bookId = (int)($_GET['book'] ?? 0);
     if ($other > 0) {
@@ -50,8 +43,6 @@ class MessageController extends Controller
       }
     }
 
-    // On peut écrire soit parce qu'on arrive depuis un livre,
-    // soit parce qu'un fil existe déjà entre les deux membres.
     $canCompose = $otherUser !== null && ($bookContext !== null || Message::hasThread((int)$me, (int)$other));
 
     $this->render('messages/inbox', [
@@ -65,8 +56,6 @@ class MessageController extends Controller
     ]);
   }
 
-  // Redirige vers /messages en gardant les paramètres utiles.
-  // Cela permet d'avoir une seule vraie page de messagerie.
   public function thread(): void
   {
     Auth::requireLogin();
@@ -83,8 +72,6 @@ class MessageController extends Controller
     $this->redirect(self::MESSAGES_PATH . (!empty($query) ? '?' . http_build_query($query) : ''));
   }
 
-  // Envoie un message :
-  // premier message seulement via un livre valide, réponses autorisées si le fil existe déjà.
   public function send(): void
   {
     Auth::requireLogin();

@@ -105,7 +105,7 @@ use App\Models\Book;
               <button type="submit"><?= $isAvailable ? 'Rendre indisponible' : 'Rendre disponible' ?></button>
             </form>
 
-            <form method="post" action="<?= $base ?>/admin/books/delete" onsubmit="return confirm('Supprimer ce livre ?');">
+            <form method="post" action="<?= $base ?>/admin/books/delete">
               <?= Csrf::input(); ?>
               <input type="hidden" name="id" value="<?= (int)$book['id'] ?>">
               <button class="admin-table__danger" type="submit">Supprimer</button>
