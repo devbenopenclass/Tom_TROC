@@ -65,7 +65,7 @@
     <?php endforeach; ?>
   </div>
 
-  <p class="center-btn latest-books-cta" style="margin-top: 120px;"><a class="btn" href="<?= $base ?>/books/exchange">Voir tous les livres</a></p>
+  <p class="center-btn latest-books-cta latest-books-cta--home"><a class="btn" href="<?= $base ?>/books/exchange">Voir tous les livres</a></p>
 </section>
 
 <section class="home-section howto">
@@ -79,7 +79,7 @@
     <div class="step">Proposez un échange et discutez avec d'autres passionnés de lecture.</div>
   </div>
 
-  <p class="center-btn" style="margin-top: 120px;"><a class="btn btn-outline" href="<?= $base ?>/books/exchange">Voir tous les livres</a></p>
+  <p class="center-btn center-btn--spaced"><a class="btn btn-outline" href="<?= $base ?>/books/exchange">Voir tous les livres</a></p>
 </section>
 
 <section class="home-banner">

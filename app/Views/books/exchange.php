@@ -8,7 +8,8 @@
   </div>
 
   <form method="get" action="<?= $base ?>/books/exchange" class="exchange-search">
-    <input name="q" value="<?= htmlspecialchars($q ?? '') ?>" placeholder="Rechercher un livre">
+    <label class="sr-only" for="exchange-search">Rechercher un livre</label>
+    <input id="exchange-search" name="q" value="<?= htmlspecialchars($q ?? '') ?>" placeholder="Rechercher un livre">
   </form>
 </section>
 

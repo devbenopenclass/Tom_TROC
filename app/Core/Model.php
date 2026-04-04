@@ -18,7 +18,9 @@ class Model
   {
     if (self::$pdo) return self::$pdo;
 
-    $dbConf = require __DIR__ . '/../../config/database.php';
+    $localConfig = __DIR__ . '/../../config/database.local.php';
+    $defaultConfig = __DIR__ . '/../../config/database.php';
+    $dbConf = file_exists($localConfig) ? require $localConfig : require $defaultConfig;
     $db = $dbConf['db'];
 
     $dsn = sprintf('mysql:host=%s;dbname=%s;charset=%s', $db['host'], $db['name'], $db['charset']);

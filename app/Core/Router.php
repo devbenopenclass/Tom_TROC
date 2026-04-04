@@ -53,7 +53,7 @@ class Router
     $handler = $this->routes[$method][$path] ?? null;
     if (!$handler) {
       http_response_code(404);
-      echo "404 Not Found";
+      (new View())->render('errors/404');
       return;
     }
 

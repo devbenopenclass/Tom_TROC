@@ -3,8 +3,8 @@
 
 <footer class="site-footer">
   <div class="shell footer-row">
-    <a href="#">Politique de confidentialité</a>
-    <a href="#">Mentions légales</a>
+    <a href="<?= $base ?>/politique-confidentialite">Politique de confidentialité</a>
+    <a href="<?= $base ?>/mentions-legales">Mentions légales</a>
     <span>Tom Troc©</span>
     <img src="<?= $base ?>/assets/img/figma/group-10.svg" alt="Décor coeur">
   </div>

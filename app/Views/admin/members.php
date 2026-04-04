@@ -36,7 +36,7 @@ require __DIR__ . '/_intro.php';
             <form method="post" action="<?= $base ?>/admin/members/delete<?= $adminAnchor ?>">
               <?= \App\Core\Csrf::input(); ?>
               <input type="hidden" name="id" value="<?= (int)$member['id'] ?>">
-              <button class="admin-table__danger" type="submit" onclick="return confirm('Supprimer ce compte ?')">Supprimer</button>
+              <button class="admin-table__danger" type="submit">Supprimer</button>
             </form>
           </div>
         </article>

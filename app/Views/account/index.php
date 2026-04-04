@@ -84,7 +84,7 @@ if (!empty($me['created_at'])) {
 
         <form method="post" action="<?= $base ?>/account/delete" class="account-delete">
           <?= Csrf::input(); ?>
-          <button class="account-delete__button" type="submit" onclick="return confirm('Supprimer votre compte ?')">Supprimer mon compte</button>
+          <button class="account-delete__button" type="submit">Supprimer mon compte</button>
         </form>
       </article>
     </div>
@@ -148,7 +148,7 @@ if (!empty($me['created_at'])) {
               <form action="<?= $base ?>/books/delete" method="post" class="inline">
                 <?= Csrf::input(); ?>
                 <input type="hidden" name="id" value="<?= (int)$b['id'] ?>">
-                <button type="submit" onclick="return confirm('Supprimer ?')">Supprimer</button>
+                <button type="submit">Supprimer</button>
               </form>
             </div>
           </div>

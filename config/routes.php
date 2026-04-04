@@ -6,6 +6,8 @@ declare(strict_types=1);
 return [
     'GET' => [
         '/' => 'HomeController@index',
+        '/mentions-legales' => 'HomeController@legalNotice',
+        '/politique-confidentialite' => 'HomeController@privacyPolicy',
 
         '/register' => 'AuthController@registerForm',
         '/login' => 'AuthController@loginForm',

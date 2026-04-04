@@ -78,7 +78,8 @@
           <?php if (!empty($bookContext)): ?>
             <input type="hidden" name="book_id" value="<?= (int)$bookContext['id'] ?>">
           <?php endif; ?>
-          <textarea name="content" rows="4" required placeholder="Écrire un message..."></textarea>
+          <label class="sr-only" for="thread-content">Écrire un message</label>
+          <textarea id="thread-content" name="content" rows="4" required placeholder="Écrire un message..."></textarea>
           <button class="btn" type="submit">Envoyer</button>
         </form>
       <?php endif; ?>

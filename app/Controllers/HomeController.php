@@ -13,4 +13,14 @@ class HomeController extends Controller
     $latest = Book::latest(4);
     $this->render('home/index', ['latest' => $latest]);
   }
+
+  public function legalNotice(): void
+  {
+    $this->render('home/legal_notice');
+  }
+
+  public function privacyPolicy(): void
+  {
+    $this->render('home/privacy_policy');
+  }
 }

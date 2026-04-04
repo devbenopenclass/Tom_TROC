@@ -60,6 +60,7 @@ $showBackMenu = $normalizedPath !== '/' && !$isAdminPage;
   <?php endif; ?>
 </head>
 <body class="<?= trim(($isAccountPage ? 'account-admin-page ' : '') . ($isMessagesPage ? 'messages-page ' : '') . ($isAdminPage ? 'admin-page' : '')) ?>">
+<a class="skip-link" href="#main-content">Aller au contenu</a>
 <header class="site-header <?= $isLogged ? 'is-auth' : '' ?>">
   <div class="shell header-row">
     <a class="brand" href="<?= $base ?>/" aria-label="Accueil TomTroc">
@@ -109,13 +110,12 @@ $showBackMenu = $normalizedPath !== '/' && !$isAdminPage;
   </div>
 </header>
 
-<main class="shell main-content<?= $isMessagesPage ? ' main-content--messages' : '' ?>">
+<main id="main-content" class="shell main-content<?= $isMessagesPage ? ' main-content--messages' : '' ?>">
 <?php if ($showBackMenu): ?>
   <div class="back-nav">
     <a
       class="back-link back-link--menu"
       href="<?= htmlspecialchars(Url::withBase($backFallback)) ?>"
-      onclick="if (window.history.length > 1) { event.preventDefault(); window.history.back(); }"
     >← Retour</a>
   </div>
 <?php endif; ?>
