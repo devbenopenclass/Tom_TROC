@@ -5,7 +5,8 @@ namespace App\Controllers;
 
 final class AdminController extends \App\Core\Controller
 {
-    private const BOOKS_PATH = '/admin/books';
+    private const ADMIN_ANCHOR = '#admin-panel';
+    private const BOOKS_PATH = '/admin/books#admin-panel';
     private const ALLOWED_BOOK_STATUSES = ['available', 'unavailable', 'reserved'];
 
     public function books(): void
@@ -42,6 +43,7 @@ final class AdminController extends \App\Core\Controller
         $this->render('admin/books', [
             'books' => $stmt->fetchAll(),
             'query' => $query,
+            'adminAnchor' => self::ADMIN_ANCHOR,
         ]);
     }
 
@@ -123,6 +125,7 @@ final class AdminController extends \App\Core\Controller
         $this->render('admin/members', [
             'members' => $stmt->fetchAll(),
             'query' => $query,
+            'adminAnchor' => self::ADMIN_ANCHOR,
         ]);
     }
 

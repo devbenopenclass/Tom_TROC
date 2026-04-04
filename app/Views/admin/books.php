@@ -1,6 +1,7 @@
 <?php
 // Vue d'administration des livres : liste, statut et actions de modération.
 use App\Core\Csrf;
+use App\Core\Url;
 use App\Core\View;
 use App\Models\Book;
 
@@ -13,6 +14,7 @@ $adminSectionMeta = count($books ?? []) . ' livre' . (count($books ?? []) > 1 ? 
 $adminSearchAction = $base . '/admin/books';
 $adminSearchPlaceholder = 'Titre, auteur, pseudo ou email';
 $adminQuery = (string)($query ?? '');
+$adminAnchor = (string)($adminAnchor ?? '#admin-panel');
 
 require __DIR__ . '/_intro.php';
 ?>
@@ -33,7 +35,12 @@ require __DIR__ . '/_intro.php';
         ?>
         <article class="admin-table__row">
           <div class="admin-table__photo">
-            <img src="<?= View::e($img) ?>" alt="Couverture de <?= View::e($book['title'] ?? 'ce livre') ?>">
+            <div class="admin-book-thumb">
+              <span class="admin-book-badge <?= $isAvailable ? 'admin-book-badge--ok' : 'admin-book-badge--off' ?>">
+                <?= $isAvailable ? 'disponible' : 'non dispo.' ?>
+              </span>
+              <img src="<?= View::e($img) ?>" alt="Couverture de <?= View::e($book['title'] ?? 'ce livre') ?>">
+            </div>
           </div>
           <div><?= View::e($book['title'] ?? '') ?></div>
           <div><?= View::e($book['author'] ?? '') ?></div>
@@ -41,17 +48,13 @@ require __DIR__ . '/_intro.php';
             <strong><?= View::e($book['username'] ?? '') ?></strong><br>
             <span class="admin-table__muted"><?= View::e($book['email'] ?? '') ?></span>
           </div>
-          <div>
-            <span class="status-pill <?= $isAvailable ? 'status-pill--ok' : 'status-pill--off' ?>">
-              <?= $isAvailable ? 'disponible' : 'indisponible' ?>
-            </span>
-          </div>
+          <div><?= $isAvailable ? 'Disponible' : 'Non dispo' ?></div>
           <div class="admin-table__actions">
             <form method="post" action="<?= $base ?>/admin/books/status">
               <?= Csrf::input(); ?>
               <input type="hidden" name="id" value="<?= (int)$book['id'] ?>">
               <input type="hidden" name="status" value="<?= $isAvailable ? 'unavailable' : 'available' ?>">
-              <button type="submit"><?= $isAvailable ? 'Rendre indisponible' : 'Rendre disponible' ?></button>
+              <button class="<?= $isAvailable ? '' : 'admin-table__warning' ?>" type="submit"><?= $isAvailable ? 'Rendre indisponible' : 'Rendre disponible' ?></button>
             </form>
 
             <form method="post" action="<?= $base ?>/admin/books/delete" onsubmit="return confirm('Supprimer ce livre ?');">

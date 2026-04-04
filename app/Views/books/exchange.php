@@ -21,9 +21,13 @@
     <?php foreach ($books as $b): ?>
       <?php
       $image = Url::asset(Book::imagePath($b));
+      $isAvailable = ($b['status'] ?? '') === 'available';
       ?>
       <a class="book" href="<?= $base ?>/books/show?id=<?= (int)$b['id'] ?>">
         <div class="thumb">
+          <span class="book-status <?= $isAvailable ? 'book-status--ok' : 'book-status--off' ?>">
+            <?= $isAvailable ? 'disponible' : 'non dispo.' ?>
+          </span>
           <img src="<?= htmlspecialchars($image) ?>" alt="">
         </div>
         <div class="meta">

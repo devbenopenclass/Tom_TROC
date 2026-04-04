@@ -300,16 +300,18 @@ class Book extends Model
       return $image;
     }
 
-    $path = '/' . ltrim($image, '/');
-    if (str_starts_with($path, '/assets/')) {
-      if (Url::publicFileExists($path)) {
+    $normalizedImage = str_replace('\\', '/', trim($image));
+    $candidates = [
+      '/' . ltrim($normalizedImage, '/'),
+      '/' . ltrim(preg_replace('#^public/#', '', ltrim($normalizedImage, '/')) ?? $normalizedImage, '/'),
+      '/assets/uploads/' . ltrim(basename($normalizedImage), '/'),
+      '/assets/img/' . ltrim(basename($normalizedImage), '/'),
+    ];
+
+    foreach (array_unique($candidates) as $path) {
+      if (str_starts_with($path, '/assets/') && Url::publicFileExists($path)) {
         return $path;
       }
-    }
-
-    $uploadsPath = '/assets/uploads/' . ltrim(basename($image), '/');
-    if (Url::publicFileExists($uploadsPath)) {
-      return $uploadsPath;
     }
 
     return null;

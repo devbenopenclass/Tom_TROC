@@ -183,13 +183,46 @@
   background: #eef1f4;
 }
 
-.admin-table__photo img {
+.admin-book-thumb {
+  position: relative;
   width: 82px;
   height: 110px;
+  overflow: hidden;
   border-radius: 8px;
-  object-fit: cover;
   background: #e8ecef;
   box-shadow: 0 8px 20px rgba(0, 0, 0, .08);
+}
+
+.admin-table__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-book-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 700;
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .12);
+}
+
+.admin-book-badge--ok {
+  background: #79c6a7;
+}
+
+.admin-book-badge--off {
+  background: #cf7a7a;
 }
 
 .admin-table__muted {
@@ -224,6 +257,12 @@
 .admin-table__actions .admin-table__danger {
   border-color: #d65858;
   color: #d65858;
+}
+
+.admin-table__actions .admin-table__warning {
+  border-color: #d65858;
+  color: #d65858;
+  background: #fff7f7;
 }
 
 .admin-table--members .admin-table__head,

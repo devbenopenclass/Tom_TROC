@@ -8,6 +8,7 @@ $adminSectionMeta = (string)($adminSectionMeta ?? '');
 $adminSearchAction = (string)($adminSearchAction ?? '');
 $adminSearchPlaceholder = (string)($adminSearchPlaceholder ?? '');
 $adminQuery = (string)($adminQuery ?? '');
+$adminAnchor = (string)($adminAnchor ?? '#admin-panel');
 ?>
 <section class="admin-hero">
   <div class="admin-hero__copy">
@@ -21,11 +22,11 @@ $adminQuery = (string)($adminQuery ?? '');
   <img src="<?= htmlspecialchars(\App\Core\Url::asset('/assets/img/figma/mask-group-1.png')) ?>" alt="Bannière bibliothèque">
 </section>
 
-<section class="admin-panel">
+<section class="admin-panel" id="<?= \App\Core\View::e(ltrim($adminAnchor, '#')) ?>">
   <div class="admin-panel__shell">
     <nav class="admin-tabs" aria-label="Navigation management">
-      <a class="admin-tabs__link<?= $adminActiveTab === 'books' ? ' admin-tabs__link--active' : '' ?>" href="<?= $base ?>/admin/books">Livres</a>
-      <a class="admin-tabs__link<?= $adminActiveTab === 'members' ? ' admin-tabs__link--active' : '' ?>" href="<?= $base ?>/admin/members">Membres</a>
+      <a class="admin-tabs__link<?= $adminActiveTab === 'books' ? ' admin-tabs__link--active' : '' ?>" href="<?= $base ?>/admin/books<?= $adminAnchor ?>">Livres</a>
+      <a class="admin-tabs__link<?= $adminActiveTab === 'members' ? ' admin-tabs__link--active' : '' ?>" href="<?= $base ?>/admin/members<?= $adminAnchor ?>">Membres</a>
     </nav>
 
     <div class="admin-section-head">
@@ -36,7 +37,7 @@ $adminQuery = (string)($adminQuery ?? '');
       <p class="admin-section-head__meta"><?= \App\Core\View::e($adminSectionMeta) ?></p>
     </div>
 
-    <form class="admin-search" method="get" action="<?= $adminSearchAction ?>">
+    <form class="admin-search" method="get" action="<?= $adminSearchAction . $adminAnchor ?>">
       <label class="admin-search__field">
         <span>Recherche</span>
         <input
@@ -48,6 +49,6 @@ $adminQuery = (string)($adminQuery ?? '');
       </label>
       <button class="btn" type="submit">Rechercher</button>
       <?php if ($adminQuery !== ''): ?>
-        <a class="btn btn-outline" href="<?= $adminSearchAction ?>">Effacer</a>
+        <a class="btn btn-outline" href="<?= $adminSearchAction . $adminAnchor ?>">Effacer</a>
       <?php endif; ?>
     </form>

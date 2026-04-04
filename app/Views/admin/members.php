@@ -11,6 +11,7 @@ $adminSectionMeta = count($members ?? []) . ' membre' . (count($members ?? []) >
 $adminSearchAction = $base . '/admin/members';
 $adminSearchPlaceholder = 'Id, pseudo ou email';
 $adminQuery = (string)($query ?? '');
+$adminAnchor = (string)($adminAnchor ?? '#admin-panel');
 
 require __DIR__ . '/_intro.php';
 ?>

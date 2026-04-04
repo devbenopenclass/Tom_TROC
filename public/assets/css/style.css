@@ -232,6 +232,14 @@ h1,h2,h3{
   display:inline-flex;align-items:center;justify-content:center;
   min-height:24px;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:500;
 }
+.book-status--ok{
+  background:#79c6a7;
+  color:#fff;
+}
+.book-status--off{
+  background:#cf7a7a;
+  color:#fff;
+}
 
 /* Single book */
 .book-show{
