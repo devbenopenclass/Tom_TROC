@@ -48,8 +48,9 @@ class Book extends Model
         FROM books b
         JOIN users u ON u.id = b.user_id
         ORDER BY b.created_at DESC
-        LIMIT {$limit}
+        LIMIT :limit
       ");
+      $stmt->bindValue('limit', max(1, $limit), \PDO::PARAM_INT);
       $stmt->execute();
       $books = $stmt->fetchAll();
       if (!empty($books)) {
