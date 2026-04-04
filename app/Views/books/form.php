@@ -21,7 +21,6 @@ $statusOptions = [
 ?>
 
 <section class="edit-page">
-  <a class="back-link" href="<?= $base ?>/account">← retour</a>
   <h1><?= $isEdit ? 'Modifier les informations' : 'Ajouter un livre' ?></h1>
 
   <section class="edit-panel">
