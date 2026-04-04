@@ -43,7 +43,7 @@ if (str_starts_with($normalizedPath, '/account/profile')) {
   $backFallback = '/account';
 }
 
-$showBackMenu = $normalizedPath !== '/' && !$isAdminPage;
+$showBackMenu = $normalizedPath !== '/' && !$isAdminPage && !$isMessagesPage;
 ?>
 <!doctype html>
 <html lang="fr">
