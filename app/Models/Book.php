@@ -128,9 +128,13 @@ class Book extends Model
   // Bibliothèque privée d'un utilisateur, utilisée dans "Mon compte" et les profils.
   public static function byUser(int $userId): array
   {
-    $stmt = self::db()->prepare("SELECT * FROM books WHERE user_id = :uid ORDER BY created_at DESC");
-    $stmt->execute(['uid' => $userId]);
-    return $stmt->fetchAll();
+    try {
+      $stmt = self::db()->prepare("SELECT * FROM books WHERE user_id = :uid ORDER BY created_at DESC");
+      $stmt->execute(['uid' => $userId]);
+      return $stmt->fetchAll();
+    } catch (\Throwable $e) {
+      return [];
+    }
   }
 
   // Création d'un livre depuis le formulaire membre.
@@ -142,6 +146,53 @@ class Book extends Model
     ");
     $stmt->execute($data);
     return (int) self::db()->lastInsertId();
+  }
+
+  // Liste d'administration avec recherche sur livre et propriétaire.
+  public static function adminList(string $query = ''): array
+  {
+    $sql = implode("\n", [
+      'SELECT b.*, u.username, u.email',
+      'FROM books b',
+      'JOIN users u ON u.id = b.user_id',
+    ]);
+    $params = [];
+
+    if ($query !== '') {
+      $sql .= implode("\n", [
+        '',
+        'WHERE b.title LIKE :query',
+        '   OR b.author LIKE :query',
+        '   OR u.username LIKE :query',
+        '   OR u.email LIKE :query',
+      ]);
+      $params['query'] = '%' . $query . '%';
+    }
+
+    $sql .= implode("\n", [
+      '',
+      'ORDER BY b.created_at DESC, b.id DESC',
+    ]);
+
+    $stmt = self::db()->prepare($sql);
+    $stmt->execute($params);
+
+    return $stmt->fetchAll();
+  }
+
+  public static function adminUpdateStatus(int $id, string $status): void
+  {
+    $stmt = self::db()->prepare('UPDATE books SET status = :status WHERE id = :id');
+    $stmt->execute([
+      'id' => $id,
+      'status' => $status,
+    ]);
+  }
+
+  public static function adminDelete(int $id): void
+  {
+    $stmt = self::db()->prepare('DELETE FROM books WHERE id = :id');
+    $stmt->execute(['id' => $id]);
   }
 
   // Mise à jour sécurisée : seul le membre qui a ajouté le livre peut modifier sa ligne.

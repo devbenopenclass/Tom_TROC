@@ -3,6 +3,7 @@ namespace App\Controllers;
 
 use App\Core\Auth;
 use App\Core\Controller;
+use App\Core\Url;
 use App\Models\Book;
 
 // Contrôleur des livres : liste publique, fiche détail,
@@ -17,7 +18,10 @@ class BookController extends Controller
   {
     $q = trim($_GET['q'] ?? '');
     $books = Book::exchangeList($q !== '' ? $q : null);
-    $this->render('books/exchange', ['books' => $books, 'q' => $q]);
+    $this->render('books/exchange', [
+      'books' => $this->buildExchangeCards($books),
+      'q' => $q,
+    ]);
   }
 
   // Affiche une seule fiche livre à partir de son id dans l'URL.
@@ -32,7 +36,7 @@ class BookController extends Controller
       return;
     }
 
-    $this->render('books/show', ['book' => $book]);
+    $this->render('books/show', ['bookView' => $this->buildBookShowView($book)]);
   }
 
   // Ouvre le formulaire d'ajout d'un livre pour le membre connecté.
@@ -55,7 +59,13 @@ class BookController extends Controller
       return;
     }
 
-    $data['image'] = $this->uploadedBookImage() ?? $data['image'];
+    $imageUpload = $this->uploadedBookImage();
+    if ($imageUpload['error'] !== null) {
+      $this->renderBookFormError('create', $imageUpload['error'], $data);
+      return;
+    }
+
+    $data['image'] = $imageUpload['path'] ?? $data['image'];
     Book::create($data);
     $this->redirect(self::ACCOUNT_PATH);
   }
@@ -85,7 +95,13 @@ class BookController extends Controller
       return;
     }
 
-    $data['image'] = $this->uploadedBookImage() ?? $data['image'];
+    $imageUpload = $this->uploadedBookImage();
+    if ($imageUpload['error'] !== null) {
+      $this->renderBookFormError('edit', $imageUpload['error'], array_merge($book, $data, ['id' => $id]));
+      return;
+    }
+
+    $data['image'] = $imageUpload['path'] ?? $data['image'];
 
     Book::update($id, $this->currentUserId(), $data);
     $this->redirect(self::ACCOUNT_PATH);
@@ -103,24 +119,33 @@ class BookController extends Controller
   }
 
   // Gère l'upload d'une couverture utilisateur dans public/assets/uploads.
-  private function handleUpload(array $file): ?string
+  private function handleUpload(array $file): array
   {
-    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) return null;
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+      return ['path' => null, 'error' => "L'image n'a pas pu être envoyée."];
+    }
 
     $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
-    $mime = mime_content_type($file['tmp_name']);
-    if (!isset($allowed[$mime])) return null;
+    $tmpName = (string)($file['tmp_name'] ?? '');
+    $mime = $tmpName !== '' ? mime_content_type($tmpName) : false;
+    if (!is_string($mime) || !isset($allowed[$mime])) {
+      return ['path' => null, 'error' => "Le format de l'image doit être JPG, PNG ou WebP."];
+    }
 
     $ext = $allowed[$mime];
     $name = bin2hex(random_bytes(16)) . '.' . $ext;
     $destDir = __DIR__ . '/../../public/assets/uploads';
 
-    if (!is_dir($destDir)) mkdir($destDir, 0777, true);
+    if (!is_dir($destDir) && !mkdir($destDir, 0777, true) && !is_dir($destDir)) {
+      return ['path' => null, 'error' => "Impossible d'enregistrer l'image pour le moment."];
+    }
 
     $dest = $destDir . '/' . $name;
-    if (!move_uploaded_file($file['tmp_name'], $dest)) return null;
+    if (!move_uploaded_file($tmpName, $dest)) {
+      return ['path' => null, 'error' => "Impossible d'enregistrer l'image pour le moment."];
+    }
 
-    return '/assets/uploads/' . $name;
+    return ['path' => '/assets/uploads/' . $name, 'error' => null];
   }
 
   private function requireBookLogin(): void
@@ -156,10 +181,10 @@ class BookController extends Controller
     ];
   }
 
-  private function uploadedBookImage(): ?string
+  private function uploadedBookImage(): array
   {
     if (empty($_FILES['image']['name'])) {
-      return null;
+      return ['path' => null, 'error' => null];
     }
 
     return $this->handleUpload($_FILES['image']);
@@ -198,5 +223,43 @@ class BookController extends Controller
       'error' => $message,
       'book' => $book,
     ]);
+  }
+
+  private function buildExchangeCards(array $books): array
+  {
+    $cards = [];
+
+    foreach ($books as $book) {
+      $isAvailable = ($book['status'] ?? '') === 'available';
+      $cards[] = [
+        'id' => (int)($book['id'] ?? 0),
+        'title' => (string)($book['title'] ?? ''),
+        'author' => (string)($book['author'] ?? ''),
+        'owner' => (string)($book['username'] ?? ''),
+        'image' => Url::asset(Book::imagePath($book)),
+        'status_class' => $isAvailable ? 'book-status--ok' : 'book-status--off',
+        'status_label' => $isAvailable ? 'disponible' : 'non dispo.',
+      ];
+    }
+
+    return $cards;
+  }
+
+  private function buildBookShowView(array $book): array
+  {
+    $description = Book::detailDescription($book);
+    $paragraphs = preg_split("/\n\s*\n/", $description) ?: [$description];
+
+    return [
+      'id' => (int)($book['id'] ?? 0),
+      'user_id' => (int)($book['user_id'] ?? 0),
+      'title' => trim((string)($book['title'] ?? 'Livre')),
+      'author' => trim((string)($book['author'] ?? 'Auteur inconnu')),
+      'owner' => trim((string)($book['username'] ?? 'membre de la communauté')),
+      'image' => Url::asset(Book::detailImagePath($book, '/assets/img/figma/mask-group-1.png')),
+      'owner_avatar' => Url::asset(\App\Models\User::avatarPath($book)),
+      'paragraphs' => array_map(static fn (string $paragraph): string => trim($paragraph), $paragraphs),
+      'can_message_owner' => Auth::check(),
+    ];
   }
 }

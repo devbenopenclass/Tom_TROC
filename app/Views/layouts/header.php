@@ -2,6 +2,7 @@
 // Entête globale du site : calcule l'état de connexion,
 // les versions CSS/assets et construit la navigation principale.
 use App\Core\Csrf;
+use App\Core\Auth;
 use App\Core\Url;
 
 $base = Url::baseUrl();
@@ -17,7 +18,7 @@ $isAccountPage = str_contains($requestPath, '/account');
 $isMessagesPage = str_contains($requestPath, '/messages');
 $isAdminPage = str_contains($requestPath, '/admin');
 if ($isLogged) {
-  $unreadCount = \App\Models\Message::unreadCount((int)$_SESSION['user_id']);
+  $unreadCount = Auth::unreadCount();
 }
 
 // Point de retour par défaut selon la page courante.

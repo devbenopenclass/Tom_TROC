@@ -3,6 +3,7 @@ namespace App\Controllers;
 
 use App\Core\Auth;
 use App\Core\Controller;
+use App\Core\Url;
 use App\Models\User;
 use App\Models\Book;
 
@@ -18,8 +19,7 @@ class AccountController extends Controller
     $me = User::find($this->currentUserId());
     $books = Book::byUser($this->currentUserId());
     $this->render('account/index', array_merge([
-      'me' => $me,
-      'books' => $books,
+      'accountView' => $this->buildAccountView($me, $books, $extra['form'] ?? []),
     ], $extra));
   }
 
@@ -52,6 +52,11 @@ class AccountController extends Controller
 
     if ($username === '') {
       $this->renderAccountError('Le pseudo est obligatoire.', $formData);
+      return;
+    }
+
+    if (User::findByUsername($username, $this->currentUserId())) {
+      $this->renderAccountError('Ce pseudo est déjà utilisé.', $formData);
       return;
     }
 
@@ -163,5 +168,47 @@ class AccountController extends Controller
     }
 
     return 'Compte mis à jour.';
+  }
+
+  private function buildAccountView(?array $me, array $books, array $form = []): array
+  {
+    $memberSince = '1 an';
+    if (!empty($me['created_at'])) {
+      $years = max(1, (int)date('Y') - (int)date('Y', strtotime((string)$me['created_at'])));
+      $memberSince = $years . ' an' . ($years > 1 ? 's' : '');
+    }
+
+    $bookRows = [];
+    foreach ($books as $book) {
+      $description = trim((string)($book['description'] ?? ''));
+      if ($description === '') {
+        $description = 'Aucune description.';
+      }
+      if (mb_strlen($description) > 110) {
+        $description = mb_substr($description, 0, 110) . '...';
+      }
+
+      $isAvailable = ($book['status'] ?? '') === 'available';
+      $bookRows[] = [
+        'id' => (int)($book['id'] ?? 0),
+        'title' => (string)($book['title'] ?? ''),
+        'author' => (string)($book['author'] ?? ''),
+        'cover' => Url::asset(Book::imagePath($book)),
+        'description' => $description,
+        'status_class' => $isAvailable ? 'status-pill--ok' : 'status-pill--off',
+        'status_label' => $isAvailable ? 'disponible' : 'indisponible',
+      ];
+    }
+
+    return [
+      'avatar' => Url::asset(User::avatarPath($me, '/assets/img/figma/mask-group-2.png')),
+      'username' => (string)($me['username'] ?? ''),
+      'username_value' => (string)($form['username'] ?? ($me['username'] ?? '')),
+      'email' => (string)($me['email'] ?? ''),
+      'bio' => (string)($me['bio'] ?? ''),
+      'member_since' => $memberSince,
+      'books_count' => count($books),
+      'book_rows' => $bookRows,
+    ];
   }
 }

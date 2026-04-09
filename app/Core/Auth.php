@@ -22,4 +22,16 @@ class Auth
       exit;
     }
   }
+
+  // Expose le compteur de messages non lus sans faire dépendre les vues
+  // du modèle de messagerie.
+  public static function unreadCount(): int
+  {
+    $userId = self::id();
+    if ($userId === null) {
+      return 0;
+    }
+
+    return \App\Models\Message::unreadCount($userId);
+  }
 }

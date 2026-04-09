@@ -1,5 +1,3 @@
-<?php use App\Core\Url; ?>
-<?php use App\Models\Book; ?>
 <?php // Catalogue public des livres : recherche et grille complète des ouvrages disponibles sur la plateforme. ?>
 
 <section class="exchange-head">
@@ -20,21 +18,17 @@
 <?php else: ?>
   <section class="grid">
     <?php foreach ($books as $b): ?>
-      <?php
-      $image = Url::asset(Book::imagePath($b));
-      $isAvailable = ($b['status'] ?? '') === 'available';
-      ?>
       <a class="book" href="<?= $base ?>/books/show?id=<?= (int)$b['id'] ?>">
         <div class="thumb">
-          <span class="book-status <?= $isAvailable ? 'book-status--ok' : 'book-status--off' ?>">
-            <?= $isAvailable ? 'disponible' : 'non dispo.' ?>
+          <span class="book-status <?= htmlspecialchars($b['status_class']) ?>">
+            <?= htmlspecialchars($b['status_label']) ?>
           </span>
-          <img src="<?= htmlspecialchars($image) ?>" alt="">
+          <img src="<?= htmlspecialchars($b['image']) ?>" alt="">
         </div>
         <div class="meta">
           <strong><?= htmlspecialchars($b['title']) ?></strong>
           <div class="muted"><?= htmlspecialchars($b['author']) ?></div>
-          <div class="book-owner">Proposé par : <?= htmlspecialchars($b['username']) ?></div>
+          <div class="book-owner">Proposé par : <?= htmlspecialchars($b['owner']) ?></div>
         </div>
       </a>
     <?php endforeach; ?>

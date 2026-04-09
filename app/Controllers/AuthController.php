@@ -34,6 +34,11 @@ class AuthController extends Controller
       return;
     }
 
+    if (User::findByUsername($username)) {
+      $this->renderAuthError('auth/register', 'Pseudo déjà utilisé.');
+      return;
+    }
+
     $this->loginUser(User::create($username, $email, password_hash($password, PASSWORD_BCRYPT)));
     $this->redirect(self::ACCOUNT_PATH);
   }

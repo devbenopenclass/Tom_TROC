@@ -96,6 +96,32 @@ class User extends Model
     return $u ?: null;
   }
 
+  // Vérifie l'unicité du pseudo côté application.
+  // Un compte peut être exclu du contrôle lors d'une mise à jour de profil.
+  public static function findByUsername(string $username, ?int $excludeId = null): ?array
+  {
+    $passwordColumn = self::resolvePasswordColumn();
+    $sql = "
+      SELECT " . self::PUBLIC_FIELDS . ", {$passwordColumn} AS password_hash
+      FROM users
+      WHERE username = :username
+    ";
+
+    $params = ['username' => $username];
+    if ($excludeId !== null) {
+      $sql .= ' AND id <> :exclude_id';
+      $params['exclude_id'] = $excludeId;
+    }
+
+    $sql .= ' LIMIT 1';
+
+    $stmt = self::db()->prepare($sql);
+    $stmt->execute($params);
+    $user = $stmt->fetch();
+
+    return $user ?: null;
+  }
+
   // Recherche par identifiant de connexion :
   // l'utilisateur peut se connecter avec son email ou son pseudo.
   public static function findByLogin(string $login): ?array
@@ -167,11 +193,6 @@ class User extends Model
   {
     $role = $role === self::ROLE_ADMIN ? self::ROLE_ADMIN : self::ROLE_USER;
 
-    if (!self::hasColumn('role') && !self::hasColumn('is_admin')) {
-      self::db()->exec("ALTER TABLE users ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'user' AFTER bio");
-      self::$userColumns = null;
-    }
-
     if (self::hasColumn('role') && self::hasColumn('is_admin')) {
       $stmt = self::db()->prepare('UPDATE users SET role = :role, is_admin = :is_admin WHERE id = :id');
       $stmt->execute([
@@ -191,11 +212,51 @@ class User extends Model
       return;
     }
 
+    if (!self::hasColumn('role') && !self::hasColumn('is_admin')) {
+      throw new \RuntimeException("La gestion des roles requiert une colonne 'role' ou 'is_admin' dans la table users.");
+    }
+
     $stmt = self::db()->prepare('UPDATE users SET is_admin = :is_admin WHERE id = :id');
     $stmt->execute([
       'id' => $id,
       'is_admin' => $role === self::ROLE_ADMIN ? 1 : 0,
     ]);
+  }
+
+  public static function adminMembers(string $query = ''): array
+  {
+    $sql = implode("\n", [
+      'SELECT',
+      '    u.id,',
+      '    u.username,',
+      '    u.email,',
+      '    u.created_at,',
+      '    COUNT(b.id) AS books_count',
+      'FROM users u',
+      'LEFT JOIN books b ON b.user_id = u.id',
+    ]);
+    $params = [];
+
+    if ($query !== '') {
+      $sql .= implode("\n", [
+        '',
+        'WHERE CAST(u.id AS CHAR) LIKE :query',
+        '   OR u.username LIKE :query',
+        '   OR u.email LIKE :query',
+      ]);
+      $params['query'] = '%' . $query . '%';
+    }
+
+    $sql .= implode("\n", [
+      '',
+      'GROUP BY u.id, u.username, u.email, u.created_at',
+      'ORDER BY u.created_at DESC, u.id DESC',
+    ]);
+
+    $stmt = self::db()->prepare($sql);
+    $stmt->execute($params);
+
+    return $stmt->fetchAll();
   }
 
   // Crée un nouveau compte membre avec un avatar par défaut.

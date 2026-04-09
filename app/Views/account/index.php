@@ -1,20 +1,5 @@
 <?php use App\Core\Csrf; ?>
-<?php use App\Core\Url; ?>
-<?php use App\Models\Book; ?>
-<?php use App\Models\User; ?>
 <?php // Tableau de bord "Mon compte" : profil, informations personnelles et bibliothèque du membre connecté. ?>
-
-<?php
-$avatar = Url::asset(User::avatarPath($me, '/assets/img/figma/mask-group-2.png'));
-$form = $form ?? [];
-$usernameValue = $form['username'] ?? ($me['username'] ?? '');
-$memberSince = '1 an';
-// Transforme la date de création en ancienneté lisible.
-if (!empty($me['created_at'])) {
-  $years = max(1, (int)date('Y') - (int)date('Y', strtotime((string)$me['created_at'])));
-  $memberSince = $years . ' an' . ($years > 1 ? 's' : '');
-}
-?>
 
 <section class="account-admin">
   <div class="account-admin__shell">
@@ -23,13 +8,13 @@ if (!empty($me['created_at'])) {
     <div class="account-admin__top">
       <article class="account-card account-card--profile">
         <div class="account-profile__avatar-wrap">
-          <img class="account-profile__avatar" src="<?= htmlspecialchars($avatar) ?>" alt="Avatar">
+          <img class="account-profile__avatar" src="<?= htmlspecialchars($accountView['avatar']) ?>" alt="Avatar">
           <a class="account-profile__edit" href="<?= $base ?>/account/profile">modifier</a>
         </div>
 
         <div class="account-profile__identity">
-          <h1 class="account-profile__name"><?= htmlspecialchars($me['username'] ?? '') ?></h1>
-          <p class="account-profile__since">Membre depuis <?= htmlspecialchars($memberSince) ?></p>
+          <h1 class="account-profile__name"><?= htmlspecialchars($accountView['username']) ?></h1>
+          <p class="account-profile__since">Membre depuis <?= htmlspecialchars($accountView['member_since']) ?></p>
           <p class="account-profile__library">Ma bibliothèque</p>
           <p class="account-profile__count">
             <span class="account-profile__count-icon" aria-hidden="true">
@@ -39,7 +24,7 @@ if (!empty($me['created_at'])) {
                 <path d="M7.5 3.5h1" />
               </svg>
             </span>
-            <span><?= count($books) ?> livres</span>
+            <span><?= (int)$accountView['books_count'] ?> livres</span>
           </p>
         </div>
       </article>
@@ -53,14 +38,14 @@ if (!empty($me['created_at'])) {
           <label class="account-form__field account-form__field--avatar">
             <span>Avatar</span>
             <div class="account-form__avatar-row">
-              <img class="account-form__avatar-preview" src="<?= htmlspecialchars($avatar) ?>" alt="Avatar actuel">
+              <img class="account-form__avatar-preview" src="<?= htmlspecialchars($accountView['avatar']) ?>" alt="Avatar actuel">
               <input type="file" name="avatar" accept="image/png,image/jpeg,image/webp">
             </div>
           </label>
 
           <label class="account-form__field">
             <span>Adresse email</span>
-            <input value="<?= htmlspecialchars($me['email'] ?? '') ?>" readonly>
+            <input value="<?= htmlspecialchars($accountView['email']) ?>" readonly>
           </label>
 
           <label class="account-form__field">
@@ -75,10 +60,10 @@ if (!empty($me['created_at'])) {
 
           <label class="account-form__field">
             <span>Pseudo</span>
-            <input name="username" value="<?= htmlspecialchars($usernameValue) ?>" required>
+            <input name="username" value="<?= htmlspecialchars($accountView['username_value']) ?>" required>
           </label>
 
-          <input type="hidden" name="bio" value="<?= htmlspecialchars($me['bio'] ?? '') ?>">
+          <input type="hidden" name="bio" value="<?= htmlspecialchars($accountView['bio']) ?>">
           <button class="btn btn-outline account-form__submit" type="submit">Enregistrer</button>
         </form>
 
@@ -107,22 +92,11 @@ if (!empty($me['created_at'])) {
       <?php if (empty($books)): ?>
         <div class="account-books__empty">Vous n'avez pas encore ajouté de livre.</div>
       <?php else: ?>
-        <?php foreach ($books as $b): ?>
-          <?php
-          $cover = Url::asset(Book::imagePath($b));
-          $isAvailable = ($b['status'] ?? '') === 'available';
-          $desc = trim((string)($b['description'] ?? ''));
-          if ($desc === '') {
-            $desc = 'Aucune description.';
-          }
-          if (mb_strlen($desc) > 110) {
-            $desc = mb_substr($desc, 0, 110) . '...';
-          }
-          ?>
+        <?php foreach ($accountView['book_rows'] as $b): ?>
           <div class="account-books__row">
             <div class="account-books__photo">
               <span class="account-books__mobile-label">Photo</span>
-              <img src="<?= htmlspecialchars($cover) ?>" alt="">
+              <img src="<?= htmlspecialchars($b['cover']) ?>" alt="">
             </div>
             <div>
               <span class="account-books__mobile-label">Titre</span>
@@ -134,12 +108,12 @@ if (!empty($me['created_at'])) {
             </div>
             <div class="account-books__desc">
               <span class="account-books__mobile-label">Description</span>
-              <?= htmlspecialchars($desc) ?>
+              <?= htmlspecialchars($b['description']) ?>
             </div>
             <div>
               <span class="account-books__mobile-label">Disponibilité</span>
-              <span class="status-pill <?= $isAvailable ? 'status-pill--ok' : 'status-pill--off' ?>">
-                <?= $isAvailable ? 'disponible' : 'indisponible' ?>
+              <span class="status-pill <?= htmlspecialchars($b['status_class']) ?>">
+                <?= htmlspecialchars($b['status_label']) ?>
               </span>
             </div>
             <div class="account-books__actions">

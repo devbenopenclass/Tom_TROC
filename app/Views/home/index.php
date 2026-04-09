@@ -1,5 +1,4 @@
 <?php use App\Core\Url; ?>
-<?php use App\Models\Book; ?>
 <?php // Page d'accueil : hero, derniers livres, étapes de fonctionnement et valeurs du projet. ?>
 <section class="home-hero">
   <div class="home-copy">
@@ -21,40 +20,8 @@
   <h2>Les derniers livres ajoutés</h2>
 
   <div class="home-books">
-    <?php
-    // Jeux de secours gardés pour le rendu de la maquette si la base est vide.
-    $fallback = [
-      ['title' => 'Esther', 'author' => 'Alabaster', 'owner' => 'CamilleDuCuir'],
-      ['title' => 'The Kinfolk Table', 'author' => 'Nathan Williams', 'owner' => 'Nathalie'],
-      ['title' => 'Wabi Sabi', 'author' => 'Beth Kempton', 'owner' => 'Alicecture'],
-      ['title' => 'Milk & honey', 'author' => 'Rupi Kaur', 'owner' => 'jugo1980_17'],
-    ];
-
-    $cards = [];
-    if (!empty($latest)) {
-      foreach (array_slice($latest, 0, 4) as $i => $b) {
-        $cards[] = [
-          'title' => $b['title'] ?? '',
-          'author' => $b['author'] ?? '',
-          'owner' => $b['username'] ?? '',
-          'img' => Url::asset(Book::imagePath($b)),
-          'id' => (int)($b['id'] ?? 0),
-        ];
-      }
-    }
-
-    // On complète visuellement jusqu'à 4 cartes si nécessaire.
-    if (count($cards) < 4) {
-      foreach (array_slice($fallback, 0, 4 - count($cards)) as $f) {
-        $f['img'] = Url::asset(Book::imagePath($f));
-        $cards[] = $f;
-      }
-    }
-    ?>
-
     <?php foreach ($cards as $c): ?>
-      <?php $url = !empty($c['id']) ? ($base . '/books/show?id=' . (int)$c['id']) : ($base . '/books/exchange'); ?>
-      <a class="home-book" href="<?= $url ?>">
+      <a class="home-book" href="<?= $base . $c['url'] ?>">
         <div class="img-wrap"><img src="<?= htmlspecialchars($c['img']) ?>" alt=""></div>
         <div class="txt">
           <strong><?= htmlspecialchars($c['title']) ?></strong>

@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Core\Auth;
+use App\Models\Book;
+use App\Models\User;
+
 final class AdminController extends \App\Core\Controller
 {
     private const ADMIN_ANCHOR = '#admin-panel';
@@ -15,34 +19,8 @@ final class AdminController extends \App\Core\Controller
         $this->requireAdmin();
 
         $query = trim((string)($_GET['q'] ?? ''));
-        $sql = implode("\n", [
-            'SELECT b.*, u.username, u.email',
-            'FROM books b',
-            'JOIN users u ON u.id = b.user_id',
-        ]);
-        $params = [];
-
-        if ($query !== '') {
-            $sql .= implode("\n", [
-                '',
-                'WHERE b.title LIKE :query',
-                '   OR b.author LIKE :query',
-                '   OR u.username LIKE :query',
-                '   OR u.email LIKE :query',
-            ]);
-            $params['query'] = '%' . $query . '%';
-        }
-
-        $sql .= implode("\n", [
-            '',
-            'ORDER BY b.created_at DESC, b.id DESC',
-        ]);
-
-        $stmt = \App\Core\Model::connection()->prepare($sql);
-        $stmt->execute($params);
-
         $this->render('admin/books', [
-            'books' => $stmt->fetchAll(),
+            'books' => Book::adminList($query),
             'query' => $query,
             'adminAnchor' => self::ADMIN_ANCHOR,
         ]);
@@ -62,11 +40,7 @@ final class AdminController extends \App\Core\Controller
             $this->redirect(self::BOOKS_PATH);
         }
 
-        $stmt = \App\Core\Model::connection()->prepare('UPDATE books SET status = :status WHERE id = :id');
-        $stmt->execute([
-            'id' => $id,
-            'status' => $status,
-        ]);
+        Book::adminUpdateStatus($id, $status);
 
         $this->redirect(self::BOOKS_PATH);
     }
@@ -81,8 +55,7 @@ final class AdminController extends \App\Core\Controller
             $this->redirect(self::BOOKS_PATH);
         }
 
-        $stmt = \App\Core\Model::connection()->prepare('DELETE FROM books WHERE id = :id');
-        $stmt->execute(['id' => $id]);
+        Book::adminDelete($id);
 
         $this->redirect(self::BOOKS_PATH);
     }
@@ -92,41 +65,10 @@ final class AdminController extends \App\Core\Controller
         $this->requireAdmin();
 
         $query = trim((string)($_GET['q'] ?? ''));
-        $sql = implode("\n", [
-            'SELECT',
-            '    u.id,',
-            '    u.username,',
-            '    u.email,',
-            '    u.created_at,',
-            '    COUNT(b.id) AS books_count',
-            'FROM users u',
-            'LEFT JOIN books b ON b.user_id = u.id',
-        ]);
-        $params = [];
-
-        if ($query !== '') {
-            $sql .= implode("\n", [
-                '',
-                'WHERE CAST(u.id AS CHAR) LIKE :query',
-                '   OR u.username LIKE :query',
-                '   OR u.email LIKE :query',
-            ]);
-            $params['query'] = '%' . $query . '%';
-        }
-
-        $sql .= implode("\n", [
-            '',
-            'GROUP BY u.id, u.username, u.email, u.created_at',
-            'ORDER BY u.created_at DESC, u.id DESC',
-        ]);
-
-        $stmt = \App\Core\Model::connection()->prepare($sql);
-        $stmt->execute($params);
-
-        $members = $stmt->fetchAll();
+        $members = User::adminMembers($query);
         foreach ($members as &$member) {
-            $member['role_label'] = \App\Models\User::roleLabel((int)$member['id']);
-            $member['is_current_admin'] = (int)($member['id'] ?? 0) === (int)(\App\Core\Auth::id() ?? 0);
+            $member['role_label'] = User::roleLabel((int)$member['id']);
+            $member['is_current_admin'] = (int)($member['id'] ?? 0) === (int)(Auth::id() ?? 0);
         }
         unset($member);
 
@@ -154,7 +96,11 @@ final class AdminController extends \App\Core\Controller
             $this->redirect('/admin/members' . self::ADMIN_ANCHOR);
         }
 
-        \App\Models\User::updateRole($id, $role);
+        try {
+            User::updateRole($id, $role);
+        } catch (\RuntimeException $e) {
+            $this->redirect('/admin/members' . self::ADMIN_ANCHOR);
+        }
 
         if ($currentUserId > 0 && $currentUserId === $id) {
             $_SESSION['is_admin'] = $role === 'admin';
@@ -174,9 +120,9 @@ final class AdminController extends \App\Core\Controller
             $this->redirect('/admin/members' . self::ADMIN_ANCHOR);
         }
 
-        \App\Models\User::delete($id);
+        User::delete($id);
 
-        $currentUserId = \App\Core\Auth::id();
+        $currentUserId = Auth::id();
         if ($currentUserId !== null && (int)$currentUserId === $id) {
             $_SESSION = [];
             session_destroy();
@@ -188,12 +134,12 @@ final class AdminController extends \App\Core\Controller
 
     private function requireAdmin(): void
     {
-        \App\Core\Auth::requireLogin();
+        Auth::requireLogin();
 
-        $userId = \App\Core\Auth::id();
+        $userId = Auth::id();
         $isAdmin = !empty($_SESSION['is_admin']);
         if (!$isAdmin && $userId !== null) {
-            $isAdmin = \App\Models\User::isAdmin((int)$userId);
+            $isAdmin = User::isAdmin((int)$userId);
         }
 
         if (!$isAdmin) {
