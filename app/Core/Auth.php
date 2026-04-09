@@ -1,20 +1,23 @@
 <?php
 namespace App\Core;
 
-// Petit service d'authentification basé sur la session PHP.
-// Il centralise les vérifications "connecté / non connecté".
+// Service d'authentification basé sur la session PHP.
+// Centralise les vérifications "connecté / non connecté" pour toute l'appli.
 class Auth
 {
+  // Retourne vrai si un utilisateur est connecté.
   public static function check(): bool
   {
     return isset($_SESSION['user_id']);
   }
 
+  // Retourne l'id de l'utilisateur connecté, ou null si personne n'est connecté.
   public static function id(): ?int
   {
     return $_SESSION['user_id'] ?? null;
   }
 
+  // Protège une page : redirige vers /login si la session est vide.
   public static function requireLogin(): void
   {
     if (!self::check()) {
@@ -23,8 +26,8 @@ class Auth
     }
   }
 
-  // Expose le compteur de messages non lus sans faire dépendre les vues
-  // du modèle de messagerie.
+  // Retourne le nombre de messages non lus pour afficher le badge dans le header.
+  // Si personne n'est connecté, on renvoie 0 directement sans interroger la base.
   public static function unreadCount(): int
   {
     $userId = self::id();

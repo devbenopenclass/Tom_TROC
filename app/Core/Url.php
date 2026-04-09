@@ -1,10 +1,12 @@
 <?php
 namespace App\Core;
 
-// Helper d'URL : calcule l'URL de base du projet
-// pour éviter les liens cassés sous /tomtroc.
+// Helper d'URL : calcule la base du projet et construit des liens fiables,
+// que l'appli soit en racine ou dans un sous-dossier comme /tomtroc.
 class Url
 {
+  // Retourne le préfixe de base du projet (ex: "/tomtroc") ou une chaîne vide si on est en racine.
+  // On lit d'abord la config, puis on se rabat sur SCRIPT_NAME si rien n'est configuré.
   public static function baseUrl(): string
   {
     $conf = require __DIR__ . '/../../config/config.php';
@@ -13,6 +15,7 @@ class Url
       return $configured;
     }
 
+    // Fallback automatique : on détermine la base à partir du chemin du script
     $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
     if ($scriptName === '') {
       return '';
@@ -22,15 +25,18 @@ class Url
     return ($dir === '' || $dir === '.') ? '' : $dir;
   }
 
+  // Préfixe un chemin interne avec la base du projet pour obtenir une URL complète.
   public static function withBase(string $path): string
   {
     $normalized = '/' . ltrim($path, '/');
     return self::baseUrl() . $normalized;
   }
 
-  // Retourne une URL d'asset avec version de cache si le fichier existe localement.
+  // Retourne l'URL publique d'un asset avec un paramètre de version pour casser le cache.
+  // Si le fichier est une URL externe, on la retourne telle quelle.
   public static function asset(string $path): string
   {
+    // Les URLs externes (http/https) passent sans modification
     if (preg_match('#^https?://#i', $path)) {
       return $path;
     }
@@ -41,7 +47,7 @@ class Url
     return self::withBase($normalized) . '?v=' . $version;
   }
 
-  // Vérifie si un chemin public local existe réellement dans /public.
+  // Vérifie qu'un fichier existe réellement dans le dossier public du projet.
   public static function publicFileExists(string $path): bool
   {
     $normalized = '/' . ltrim($path, '/');
@@ -53,6 +59,8 @@ class Url
     return is_file($publicPath . $normalized);
   }
 
+  // Retourne la date de modification d'un asset pour le versionnage du cache.
+  // Si le fichier n'existe pas, on renvoie "1" comme version neutre.
   private static function publicAssetVersion(string $path): string
   {
     if (!self::publicFileExists($path)) {

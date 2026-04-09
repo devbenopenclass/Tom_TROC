@@ -4,17 +4,17 @@ namespace App\Models;
 use App\Managers\BookManager;
 use App\Core\Url;
 
-// Modèle métier des livres : lecture/écriture en base,
-// fallbacks de catalogue et helpers d'images / descriptions.
-// Les lectures/écritures SQL sont maintenant déléguées à BookManager,
-// qui hydrate une vraie entité App\Entities\Book.
+// Façade du domaine livre : point d'entrée unique pour tout ce qui touche aux livres.
+// Les requêtes SQL sont déléguées à BookManager, qui hydrate des entités App\Entities\Book.
+// Ce modèle gère aussi les fallbacks visuels et les textes de présentation.
 class Book
 {
-  // Retourne l'image d'une carte livre.
-  // Priorité : mapping par titre, chemin image stocké, puis fallback global.
+  // Retourne le chemin de l'image d'une carte livre.
+  // Priorité : image par titre connu > image stockée en base > fallback global.
   public static function imagePath(?array $book, string $fallback = '/assets/img/figma/mask-group.png'): string
   {
     $image = trim((string)($book['image'] ?? ''));
+    // Certains titres connus ont une image dédiée dans le projet : on les vérifie en premier
     $titleFallback = self::fallbackImageByTitle((string)($book['title'] ?? ''));
 
     if ($titleFallback !== null) {
@@ -31,8 +31,9 @@ class Book
     return $fallback;
   }
 
-  // Certaines fiches détail utilisent un visuel différent de la carte.
-  // Cette méthode permet de brancher une image dédiée par titre.
+  // Retourne l'image pour la fiche détail d'un livre.
+  // Pour l'instant on utilise la même image que la carte catalogue,
+  // mais cette méthode permet de brancher une logique différente plus tard si besoin.
   public static function detailImagePath(?array $book, string $fallback = '/assets/img/figma/mask-group.png'): string
   {
     // Les fiches détail reprennent le même univers visuel que les cartes
@@ -40,8 +41,8 @@ class Book
     return self::imagePath($book, $fallback);
   }
 
-  // Récupère les derniers livres ajoutés pour la page d'accueil.
-  // Si la base est vide ou indisponible, on tombe sur le catalogue démo.
+  // Retourne les N derniers livres ajoutés.
+  // Si la base est vide ou inaccessible, on tombe sur des livres de démonstration.
   public static function latest(int $limit = 4): array
   {
     try {
@@ -53,13 +54,14 @@ class Book
         return $books;
       }
     } catch (\Throwable $e) {
+      // Base inaccessible au démarrage : on affiche les démos plutôt qu'une page cassée
     }
 
     return array_slice(self::fallbackCatalog(), 0, $limit);
   }
 
   // Retourne la liste publique des livres à l'échange,
-  // avec filtre texte sur titre, auteur ou pseudo du membre.
+  // avec filtre optionnel sur le titre, l'auteur ou le pseudo du membre.
   public static function exchangeList(?string $q = null): array
   {
     try {
@@ -71,13 +73,14 @@ class Book
         return $books;
       }
     } catch (\Throwable $e) {
+      // En cas d'erreur, le catalogue de démo prend le relais
     }
 
     return self::filterFallbackCatalog($q);
   }
 
-  // Charge une fiche livre unique.
-  // En secours, on cherche aussi dans le catalogue de démonstration.
+  // Charge une fiche livre par son identifiant.
+  // Si la base ne répond pas, on cherche aussi dans le catalogue de démo.
   public static function find(int $id): ?array
   {
     try {
@@ -86,8 +89,10 @@ class Book
         return $book;
       }
     } catch (\Throwable $e) {
+      // On continue et on cherche dans les démos si possible
     }
 
+    // Dernier recours : on cherche dans les livres de démonstration
     foreach (self::fallbackCatalog() as $book) {
       if ((int)$book['id'] === $id) {
         return $book;
@@ -97,7 +102,7 @@ class Book
     return null;
   }
 
-  // Bibliothèque privée d'un utilisateur, utilisée dans "Mon compte" et les profils.
+  // Retourne tous les livres d'un membre, utilisé dans "Mon compte" et les profils publics.
   public static function byUser(int $userId): array
   {
     try {
@@ -110,13 +115,13 @@ class Book
     }
   }
 
-  // Création d'un livre depuis le formulaire membre.
+  // Crée un livre depuis le formulaire membre et retourne son nouvel identifiant.
   public static function create(array $data): int
   {
     return BookManager::create($data);
   }
 
-  // Liste d'administration avec recherche sur livre et propriétaire.
+  // Liste d'administration avec recherche sur titre, auteur, pseudo et email du propriétaire.
   public static function adminList(string $query = ''): array
   {
     return array_map(
@@ -125,33 +130,37 @@ class Book
     );
   }
 
+  // Met à jour le statut d'un livre depuis le panneau admin.
   public static function adminUpdateStatus(int $id, string $status): void
   {
     BookManager::adminUpdateStatus($id, $status);
   }
 
+  // Supprime un livre depuis le panneau admin, quel que soit le propriétaire.
   public static function adminDelete(int $id): void
   {
     BookManager::adminDelete($id);
   }
 
-  // Mise à jour sécurisée : seul le membre qui a ajouté le livre peut modifier sa ligne.
+  // Met à jour un livre : seul le membre propriétaire peut modifier sa propre fiche.
   public static function update(int $id, int $userId, array $data): void
   {
     BookManager::update($id, $userId, $data);
   }
 
-  // Suppression sécurisée : seulement pour le membre connecté qui a ajouté le livre.
+  // Supprime un livre : seulement le membre qui l'a ajouté peut le retirer.
   public static function delete(int $id, int $userId): void
   {
     BookManager::delete($id, $userId);
   }
 
-  // Génère le texte long des fiches détail.
-  // Les titres connus ont un texte dédié ; sinon on recycle la description
-  // en base ou on génère un texte générique cohérent.
+  // Retourne le texte long affiché sur la fiche détail d'un livre.
+  // Les titres connus ont un texte dédié rédigé à la main.
+  // Pour les autres, on recycle la description en base si elle est assez longue,
+  // sinon on génère un texte générique à partir du titre et de l'auteur.
   public static function detailDescription(array $book): string
   {
+    // Textes rédigés pour les livres du catalogue de démonstration
     $map = [
       'esther' => "J'ai été immédiatement touché par l'atmosphère paisible d'Esther. Ce livre dégage une douceur rare, portée par des paysages calmes et une présence presque méditative.\n\nAu fil des pages, on découvre une oeuvre délicate, tournée vers l'introspection, la nature et les émotions discrètes. Tout y est simple, juste et profondément apaisant.\n\nC'est un livre que l'on ouvre pour ralentir, respirer et retrouver un peu de clarté. Il trouvera facilement sa place auprès des lecteurs en quête de beauté et de sérénité.\n\nEsther est une invitation à contempler autrement, avec plus de lenteur, plus d'attention, et beaucoup de sensibilité.",
       'thekinfolktable' => "J'ai récemment plongé dans les pages de 'The Kinfolk Table' et j'ai été enchanté par cette oeuvre captivante. Ce livre va bien au-delà d'une simple collection de recettes ; il célèbre l'art de partager des moments authentiques autour de la table.\n\nLes photographies magnifiques et le ton chaleureux captivent dès le départ, transportant le lecteur dans un voyage à travers des recettes et des histoires qui mettent en avant la beauté de la simplicité et de la convivialité.\n\nChaque page est une invitation à ralentir, à savourer et à créer des souvenirs durables avec les êtres chers.\n\n'The Kinfolk Table' incarne parfaitement l'esprit de la cuisine et de la camaraderie, et il est certain que ce livre trouvera une place spéciale dans le coeur de tout amoureux de la cuisine et des rencontres inspirantes.",
@@ -172,15 +181,19 @@ class Book
     ];
 
     $key = self::normalizeTitleKey((string)($book['title'] ?? ''));
+
+    // Titre connu : on retourne le texte rédigé à la main
     if (isset($map[$key])) {
       return $map[$key];
     }
 
+    // Description suffisamment longue en base : on l'utilise telle quelle
     $description = trim((string)($book['description'] ?? ''));
     if ($description !== '' && self::stringLength($description) > 80) {
       return $description;
     }
 
+    // Aucune description utile : on génère un texte générique à partir des métadonnées du livre
     $title = trim((string)($book['title'] ?? 'Livre'));
     $author = trim((string)($book['author'] ?? 'Auteur inconnu'));
     $owner = trim((string)($book['username'] ?? 'un membre'));
@@ -193,7 +206,8 @@ class Book
     );
   }
 
-  // Filtre le catalogue de secours en cas d'absence de base de données.
+  // Filtre le catalogue de démo avec la même logique de recherche que la base.
+  // Permet de garder la page Exchange utilisable même sans données réelles.
   private static function filterFallbackCatalog(?string $q = null): array
   {
     $books = self::fallbackCatalog();
@@ -215,8 +229,9 @@ class Book
     }));
   }
 
-  // Bibliothèque factice utilisée pour garder le site présentable
-  // même si les données locales sont absentes.
+  // Catalogue fictif utilisé quand la base de données est vide ou inaccessible.
+  // Permet de présenter le site avec du contenu même au premier démarrage.
+  // Le tableau est mis en cache via static pour ne pas le reconstruire à chaque appel.
   private static function fallbackCatalog(): array
   {
     static $books = null;
@@ -247,7 +262,7 @@ class Book
     return $books;
   }
 
-  // Construit une entrée de livre de démonstration homogène.
+  // Construit une entrée de livre de démonstration avec une structure homogène.
   private static function fallbackBook(
     int $id,
     int $userId,
@@ -276,14 +291,17 @@ class Book
   }
 
   // Valide et normalise un chemin image venant de la base.
-  // On accepte soit un asset déjà public, soit une image uploadée.
+  // On teste plusieurs variantes du chemin pour s'adapter aux données existantes.
   private static function normalizeImagePath(string $image): ?string
   {
+    // Une URL externe passe sans transformation
     if (preg_match('#^https?://#i', $image)) {
       return $image;
     }
 
     $normalizedImage = str_replace('\\', '/', trim($image));
+
+    // On teste plusieurs variantes du chemin pour trouver le fichier réel
     $candidates = [
       '/' . ltrim($normalizedImage, '/'),
       '/' . ltrim(preg_replace('#^public/#', '', ltrim($normalizedImage, '/')) ?? $normalizedImage, '/'),
@@ -300,7 +318,8 @@ class Book
     return null;
   }
 
-  // Associe certains titres connus à une couverture précise du projet.
+  // Associe certains titres connus à une image de couverture dédiée.
+  // Le titre est normalisé en clé pour absorber les variations de casse et de ponctuation.
   private static function fallbackImageByTitle(string $title): ?string
   {
     $map = [
@@ -326,7 +345,8 @@ class Book
     return $map[$key] ?? null;
   }
 
-  // Nettoie un titre pour créer une clé stable de matching.
+  // Transforme un titre en clé de matching insensible à la casse et à la ponctuation.
+  // Exemple : "Milk & honey" → "milkhoney"
   private static function normalizeTitleKey(string $value): string
   {
     $value = trim($value);
@@ -334,7 +354,7 @@ class Book
     return preg_replace('/[^a-z0-9]+/i', '', $value);
   }
 
-  // Compatibilité mbstring/non-mbstring pour compter les caractères.
+  // Compte les caractères d'une chaîne avec ou sans l'extension mbstring.
   private static function stringLength(string $value): int
   {
     return function_exists('mb_strlen') ? mb_strlen($value) : strlen($value);

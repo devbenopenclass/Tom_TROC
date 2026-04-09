@@ -6,15 +6,16 @@ use App\Core\Url;
 use App\Models\User;
 use App\Models\Book;
 
-// Contrôleur des profils publics : affiche un membre
-// et la bibliothèque rattachée à son compte.
+// Affiche les profils publics des membres et leur bibliothèque.
 class ProfileController extends Controller
 {
+  // Charge le profil d'un membre à partir de son id en paramètre d'URL.
   public function show(): void
   {
     $id = (int)($_GET['id'] ?? 0);
     $user = $id ? User::find($id) : null;
 
+    // Si le membre n'existe pas, on retourne un 404 explicite
     if (!$user) {
       http_response_code(404);
       echo "Profil introuvable";
@@ -27,6 +28,8 @@ class ProfileController extends Controller
     ]);
   }
 
+  // Prépare toutes les données dont la vue de profil a besoin :
+  // infos du membre, ses livres et le droit de le contacter.
   private function buildProfileView(array $user, array $books): array
   {
     $bookCards = [];
@@ -37,6 +40,7 @@ class ProfileController extends Controller
         'title' => (string)($book['title'] ?? ''),
         'author' => (string)($book['author'] ?? ''),
         'image' => Url::asset(Book::imagePath($book)),
+        // On traduit le statut technique en libellé lisible pour la vue
         'status_label' => $status === 'reserved' ? 'réservé' : ($status === 'unavailable' ? 'indisponible' : 'disponible'),
       ];
     }
@@ -46,6 +50,7 @@ class ProfileController extends Controller
       'username' => (string)($user['username'] ?? ''),
       'bio' => (string)($user['bio'] ?? ''),
       'avatar' => Url::asset(User::avatarPath($user)),
+      // On peut contacter le membre seulement si on est connecté et que ce n'est pas soi-même
       'can_contact' => !empty($_SESSION['user_id']) && (int)$_SESSION['user_id'] !== (int)$user['id'],
       'books' => $bookCards,
     ];

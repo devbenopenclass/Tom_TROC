@@ -1,6 +1,8 @@
 <?php
 namespace App\Entities;
 
+// Entité immuable représentant un utilisateur tel qu'il sort de la base de données.
+// Sert de conteneur typé entre le manager SQL et les modèles de l'application.
 final class User
 {
   public function __construct(
@@ -10,13 +12,18 @@ final class User
     private ?string $avatar = null,
     private ?string $bio = null,
     private ?string $createdAt = null,
+    // Le hash du mot de passe est optionnel : les requêtes publiques ne le chargent pas
     private ?string $passwordHash = null,
+    // Les champs supplémentaires (ex: books_count) sont conservés ici
     private array $extra = []
   ) {
   }
 
+  // Construit une entité User à partir d'un tableau associatif venant de PDO.
+  // Les colonnes connues sont typées, le reste part dans $extra.
   public static function fromArray(array $data): self
   {
+    // On copie tout d'abord, puis on retire les champs gérés explicitement
     $extra = $data;
     unset(
       $extra['id'],
@@ -40,23 +47,29 @@ final class User
     );
   }
 
+  // Retourne l'identifiant de l'utilisateur.
   public function id(): int
   {
     return $this->id;
   }
 
+  // Retourne l'email, utile pour les vérifications d'admin par adresse.
   public function email(): string
   {
     return $this->email;
   }
 
+  // Reconvertit l'entité en tableau associatif pour la couche vue ou modèle.
+  // On n'inclut les champs optionnels que s'ils ont une valeur.
   public function toArray(): array
   {
+    // On repart des champs extras (books_count, etc.) pour ne pas les perdre
     $data = $this->extra;
     $data['id'] = $this->id;
     $data['username'] = $this->username;
     $data['email'] = $this->email;
 
+    // Les champs optionnels ne sont ajoutés que s'ils ont été renseignés
     if ($this->avatar !== null) {
       $data['avatar'] = $this->avatar;
     }
@@ -69,6 +82,7 @@ final class User
       $data['created_at'] = $this->createdAt;
     }
 
+    // Le hash du mot de passe n'est transmis que quand il a été explicitement chargé
     if ($this->passwordHash !== null) {
       $data['password_hash'] = $this->passwordHash;
     }

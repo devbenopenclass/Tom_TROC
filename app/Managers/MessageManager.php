@@ -5,8 +5,12 @@ use App\Core\Model;
 use App\Entities\Message;
 use PDOException;
 
+// Accès SQL pour la messagerie : envoi, lecture des fils, compteur non lus,
+// et liste des conversations. Tout retourne des entités Message hydratées.
 final class MessageManager extends Model
 {
+  // Compte les messages non lus pour l'utilisateur connecté.
+  // En cas d'erreur SQL (ex : colonne is_read absente sur un vieux schéma), on renvoie 0.
   public static function unreadCount(int $me): int
   {
     try {
@@ -19,10 +23,12 @@ final class MessageManager extends Model
       $row = $stmt->fetch();
       return (int)($row['c'] ?? 0);
     } catch (PDOException $e) {
+      // On ne bloque pas toute la page si la colonne n'existe pas encore
       return 0;
     }
   }
 
+  // Insère un message dans la table.
   public static function send(int $senderId, int $receiverId, string $content): void
   {
     $stmt = self::db()->prepare("
@@ -32,6 +38,8 @@ final class MessageManager extends Model
     $stmt->execute(['s' => $senderId, 'r' => $receiverId, 'c' => $content]);
   }
 
+  // Vérifie si deux membres ont déjà échangé au moins un message,
+  // dans un sens ou dans l'autre.
   public static function hasThread(int $me, int $other): bool
   {
     $stmt = self::db()->prepare("
@@ -46,6 +54,9 @@ final class MessageManager extends Model
     return (bool)$stmt->fetchColumn();
   }
 
+  // Retourne tous les messages entre deux membres, triés par date croissante
+  // pour afficher la conversation dans l'ordre chronologique.
+  // Les pseudos et avatars des deux côtés sont inclus pour éviter des requêtes supplémentaires.
   public static function thread(int $me, int $other): array
   {
     $stmt = self::db()->prepare("
@@ -62,6 +73,8 @@ final class MessageManager extends Model
     return self::hydrateMany($stmt->fetchAll());
   }
 
+  // Marque comme lus tous les messages reçus dans le fil actif.
+  // On ignore silencieusement les erreurs si la colonne is_read n'existe pas.
   public static function markThreadAsRead(int $me, int $other): void
   {
     try {
@@ -74,9 +87,14 @@ final class MessageManager extends Model
       ");
       $stmt->execute(['me' => $me, 'other' => $other]);
     } catch (PDOException $e) {
+      // Pas grave si ça échoue, le badge sera juste potentiellement incorrect
     }
   }
 
+  // Retourne la liste des conversations de l'utilisateur :
+  // une ligne par interlocuteur avec le dernier message et le compteur de non lus.
+  // On tente d'abord la requête avec les non lus, et si elle échoue (vieux schéma),
+  // on retombe sur la version sans compteur.
   public static function inbox(int $me): array
   {
     try {
@@ -84,12 +102,15 @@ final class MessageManager extends Model
       $stmt->execute(['me' => $me]);
       return self::hydrateMany($stmt->fetchAll());
     } catch (PDOException $e) {
+      // Fallback si la colonne is_read n'existe pas encore dans la base
       $stmt = self::db()->prepare(self::inboxQuery(false));
       $stmt->execute(['me' => $me]);
       return self::hydrateMany($stmt->fetchAll());
     }
   }
 
+  // Retourne tous les membres (sauf soi-même) avec leur nombre de livres.
+  // Utilisé pour la liste des contacts dans la messagerie.
   public static function contacts(int $me): array
   {
     $stmt = self::db()->prepare("
@@ -105,13 +126,18 @@ final class MessageManager extends Model
     return self::hydrateMany($stmt->fetchAll());
   }
 
+  // Hydrate un tableau de lignes en tableau d'entités Message.
   private static function hydrateMany(array $rows): array
   {
     return array_map(static fn (array $row): Message => Message::fromArray($row), $rows);
   }
 
+  // Construit la requête SQL de la boîte de réception.
+  // $withUnreadCount permet d'activer ou désactiver le compteur de messages non lus
+  // selon que la colonne is_read existe ou non dans la base.
   private static function inboxQuery(bool $withUnreadCount): string
   {
+    // Si on peut compter les non lus, on prépare la jointure correspondante
     $unreadSelect = $withUnreadCount ? 'COALESCE(unread.unread_count, 0)' : '0';
     $unreadJoin = $withUnreadCount ? "
         LEFT JOIN (
@@ -121,6 +147,7 @@ final class MessageManager extends Model
           GROUP BY sender_id
         ) unread ON unread.sender_id = CASE WHEN m.sender_id = :me THEN m.receiver_id ELSE m.sender_id END" : '';
 
+    // La sous-requête "latest" garantit qu'on ne récupère que le dernier message par fil
     return "
       SELECT
         CASE WHEN m.sender_id = :me THEN m.receiver_id ELSE m.sender_id END AS other_id,
