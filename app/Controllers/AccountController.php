@@ -165,7 +165,7 @@ class AccountController extends Controller
     $tmpName = (string)($file['tmp_name'] ?? '');
     $mime = $tmpName !== '' ? mime_content_type($tmpName) : false;
     if (!is_string($mime) || !isset($allowed[$mime])) {
-      return ['path' => null, 'error' => 'Le format de l'avatar doit être JPG, PNG ou WebP.'];
+      return ['path' => null, 'error' => "Le format de l'avatar doit être JPG, PNG ou WebP."];
     }
 
     // On crée le dossier de destination si ce n'est pas déjà fait
@@ -188,7 +188,7 @@ class AccountController extends Controller
   private function profileSuccessMessage(bool $passwordChanged, bool $avatarChanged): string
   {
     if ($passwordChanged && $avatarChanged) {
-      return 'Compte mis à jour. Le mot de passe et l'avatar ont bien été modifiés.';
+      return "Compte mis à jour. Le mot de passe et l'avatar ont bien été modifiés.";
     }
 
     if ($passwordChanged) {
@@ -196,7 +196,7 @@ class AccountController extends Controller
     }
 
     if ($avatarChanged) {
-      return 'Compte mis à jour. L'avatar a bien été modifié.';
+      return "Compte mis à jour. L'avatar a bien été modifié.";
     }
 
     return 'Compte mis à jour.';
