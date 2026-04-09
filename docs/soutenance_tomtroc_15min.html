@@ -97,6 +97,76 @@
       font-size: 9.5pt;
       color: #486581;
     }
+    /* ── Sitemap diagram ── */
+    .sitemap { margin: 0.3cm 0 0.5cm; }
+    .sm-zone {
+      border: 1.5px solid;
+      border-radius: 6px;
+      padding: 0.25cm 0.35cm;
+      margin-bottom: 0.12cm;
+    }
+    .zone-pub    { border-color: #b7ebc6; background: #f0fff4; }
+    .zone-auth   { border-color: #bee3f8; background: #ebf8ff; }
+    .zone-member { border-color: #fbd38d; background: #fffaf0; }
+    .zone-admin  { border-color: #feb2b2; background: #fff5f5; }
+    .sm-label {
+      font-size: 7.5pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #486581;
+      margin-bottom: 0.14cm;
+    }
+    .sm-row {
+      display: flex;
+      align-items: stretch;
+      flex-wrap: wrap;
+      gap: 0.1cm;
+      margin-bottom: 0.06cm;
+    }
+    .sm-box {
+      border: 1px solid #d9e2ec;
+      border-radius: 4px;
+      background: #fff;
+      padding: 0.08cm 0.14cm;
+      min-width: 2.6cm;
+      display: flex;
+      flex-direction: column;
+    }
+    .sm-box.sm-danger { border-color: #feb2b2; }
+    .sm-url  { font-size: 6.5pt; color: #829ab1; font-family: monospace; }
+    .sm-name { font-size: 9pt; font-weight: bold; color: #102a43; margin: 0.03cm 0; }
+    .sm-act  { font-size: 7.5pt; color: #486581; }
+    .sm-arr {
+      font-size: 13pt;
+      color: #9fb3c8;
+      display: flex;
+      align-items: center;
+      padding: 0 0.02cm;
+      flex-shrink: 0;
+    }
+    .sm-pipe { color: #d9e2ec; font-size: 16pt; }
+    .sm-connector {
+      text-align: center;
+      font-size: 8.5pt;
+      color: #9fb3c8;
+      margin: 0.04cm 0;
+    }
+    .sm-legend {
+      display: flex;
+      gap: 0.3cm;
+      flex-wrap: wrap;
+      margin-top: 0.15cm;
+      font-size: 7.5pt;
+      color: #486581;
+    }
+    .sm-legend-item { display: flex; align-items: center; gap: 0.08cm; }
+    .sm-dot {
+      width: 0.22cm; height: 0.22cm;
+      border-radius: 50%;
+      border: 1.5px solid;
+      display: inline-block;
+    }
   </style>
 </head>
 <body>
@@ -153,7 +223,148 @@
     </tbody>
   </table>
 
-  <h2>2. Script Oral Pret A Dire Avec Reponses Pieges Integrees</h2>
+  <h2>2. Carte Des Pages Et Navigation</h2>
+  <p class="small">Vue d'ensemble des pages, routes et actions par zone d'acces. Les fleches indiquent les transitions principales.</p>
+
+  <div class="sitemap">
+
+    <!-- Zone publique -->
+    <div class="sm-zone zone-pub">
+      <div class="sm-label">Zone publique — aucune connexion requise</div>
+      <div class="sm-row">
+        <div class="sm-box">
+          <span class="sm-url">GET /</span>
+          <span class="sm-name">Accueil</span>
+          <span class="sm-act">Derniers livres ajoutes</span>
+        </div>
+        <span class="sm-arr">→</span>
+        <div class="sm-box">
+          <span class="sm-url">GET /books</span>
+          <span class="sm-name">Catalogue</span>
+          <span class="sm-act">Recherche par titre, auteur, membre</span>
+        </div>
+        <span class="sm-arr">→</span>
+        <div class="sm-box">
+          <span class="sm-url">GET /book/:id</span>
+          <span class="sm-name">Fiche livre</span>
+          <span class="sm-act">Detail · bouton Contacter le membre</span>
+        </div>
+        <span class="sm-arr">→</span>
+        <div class="sm-box">
+          <span class="sm-url">GET /profile/:id</span>
+          <span class="sm-name">Profil public</span>
+          <span class="sm-act">Livres du membre · bouton Contacter</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sm-connector">↓ redirection si non connecte</div>
+
+    <!-- Zone auth -->
+    <div class="sm-zone zone-auth">
+      <div class="sm-label">Authentification</div>
+      <div class="sm-row">
+        <div class="sm-box">
+          <span class="sm-url">GET + POST /login</span>
+          <span class="sm-name">Connexion</span>
+          <span class="sm-act">Email ou pseudo · hash verifie · session regeneree</span>
+        </div>
+        <span class="sm-arr">↔</span>
+        <div class="sm-box">
+          <span class="sm-url">GET + POST /register</span>
+          <span class="sm-name">Inscription</span>
+          <span class="sm-act">Pseudo unique · email unique · mot de passe hache</span>
+        </div>
+        <span class="sm-arr sm-pipe">|</span>
+        <div class="sm-box">
+          <span class="sm-url">POST /logout</span>
+          <span class="sm-name">Deconnexion</span>
+          <span class="sm-act">Session detruite · redirection accueil</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sm-connector">↓ acces reserve aux membres connectes</div>
+
+    <!-- Zone membre -->
+    <div class="sm-zone zone-member">
+      <div class="sm-label">Espace membre — session active requise</div>
+      <div class="sm-row">
+        <div class="sm-box">
+          <span class="sm-url">GET /account</span>
+          <span class="sm-name">Mon compte</span>
+          <span class="sm-act">Resume profil + mes livres</span>
+        </div>
+        <span class="sm-arr">→</span>
+        <div class="sm-box">
+          <span class="sm-url">GET /account/edit</span>
+          <span class="sm-name">Modifier profil</span>
+          <span class="sm-act">POST /account/update · avatar upload</span>
+        </div>
+        <span class="sm-arr sm-pipe">|</span>
+        <div class="sm-box">
+          <span class="sm-url">GET /book/new</span>
+          <span class="sm-name">Ajouter livre</span>
+          <span class="sm-act">POST /book/new · image optionnelle</span>
+        </div>
+        <span class="sm-arr">→</span>
+        <div class="sm-box">
+          <span class="sm-url">GET /book/:id/edit</span>
+          <span class="sm-name">Modifier livre</span>
+          <span class="sm-act">POST update · POST delete (proprietaire)</span>
+        </div>
+      </div>
+      <div class="sm-row" style="margin-top:0.1cm;">
+        <div class="sm-box">
+          <span class="sm-url">GET /messages</span>
+          <span class="sm-name">Messagerie</span>
+          <span class="sm-act">Liste conversations · compteur non lus</span>
+        </div>
+        <span class="sm-arr">→</span>
+        <div class="sm-box">
+          <span class="sm-url">GET /messages/:id</span>
+          <span class="sm-name">Fil de discussion</span>
+          <span class="sm-act">POST /message/send · marque comme lu</span>
+        </div>
+        <span class="sm-arr sm-pipe">|</span>
+        <div class="sm-box sm-danger">
+          <span class="sm-url">POST /account/delete</span>
+          <span class="sm-name">Supprimer compte</span>
+          <span class="sm-act">Livres supprimes en cascade · session detruite</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sm-connector">↓ acces reserve aux administrateurs (role admin verifie en session + BDD)</div>
+
+    <!-- Zone admin -->
+    <div class="sm-zone zone-admin">
+      <div class="sm-label">Espace admin — role admin requis · HTTP 403 sinon</div>
+      <div class="sm-row">
+        <div class="sm-box">
+          <span class="sm-url">GET /admin/books</span>
+          <span class="sm-name">Gestion des livres</span>
+          <span class="sm-act">Recherche · POST /admin/books/status · POST /admin/books/delete</span>
+        </div>
+        <span class="sm-arr sm-pipe">|</span>
+        <div class="sm-box">
+          <span class="sm-url">GET /admin/members</span>
+          <span class="sm-name">Gestion des membres</span>
+          <span class="sm-act">Recherche · POST /admin/members/role · POST /admin/members/delete</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sm-legend">
+      <span class="sm-legend-item"><span class="sm-dot" style="border-color:#38a169;background:#f0fff4;"></span> Public</span>
+      <span class="sm-legend-item"><span class="sm-dot" style="border-color:#3182ce;background:#ebf8ff;"></span> Auth</span>
+      <span class="sm-legend-item"><span class="sm-dot" style="border-color:#d69e2e;background:#fffaf0;"></span> Membre connecte</span>
+      <span class="sm-legend-item"><span class="sm-dot" style="border-color:#e53e3e;background:#fff5f5;"></span> Admin uniquement</span>
+      <span class="sm-legend-item">→ navigation · | separateur · ↔ pages liees</span>
+    </div>
+  </div>
+
+  <h2>3. Script Oral Pret A Dire Avec Reponses Pieges Integrees</h2>
 
   <h3>Introduction</h3>
   <p>Bonjour. Je vais vous presenter TomTroc, une application web dediee a l'echange de livres entre membres. L'idee du projet est de permettre a un utilisateur de proposer des livres, de consulter ceux des autres membres, puis d'entrer en contact via une messagerie interne. Mon objectif etait de construire une application complete, claire et maintenable, en respectant le cadre impose par le projet, notamment une architecture MVC, une base relationnelle et l'absence de librairies PHP externes.</p>
@@ -191,7 +402,7 @@
   <h3>Conclusion</h3>
   <p>Pour conclure, TomTroc est une application complete, fonctionnelle et plus saine apres refactorisation. Ce projet montre ma capacite a repondre a un besoin utilisateur, a structurer une application web, a appliquer les bases de la securite, et a faire evoluer un code existant pour le rendre plus maintenable sans casser l'experience utilisateur. Si le jury me demande quelle est ma plus-value personnelle, je peux dire qu'elle se situe autant dans le developpement que dans la relecture technique : identifier les risques, corriger sans casser le visuel, et amener le projet a un meilleur niveau de conformite architecturale.</p>
 
-  <h2>3. Termes Techniques Et Definitions</h2>
+  <h2>4. Termes Techniques Et Definitions</h2>
 
   <div class="term"><strong>MVC</strong><span class="tag">Architecture</span><br>Modele, Vue, Controleur. Le modele gere les donnees, la vue gere l'affichage, le controleur fait le lien entre les deux.</div>
   <div class="term"><strong>Entite</strong><span class="tag">Architecture</span><br>Objet metier representant une donnee du domaine, par exemple un utilisateur, un livre ou un message.</div>
@@ -211,7 +422,7 @@
   <div class="term"><strong>Refactorisation</strong><span class="tag">Qualite logicielle</span><br>Modification de la structure interne du code sans changer le comportement fonctionnel visible.</div>
   <div class="term"><strong>CRUD</strong><span class="tag">Base de donnees</span><br>Create, Read, Update, Delete : creer, lire, modifier et supprimer des donnees en base.</div>
 
-  <h2>4. Flux A Montrer Au Jury</h2>
+  <h2>5. Flux A Montrer Au Jury</h2>
   <table class="flow-table">
     <thead>
       <tr>
@@ -249,12 +460,12 @@
 
   <div class="qa"><strong>Document de flux associe :</strong><br>Un document dedie reprend ces parcours en detail avec les routes reelles du projet : <em>docs/FLOWS_SITE.md</em>.</div>
 
-  <h2>5. Bilan De Conformite A Dire Au Jury</h2>
+  <h2>6. Bilan De Conformite A Dire Au Jury</h2>
   <div class="qa"><strong>Conforme dans le code :</strong><br>README present, Git/GitHub avec historique suffisant, routeur et point d'entree unique, vues avec header et footer communs, base relationnelle avec integrite, CRUD, administration protegee, mots de passe hashes, aucune librairie PHP externe, architecture avec entites et managers.</div>
   <div class="qa"><strong>A verifier formellement :</strong><br>validation W3C, validation WCAG niveau 2 et conformite visuelle exacte aux maquettes Figma. Ces points demandent des outils ou une verification manuelle et ne doivent pas etre annonces comme valides si on ne les a pas testes.</div>
   <div class="qa"><strong>Formulation conseillee :</strong><br>Sur les criteres objectivables dans le code, le projet est globalement conforme. Les points restant a certifier relevent surtout de la validation externe et de la verification visuelle.</div>
 
-  <h2>6. Mini Liste De Questions Tres Pieges</h2>
+  <h2>7. Mini Liste De Questions Tres Pieges</h2>
   <ul>
     <li><strong>Le responsive n'est pas parfait, est-ce eliminatoire ?</strong> Non, la fiche precise que cela ne peut pas a lui seul provoquer un refus de soutenance, meme si cela reste un point de qualite.</li>
     <li><strong>Comment prouvez-vous le critere entite et manager ?</strong> En montrant les classes d'entite dediees et les managers responsables des acces aux donnees, puis les facades de compatibilite qui preservent le comportement existant.</li>
@@ -267,7 +478,7 @@
     <li><strong>Qu'est-ce qu'une vue ne devrait idealement pas faire ?</strong> Lancer des requetes, prendre des decisions metier ou transformer lourdement les donnees.</li>
   </ul>
 
-  <h2>7. Conclusion Courte A Apprendre Par Coeur</h2>
+  <h2>8. Conclusion Courte A Apprendre Par Coeur</h2>
   <div class="conclusion">
     <p>TomTroc est une application web complete construite en PHP natif avec une architecture MVC maison, renforcee par des couches entite et manager. Au-dela des fonctionnalites visibles, j'ai travaille sur la qualite interne du projet : securite, robustesse, clarte architecturale, conformite a la fiche et maintenabilite. Cette soutenance montre donc a la fois la capacite a developper une application fonctionnelle et la capacite a l'ameliorer avec un regard d'ingenierie logicielle.</p>
   </div>
