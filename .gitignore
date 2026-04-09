@@ -7,3 +7,4 @@
 /config/config.local.php
 /config/database.local.php
 .env
+.codex
