@@ -1,12 +1,14 @@
 <?php
 namespace App\Models;
 
-use App\Core\Model;
+use App\Managers\BookManager;
 use App\Core\Url;
 
 // Modèle métier des livres : lecture/écriture en base,
 // fallbacks de catalogue et helpers d'images / descriptions.
-class Book extends Model
+// Les lectures/écritures SQL sont maintenant déléguées à BookManager,
+// qui hydrate une vraie entité App\Entities\Book.
+class Book
 {
   // Retourne l'image d'une carte livre.
   // Priorité : mapping par titre, chemin image stocké, puis fallback global.
@@ -43,16 +45,10 @@ class Book extends Model
   public static function latest(int $limit = 4): array
   {
     try {
-      $stmt = self::db()->prepare("
-        SELECT b.*, u.username
-        FROM books b
-        JOIN users u ON u.id = b.user_id
-        ORDER BY b.created_at DESC
-        LIMIT :limit
-      ");
-      $stmt->bindValue('limit', max(1, $limit), \PDO::PARAM_INT);
-      $stmt->execute();
-      $books = $stmt->fetchAll();
+      $books = array_map(
+        static fn (\App\Entities\Book $book): array => $book->toArray(),
+        BookManager::latest($limit)
+      );
       if (!empty($books)) {
         return $books;
       }
@@ -67,26 +63,10 @@ class Book extends Model
   public static function exchangeList(?string $q = null): array
   {
     try {
-      if ($q) {
-        $stmt = self::db()->prepare("
-          SELECT b.*, u.username
-          FROM books b
-          JOIN users u ON u.id = b.user_id
-          WHERE b.title LIKE :q OR b.author LIKE :q OR u.username LIKE :q
-          ORDER BY b.created_at DESC
-        ");
-        $stmt->execute(['q' => "%{$q}%"]);
-        $books = $stmt->fetchAll();
-      } else {
-        $stmt = self::db()->query("
-          SELECT b.*, u.username
-          FROM books b
-          JOIN users u ON u.id = b.user_id
-          ORDER BY b.created_at DESC
-        ");
-        $books = $stmt->fetchAll();
-      }
-
+      $books = array_map(
+        static fn (\App\Entities\Book $book): array => $book->toArray(),
+        BookManager::exchangeList($q)
+      );
       if (!empty($books)) {
         return $books;
       }
@@ -101,15 +81,7 @@ class Book extends Model
   public static function find(int $id): ?array
   {
     try {
-      $stmt = self::db()->prepare("
-        SELECT b.*, u.username
-        FROM books b
-        JOIN users u ON u.id = b.user_id
-        WHERE b.id = :id
-        LIMIT 1
-      ");
-      $stmt->execute(['id' => $id]);
-      $book = $stmt->fetch();
+      $book = BookManager::find($id)?->toArray();
       if ($book) {
         return $book;
       }
@@ -129,9 +101,10 @@ class Book extends Model
   public static function byUser(int $userId): array
   {
     try {
-      $stmt = self::db()->prepare("SELECT * FROM books WHERE user_id = :uid ORDER BY created_at DESC");
-      $stmt->execute(['uid' => $userId]);
-      return $stmt->fetchAll();
+      return array_map(
+        static fn (\App\Entities\Book $book): array => $book->toArray(),
+        BookManager::byUser($userId)
+      );
     } catch (\Throwable $e) {
       return [];
     }
@@ -140,80 +113,38 @@ class Book extends Model
   // Création d'un livre depuis le formulaire membre.
   public static function create(array $data): int
   {
-    $stmt = self::db()->prepare("
-      INSERT INTO books (user_id, title, author, image, description, status)
-      VALUES (:user_id, :title, :author, :image, :description, :status)
-    ");
-    $stmt->execute($data);
-    return (int) self::db()->lastInsertId();
+    return BookManager::create($data);
   }
 
   // Liste d'administration avec recherche sur livre et propriétaire.
   public static function adminList(string $query = ''): array
   {
-    $sql = implode("\n", [
-      'SELECT b.*, u.username, u.email',
-      'FROM books b',
-      'JOIN users u ON u.id = b.user_id',
-    ]);
-    $params = [];
-
-    if ($query !== '') {
-      $sql .= implode("\n", [
-        '',
-        'WHERE b.title LIKE :query',
-        '   OR b.author LIKE :query',
-        '   OR u.username LIKE :query',
-        '   OR u.email LIKE :query',
-      ]);
-      $params['query'] = '%' . $query . '%';
-    }
-
-    $sql .= implode("\n", [
-      '',
-      'ORDER BY b.created_at DESC, b.id DESC',
-    ]);
-
-    $stmt = self::db()->prepare($sql);
-    $stmt->execute($params);
-
-    return $stmt->fetchAll();
+    return array_map(
+      static fn (\App\Entities\Book $book): array => $book->toArray(),
+      BookManager::adminList($query)
+    );
   }
 
   public static function adminUpdateStatus(int $id, string $status): void
   {
-    $stmt = self::db()->prepare('UPDATE books SET status = :status WHERE id = :id');
-    $stmt->execute([
-      'id' => $id,
-      'status' => $status,
-    ]);
+    BookManager::adminUpdateStatus($id, $status);
   }
 
   public static function adminDelete(int $id): void
   {
-    $stmt = self::db()->prepare('DELETE FROM books WHERE id = :id');
-    $stmt->execute(['id' => $id]);
+    BookManager::adminDelete($id);
   }
 
   // Mise à jour sécurisée : seul le membre qui a ajouté le livre peut modifier sa ligne.
   public static function update(int $id, int $userId, array $data): void
   {
-    $data['id'] = $id;
-    $data['user_id'] = $userId;
-
-    $stmt = self::db()->prepare("
-      UPDATE books
-      SET title=:title, author=:author, image=:image, description=:description, status=:status
-      WHERE id=:id AND user_id=:user_id
-    ");
-    $stmt->execute($data);
+    BookManager::update($id, $userId, $data);
   }
 
   // Suppression sécurisée : seulement pour le membre connecté qui a ajouté le livre.
   public static function delete(int $id, int $userId): void
   {
-    $stmt = self::db()->prepare("DELETE FROM books WHERE id = :id AND user_id = :uid");
-    $stmt->execute(['id' => $id, 'uid' => $userId]);
+    BookManager::delete($id, $userId);
   }
 
   // Génère le texte long des fiches détail.

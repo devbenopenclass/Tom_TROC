@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Soutenance TomTroc - 15 minutes</title>
+  <style>
+    @page { size: A4; margin: 1.6cm; }
+    body {
+      font-family: "Liberation Sans", Arial, sans-serif;
+      color: #1f2933;
+      line-height: 1.45;
+      font-size: 11.5pt;
+    }
+    h1, h2, h3 {
+      font-family: "Liberation Serif", Georgia, serif;
+      margin: 0 0 0.35cm;
+      color: #102a43;
+    }
+    h1 {
+      font-size: 24pt;
+      border-bottom: 2px solid #d9e2ec;
+      padding-bottom: 0.2cm;
+      margin-bottom: 0.45cm;
+    }
+    h2 {
+      font-size: 16pt;
+      margin-top: 0.7cm;
+    }
+    h3 {
+      font-size: 12.5pt;
+      margin-top: 0.45cm;
+    }
+    p { margin: 0 0 0.25cm; }
+    ul { margin: 0.15cm 0 0.35cm 0.6cm; }
+    li { margin-bottom: 0.12cm; }
+    .meta {
+      background: #f0f4f8;
+      border: 1px solid #d9e2ec;
+      padding: 0.35cm 0.45cm;
+      border-radius: 6px;
+      margin-bottom: 0.45cm;
+    }
+    .timeline {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.2cm 0 0.35cm;
+    }
+    .timeline th, .timeline td {
+      border: 1px solid #d9e2ec;
+      padding: 0.2cm 0.24cm;
+      vertical-align: top;
+    }
+    .timeline th {
+      background: #f0f4f8;
+      text-align: left;
+    }
+    .flow-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.2cm 0 0.35cm;
+    }
+    .flow-table th, .flow-table td {
+      border: 1px solid #d9e2ec;
+      padding: 0.18cm 0.22cm;
+      vertical-align: top;
+    }
+    .flow-table th {
+      background: #f7fafc;
+      text-align: left;
+    }
+    .term, .qa {
+      border: 1px solid #d9e2ec;
+      border-radius: 6px;
+      padding: 0.28cm 0.32cm;
+      margin-bottom: 0.2cm;
+      background: #fff;
+    }
+    .term strong, .qa strong {
+      color: #102a43;
+    }
+    .tag {
+      display: inline-block;
+      padding: 0.04cm 0.18cm;
+      border-radius: 999px;
+      background: #e3f2fd;
+      color: #0b4f6c;
+      font-size: 9pt;
+      margin-left: 0.12cm;
+    }
+    .conclusion {
+      background: #f0fff4;
+      border: 1px solid #b7ebc6;
+      border-radius: 6px;
+      padding: 0.35cm 0.42cm;
+    }
+    .small {
+      font-size: 9.5pt;
+      color: #486581;
+    }
+  </style>
+</head>
+<body>
+  <h1>Soutenance TomTroc - 15 minutes</h1>
+
+  <div class="meta">
+    <p><strong>Projet :</strong> TomTroc, plateforme d'echange de livres entre membres.</p>
+    <p><strong>Positionnement :</strong> application web PHP avec architecture MVC, couches entite et manager, base relationnelle MySQL via PDO, sans librairie PHP externe conformement aux exigences du projet.</p>
+    <p><strong>Objectif de la soutenance :</strong> presenter le projet tout en montrant un bilan de conformite honnete par rapport a la fiche d'autoevaluation : ce qui est conforme dans le code, ce qui est securise, et ce qui reste a valider avec des outils externes.</p>
+  </div>
+
+  <h2>1. Fil Conducteur De La Presentation</h2>
+  <p>Le message central a faire passer est simple : j'ai realise une application web fonctionnelle qui repond aux attendus structurels du projet, puis j'ai renforce sa conformite technique. Aujourd'hui, les criteres objectivables dans le code sont globalement conformes, notamment l'architecture MVC avec entites et managers, la base relationnelle, le CRUD, la securite de base, Git/GitHub et l'absence de librairie PHP externe. Les points comme W3C, WCAG ou la conformite exacte aux maquettes doivent, eux, etre verifies avec les outils adaptes.</p>
+
+  <table class="timeline">
+    <thead>
+      <tr>
+        <th style="width: 16%;">Temps</th>
+        <th style="width: 32%;">Partie</th>
+        <th>Ce qu'il faut dire</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>0 a 2 min</td>
+        <td>Contexte et besoin</td>
+        <td>Presenter TomTroc comme une plateforme de mise en relation entre lecteurs pour partager et echanger des livres, avec inscription, bibliotheque personnelle, profils publics, messagerie et administration.</td>
+      </tr>
+      <tr>
+        <td>2 a 5 min</td>
+        <td>Architecture technique</td>
+        <td>Expliquer le point d'entree unique, le routeur, les controleurs, les vues, les entites et les managers. Montrer que le projet respecte l'interdiction des librairies PHP externes imposee par la fiche.</td>
+      </tr>
+      <tr>
+        <td>5 a 8 min</td>
+        <td>Fonctionnalites clés</td>
+        <td>Montrer les parcours utilisateurs reels : consulter des livres, creer un compte, gerer son profil, ajouter un livre, contacter un membre, acceder a l'administration.</td>
+      </tr>
+      <tr>
+        <td>8 a 11 min</td>
+        <td>Securite et robustesse</td>
+        <td>Mettre en avant CSRF, mots de passe hashes, requetes preparees PDO, regeneration de session, controles d'acces, validation des uploads et prevention des comportements ambigus.</td>
+      </tr>
+      <tr>
+        <td>11 a 13 min</td>
+        <td>Bilan de conformite</td>
+        <td>Expliquer ce qui est conforme dans le depot aujourd'hui, puis distinguer les points techniques deja demontres dans le code des points qui demandent encore une validation externe, comme W3C, WCAG ou le controle visuel face a Figma.</td>
+      </tr>
+      <tr>
+        <td>13 a 15 min</td>
+        <td>Conclusion et ouverture</td>
+        <td>Conclure sur la valeur du projet, les acquis techniques et les evolutions possibles : pagination, logs, tests, politique de roles plus fine, notifications, optimisation de requetes.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>2. Script Oral Pret A Dire Avec Reponses Pieges Integrees</h2>
+
+  <h3>Introduction</h3>
+  <p>Bonjour. Je vais vous presenter TomTroc, une application web dediee a l'echange de livres entre membres. L'idee du projet est de permettre a un utilisateur de proposer des livres, de consulter ceux des autres membres, puis d'entrer en contact via une messagerie interne. Mon objectif etait de construire une application complete, claire et maintenable, en respectant le cadre impose par le projet, notamment une architecture MVC, une base relationnelle et l'absence de librairies PHP externes.</p>
+
+  <h3>Besoin Fonctionnel</h3>
+  <p>Le besoin metier est de faciliter le partage de livres. Pour cela, l'application couvre plusieurs cas d'usage : inscription et connexion, gestion du compte, publication d'un livre, consultation du catalogue, affichage du profil public d'un membre, envoi de messages et administration des contenus et des membres. Cette couverture fonctionnelle est importante car la grille verifie que toutes les pages demandees sont presentes et que tous les liens sont operationnels.</p>
+
+  <h3>Architecture</h3>
+  <p>Sur le plan technique, le projet repose sur une architecture MVC maison. Le point d'entree HTTP initialise l'application, le routeur associe chaque URL a une action de controleur, les controleurs coordonnent le traitement, les managers dialoguent avec MySQL via PDO, les entites representent les donnees metier, et les vues se concentrent sur le rendu HTML. Cette organisation repond directement a la fiche, qui impose un routeur, des controleurs, des modeles avec une logique entite et manager ou repository, et un systeme de vues evitant la duplication du header et du footer. Si l'on me demande pourquoi ne pas avoir utilise un framework comme Laravel, la bonne reponse est que ce n'etait pas autorise dans ce projet : il fallait justement respecter une implementation sans librairie PHP de ce type.</p>
+
+  <h3>Choix Techniques</h3>
+  <p>J'ai donc implemente les briques necessaires en PHP : routage, rendu des vues, gestion de session, protection CSRF et helpers d'URL. J'ai egalement structure l'acces aux donnees avec de vraies entites et des managers, tout en gardant des facades de compatibilite pour ne pas casser les fonctionnalites deja en place. L'enjeu n'etait pas de revendiquer un choix personnel de faire sans framework, mais de montrer que je savais respecter les contraintes du cahier d'evaluation. Si l'on me demande pourquoi avoir garde du PHP natif, je peux expliquer que c'etait un attendu explicite du projet, et que cela permet de rendre visibles les mecanismes fondamentaux de l'application.</p>
+
+  <h3>Fonctionnalites A Montrer</h3>
+  <p>Du point de vue utilisateur, l'application permet de parcourir les livres disponibles, de creer un compte, de gerer un profil, d'ajouter un ouvrage, de consulter le profil public d'un membre et de le contacter par messagerie. Il y a aussi une partie administration pour gerer les livres et les membres. Si le jury demande comment l'application est structuree sans melanger toutes ces fonctionnalites, je peux montrer que chaque parcours passe par un controleur dedie, avec des modeles specialises et des vues separees. Je peux aussi rappeler que la partie admin n'est pas accessible a un utilisateur lambda, ce qui est un point verifie par la fiche.</p>
+
+  <h3>Parcours Reels Du Site</h3>
+  <p>J'ai egalement formalise les flux reels du site a partir des routes en place. Le parcours principal est le suivant : accueil, catalogue, fiche livre, puis soit connexion ou inscription si l'utilisateur n'est pas authentifie, soit redirection vers la messagerie avec un contexte livre. Cote membre, l'espace Mon compte permet d'editer le profil, d'ajouter, modifier ou supprimer ses propres livres. Cote admin, il existe deux zones distinctes : gestion des livres et gestion des membres. Si l'on me demande comment je sais que ces flux correspondent au projet reel, je peux m'appuyer directement sur les routes et les controleurs du depot.</p>
+
+  <h3>Securite</h3>
+  <p>J'ai mis en place plusieurs protections de base. Les mots de passe sont stockes avec <strong>password_hash</strong>, les requetes SQL sont preparees via <strong>PDO</strong>, les formulaires sensibles sont proteges par un token <strong>CSRF</strong>, et la session est regeneree a la connexion. J'ai egalement renforce les validations applicatives, notamment sur l'unicite du pseudo, les uploads d'images et les controles d'acces sur les ressources privees ou administrateur. Si on me demande comment je garantis la securite sans framework, je peux repondre que la securite repose d'abord sur les bonnes pratiques : requetes preparees, hash, validation serveur, sessions et controle d'acces. Si on me demande comment je sais qu'un formulaire vient bien du site, je reponds par le token CSRF verifie cote serveur. Si on me demande pourquoi valider cote serveur alors que certains champs sont deja requis en HTML, je reponds qu'un navigateur ou un client malveillant peut contourner le front, donc la vraie confiance doit rester cote serveur. Enfin, la fiche demande explicitement que les mots de passe soient encodes et que les identifiants de connexion a la base ne soient pas visibles sur la derniere version en ligne.</p>
+
+  <h3>Bilan De Conformite</h3>
+  <p>Si je fais un bilan honnete par rapport a la fiche, plusieurs points sont aujourd'hui objectivement conformes dans le depot. Le README est present. Le projet est bien versionne avec Git et GitHub, avec plus de cinq commits. Le point d'entree unique et le routeur sont en place. Les vues reutilisent un header et un footer communs. La base est relationnelle avec cles etrangeres et suppressions en cascade. Les operations CRUD sont presentes. L'administration est protegee. Les mots de passe sont hashes. Les identifiants sensibles locaux ne sont pas versionnes. Et surtout, l'architecture inclut maintenant de vraies entites et de vrais managers, ce qui repond mieux au critere modele entite ou manager. Si l'on me demande ce que je ne peux pas certifier uniquement en lisant le code, je reponds avec honnetete : la conformite exacte W3C, WCAG niveau 2 et le respect pixel perfect de Figma demandent des outils ou une verification visuelle complementaire.</p>
+
+  <h3>Ameliorations Recentes A Valoriser</h3>
+  <p>Un travail d'assainissement a ete realise pour rendre le projet plus robuste et plus conforme. J'ai corrige l'ambiguite de connexion liee a l'absence de verification d'unicite du pseudo, alors que la connexion pouvait se faire par pseudo ou email. J'ai fiabilise les uploads pour que les erreurs ne soient plus silencieuses. J'ai retire une modification de schema SQL a chaud dans la gestion des roles admin, ce qui etait risqué en production. J'ai aussi pousse plus loin le respect du MVC en deplacant du SQL et de la preparation de donnees hors des vues, puis en introduisant une vraie couche entite et manager. Si l'on me demande quel etait le risque principal, je peux citer le pseudo non unique et la mutation du schema a chaud. Si l'on me demande pourquoi du SQL dans un controleur est un probleme, je reponds que cela melange orchestration et acces aux donnees, donc cela nuit a la maintenance et aux tests. Si l'on me demande ce qui prouve que le MVC a ete ameliore, je peux expliquer que les vues affichent maintenant des donnees deja preparees, que le SQL admin est revenu dans les couches de donnees, et que les managers hydratent des entites dediees.</p>
+
+  <h3>Robustesse Et Limites</h3>
+  <p>Sur la robustesse, le projet gere mieux les comportements degradés qu'avant. Certaines parties du catalogue ont deja des mecanismes de repli, et j'ai renforce des zones qui pouvaient tomber plus brutalement, comme certaines recuperations de livres utilisateur. Si l'on me demande si les uploads sont vraiment securises, je peux repondre qu'ils sont desormais verifies par type MIME, limites a des formats attendus, nommes aleatoirement et qu'ils renvoient une erreur explicite en cas d'echec. Si l'on me demande pourquoi je parle de robustesse sans tests automatises, je peux reconnaitre que les tests sont un axe d'amelioration important, mais que la robustesse passe deja par la clarte des responsabilites, la validation serveur et la suppression des comportements silencieux. Je peux aussi preciser avec honnetete que, selon la fiche, l'absence de responsive correct ne peut pas a elle seule provoquer un refus de soutenance, meme si cela reste souhaitable qualitativement.</p>
+
+  <h3>Ouverture Et Production</h3>
+  <p>Si le projet devait aller plus loin, mes priorites seraient d'ajouter de vraies migrations de base de donnees, des tests automatisés, une strategie de logs, une meilleure gestion des erreurs, une pagination du catalogue, et une politique de droits plus fine. J'ajouterais aussi une vraie campagne de validation W3C et WCAG avec corrections dediees, afin de transformer les points encore a verifier en points formellement valides. Cela montre que je distingue bien ce qui releve des attendus pedagogiques du projet, de ce qui serait necessaire pour une mise en production plus professionnelle.</p>
+
+  <h3>Conclusion</h3>
+  <p>Pour conclure, TomTroc est une application complete, fonctionnelle et plus saine apres refactorisation. Ce projet montre ma capacite a repondre a un besoin utilisateur, a structurer une application web, a appliquer les bases de la securite, et a faire evoluer un code existant pour le rendre plus maintenable sans casser l'experience utilisateur. Si le jury me demande quelle est ma plus-value personnelle, je peux dire qu'elle se situe autant dans le developpement que dans la relecture technique : identifier les risques, corriger sans casser le visuel, et amener le projet a un meilleur niveau de conformite architecturale.</p>
+
+  <h2>3. Termes Techniques Et Definitions</h2>
+
+  <div class="term"><strong>MVC</strong><span class="tag">Architecture</span><br>Modele, Vue, Controleur. Le modele gere les donnees, la vue gere l'affichage, le controleur fait le lien entre les deux.</div>
+  <div class="term"><strong>Entite</strong><span class="tag">Architecture</span><br>Objet metier representant une donnee du domaine, par exemple un utilisateur, un livre ou un message.</div>
+  <div class="term"><strong>Manager</strong><span class="tag">Architecture</span><br>Classe chargee des acces aux donnees et de l'hydratation des entites. Elle centralise les requetes SQL.</div>
+  <div class="term"><strong>Routeur</strong><span class="tag">HTTP</span><br>Composant qui associe une URL et une methode HTTP, par exemple GET ou POST, a une action de controleur.</div>
+  <div class="term"><strong>Point d'entree unique</strong><span class="tag">Front controller</span><br>Fichier central, ici <em>public/index.php</em>, qui recoit toutes les requetes et delegue ensuite au routeur.</div>
+  <div class="term"><strong>Autoload</strong><span class="tag">Organisation du code</span><br>Mecanisme qui charge automatiquement une classe PHP lorsqu'elle est utilisee, sans avoir a inclure chaque fichier manuellement.</div>
+  <div class="term"><strong>PDO</strong><span class="tag">Base de donnees</span><br>Extension native de PHP pour se connecter a une base de donnees et executer des requetes de maniere portable et securisee.</div>
+  <div class="term"><strong>Requete preparee</strong><span class="tag">Securite SQL</span><br>Requete SQL avec parametres separes des donnees utilisateur, ce qui limite les injections SQL.</div>
+  <div class="term"><strong>Injection SQL</strong><span class="tag">Faille</span><br>Attaque consistant a injecter du SQL malveillant dans une requete mal protegee.</div>
+  <div class="term"><strong>CSRF</strong><span class="tag">Securite formulaire</span><br>Cross-Site Request Forgery. Attaque qui pousse un utilisateur connecte a soumettre une action a son insu. Un token unique permet de verifier que le formulaire vient bien du site.</div>
+  <div class="term"><strong>Hash de mot de passe</strong><span class="tag">Securite</span><br>Transformation irreversible du mot de passe avant stockage. On ne stocke jamais le mot de passe en clair.</div>
+  <div class="term"><strong>Session</strong><span class="tag">Etat utilisateur</span><br>Mecanisme permettant de conserver l'etat d'un utilisateur connecte entre plusieurs requetes HTTP.</div>
+  <div class="term"><strong>Regeneration de session</strong><span class="tag">Securite</span><br>Changement de l'identifiant de session lors d'une connexion pour limiter les risques de fixation de session.</div>
+  <div class="term"><strong>Validation serveur</strong><span class="tag">Robustesse</span><br>Verification des donnees cote serveur, meme si un controle existe deja cote navigateur. C'est indispensable car le front peut etre contourne.</div>
+  <div class="term"><strong>MIME type</strong><span class="tag">Upload</span><br>Type de contenu d'un fichier, par exemple image/jpeg ou image/png, utilise ici pour filtrer les uploads autorises.</div>
+  <div class="term"><strong>Refactorisation</strong><span class="tag">Qualite logicielle</span><br>Modification de la structure interne du code sans changer le comportement fonctionnel visible.</div>
+  <div class="term"><strong>CRUD</strong><span class="tag">Base de donnees</span><br>Create, Read, Update, Delete : creer, lire, modifier et supprimer des donnees en base.</div>
+
+  <h2>4. Flux A Montrer Au Jury</h2>
+  <table class="flow-table">
+    <thead>
+      <tr>
+        <th style="width: 28%;">Flux</th>
+        <th>Enchainement conforme au projet</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Parcours principal</td>
+        <td>Accueil, catalogue, fiche livre, puis connexion ou inscription si besoin, puis messagerie avec contexte livre.</td>
+      </tr>
+      <tr>
+        <td>Authentification</td>
+        <td>Formulaire, validation serveur, session ouverte, regeneration d'identifiant de session, redirection vers Mon compte.</td>
+      </tr>
+      <tr>
+        <td>Espace membre</td>
+        <td>Mon compte, edition du profil, gestion de la bibliotheque personnelle, suppression de son propre compte.</td>
+      </tr>
+      <tr>
+        <td>Messagerie</td>
+        <td>Premier message autorise via un livre valide ou reponse sur un fil deja existant, puis consultation du fil dans la page Messages.</td>
+      </tr>
+      <tr>
+        <td>Administration</td>
+        <td>Deux pages protegees : gestion des livres et gestion des membres, avec actions en POST pour modifier statuts, roles ou suppressions.</td>
+      </tr>
+      <tr>
+        <td>Flux technique</td>
+        <td>Requete, point d'entree, App, Router, Controller, facade de modele, Manager, Entite, puis rendu de la vue HTML.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="qa"><strong>Document de flux associe :</strong><br>Un document dedie reprend ces parcours en detail avec les routes reelles du projet : <em>docs/FLOWS_SITE.md</em>.</div>
+
+  <h2>5. Bilan De Conformite A Dire Au Jury</h2>
+  <div class="qa"><strong>Conforme dans le code :</strong><br>README present, Git/GitHub avec historique suffisant, routeur et point d'entree unique, vues avec header et footer communs, base relationnelle avec integrite, CRUD, administration protegee, mots de passe hashes, aucune librairie PHP externe, architecture avec entites et managers.</div>
+  <div class="qa"><strong>A verifier formellement :</strong><br>validation W3C, validation WCAG niveau 2 et conformite visuelle exacte aux maquettes Figma. Ces points demandent des outils ou une verification manuelle et ne doivent pas etre annonces comme valides si on ne les a pas testes.</div>
+  <div class="qa"><strong>Formulation conseillee :</strong><br>Sur les criteres objectivables dans le code, le projet est globalement conforme. Les points restant a certifier relevent surtout de la validation externe et de la verification visuelle.</div>
+
+  <h2>6. Mini Liste De Questions Tres Pieges</h2>
+  <ul>
+    <li><strong>Le responsive n'est pas parfait, est-ce eliminatoire ?</strong> Non, la fiche precise que cela ne peut pas a lui seul provoquer un refus de soutenance, meme si cela reste un point de qualite.</li>
+    <li><strong>Comment prouvez-vous le critere entite et manager ?</strong> En montrant les classes d'entite dediees et les managers responsables des acces aux donnees, puis les facades de compatibilite qui preservent le comportement existant.</li>
+    <li><strong>Pouvez-vous affirmer que tout est valide W3C et WCAG ?</strong> Non, pas sans passage par les validateurs et les controles adaptes. Je peux dire que le code va dans le bon sens, mais pas certifier un resultat non teste.</li>
+    <li><strong>Comment prouvez-vous que vos flux correspondent au site reel ?</strong> En montrant que chaque etape du parcours correspond a une route definie et a un controleur effectivement present dans le projet.</li>
+    <li><strong>Pourquoi ne pas gerer les roles uniquement en base ?</strong> Parce qu'il faut une source de verite stable et une vraie migration. Le code ne doit pas essayer d'inventer le schema en production.</li>
+    <li><strong>Pourquoi avoir garde du PHP natif alors que cela augmente le travail ?</strong> Parce que c'etait la contrainte du projet, et qu'elle permet de montrer explicitement la comprehension des couches de l'application.</li>
+    <li><strong>Comment savez-vous qu'un formulaire vient bien de votre site ?</strong> Grace au token CSRF compare cote serveur.</li>
+    <li><strong>Pourquoi valider cote serveur si le HTML impose deja required ?</strong> Parce qu'un client peut contourner ou falsifier le formulaire.</li>
+    <li><strong>Qu'est-ce qu'une vue ne devrait idealement pas faire ?</strong> Lancer des requetes, prendre des decisions metier ou transformer lourdement les donnees.</li>
+  </ul>
+
+  <h2>7. Conclusion Courte A Apprendre Par Coeur</h2>
+  <div class="conclusion">
+    <p>TomTroc est une application web complete construite en PHP natif avec une architecture MVC maison, renforcee par des couches entite et manager. Au-dela des fonctionnalites visibles, j'ai travaille sur la qualite interne du projet : securite, robustesse, clarte architecturale, conformite a la fiche et maintenabilite. Cette soutenance montre donc a la fois la capacite a developper une application fonctionnelle et la capacite a l'ameliorer avec un regard d'ingenierie logicielle.</p>
+  </div>
+
+  <p class="small">Document genere pour une soutenance orale d'environ 15 minutes. Conseil : presenter calmement, illustrer avec 2 ou 3 ecrans maximum, et utiliser la mini liste finale uniquement comme pense-bete.</p>
+</body>
+</html>
