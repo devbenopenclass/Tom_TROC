@@ -45,13 +45,18 @@ class ProfileController extends Controller
       ];
     }
 
+    $currentUserId = (int)($_SESSION['user_id'] ?? 0);
+    $profileUserId = (int)($user['id'] ?? 0);
+
     return [
-      'id' => (int)($user['id'] ?? 0),
+      'id' => $profileUserId,
       'username' => (string)($user['username'] ?? ''),
       'bio' => (string)($user['bio'] ?? ''),
       'avatar' => Url::asset(User::avatarPath($user)),
       // On peut contacter le membre seulement si on est connecté et que ce n'est pas soi-même
-      'can_contact' => !empty($_SESSION['user_id']) && (int)$_SESSION['user_id'] !== (int)$user['id'],
+      'can_contact' => $currentUserId > 0 && $currentUserId !== $profileUserId,
+      // Le propriétaire du profil peut ajouter un livre depuis sa propre page
+      'is_own_profile' => $currentUserId > 0 && $currentUserId === $profileUserId,
       'books' => $bookCards,
     ];
   }

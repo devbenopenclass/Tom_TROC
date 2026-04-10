@@ -25,7 +25,12 @@
 </section>
 
 <section class="card">
-  <h2>Bibliothèque</h2>
+  <div class="account-books__toolbar">
+    <h2>Bibliothèque</h2>
+    <?php if ($profileView['is_own_profile']): ?>
+      <a class="btn account-books__add" href="<?= $base ?>/books/create">Ajouter un livre</a>
+    <?php endif; ?>
+  </div>
   <?php if (empty($profileView['books'])): ?>
     <p class="muted">Aucun livre dans cette bibliothèque.</p>
   <?php else: ?>
