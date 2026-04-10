@@ -89,7 +89,7 @@
         <span>Action</span>
       </div>
 
-      <?php if (empty($books)): ?>
+      <?php if (empty($accountView['book_rows'])): ?>
         <div class="account-books__empty">Vous n'avez pas encore ajouté de livre.</div>
       <?php else: ?>
         <?php foreach ($accountView['book_rows'] as $b): ?>

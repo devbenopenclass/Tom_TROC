@@ -1,6 +1,8 @@
 # TomTroc
 
-TomTroc est une application PHP MVC de partage et d'echange de livres entre membres.
+TomTroc est une application web PHP de partage et d'echange de livres entre membres.
+Le projet respecte une architecture MVC maison sans librairie PHP externe, avec une couche
+`Entity` / `Manager` pour structurer l'acces aux donnees.
 
 ## Fonctionnalites
 
@@ -23,6 +25,7 @@ TomTroc est une application PHP MVC de partage et d'echange de livres entre memb
 - Apache
 - HTML
 - CSS
+- PDO
 
 ## Structure
 
@@ -30,9 +33,12 @@ TomTroc est une application PHP MVC de partage et d'echange de livres entre memb
 app/
   Controllers/
   Core/
+  Entities/
+  Managers/
   Models/
   Views/
 config/
+docs/
 public/
 storage/
 README.md
@@ -53,6 +59,12 @@ LIEN_REPO.txt
 - `app/Controllers/BookController.php`
 - `app/Controllers/MessageController.php`
 - `app/Controllers/AdminController.php`
+- `app/Entities/User.php`
+- `app/Entities/Book.php`
+- `app/Entities/Message.php`
+- `app/Managers/UserManager.php`
+- `app/Managers/BookManager.php`
+- `app/Managers/MessageManager.php`
 - `app/Models/User.php`
 - `app/Models/Book.php`
 - `app/Models/Message.php`
@@ -120,6 +132,8 @@ http://IP_DU_PC/tomtroc/
 Pages publiques :
 
 - `/`
+- `/mentions-legales`
+- `/politique-confidentialite`
 - `/register`
 - `/login`
 - `/books/exchange`
@@ -133,8 +147,10 @@ Espace membre :
 - `/account/delete`
 - `/books/create`
 - `/books/edit?id=...`
+- `/books/delete`
 - `/messages`
 - `/messages/thread?user=...`
+- `/messages/send`
 
 Administration :
 
@@ -176,6 +192,43 @@ Le schema SQL principal definit trois tables :
 
 La table `users` peut stocker un role de compte avec le champ `role`.
 Les relations entre tables sont definies avec des cles etrangeres et des suppressions en cascade.
+
+## Architecture
+
+Le projet suit l'organisation suivante :
+
+- `public/index.php` : point d'entree unique
+- `app/Core/Router.php` : routage GET / POST
+- `app/Controllers/` : orchestration des actions
+- `app/Views/` : rendu HTML avec layout commun
+- `app/Models/` : facades de compatibilite appelees par les controleurs
+- `app/Managers/` : acces SQL via PDO
+- `app/Entities/` : objets metier hydratant les donnees
+
+Flux technique simplifie :
+
+```text
+Requete HTTP
+-> public/index.php
+-> App
+-> Router
+-> Controller
+-> Model facade
+-> Manager
+-> Entity / MySQL
+-> View
+-> HTML
+```
+
+## Securite et robustesse
+
+- mots de passe stockes avec `password_hash`
+- requetes preparees via PDO
+- token CSRF sur les formulaires sensibles
+- regeneration de session a la connexion
+- controle d'acces pour les espaces membre et admin
+- verification MIME sur les uploads d'images
+- affichage d'erreurs explicites si une creation ou une modification de livre echoue
 
 ## Assets utiles
 

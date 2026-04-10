@@ -71,7 +71,17 @@ class BookController extends Controller
 
     // On écrase l'image par le chemin réel si un fichier a bien été uploadé
     $data['image'] = $imageUpload['path'] ?? $data['image'];
-    Book::create($data);
+    try {
+      Book::create($data);
+    } catch (\Throwable $e) {
+      $this->renderBookFormError(
+        'create',
+        "Impossible d'ajouter le livre pour le moment.",
+        $data
+      );
+      return;
+    }
+
     $this->redirect(self::ACCOUNT_PATH);
   }
 
@@ -109,7 +119,13 @@ class BookController extends Controller
 
     $data['image'] = $imageUpload['path'] ?? $data['image'];
 
-    Book::update($id, $this->currentUserId(), $data);
+    try {
+      Book::update($id, $this->currentUserId(), $data);
+    } catch (\Throwable $e) {
+      $this->renderBookFormError('edit', "Impossible d'enregistrer les modifications pour le moment.", array_merge($book, $data, ['id' => $id]));
+      return;
+    }
+
     $this->redirect(self::ACCOUNT_PATH);
   }
 
