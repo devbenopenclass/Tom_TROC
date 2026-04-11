@@ -18,10 +18,10 @@ $passwordFields = [
     <h1>Modifier mon compte</h1>
     <p>Mets à jour ton pseudo, ta bio et ton mot de passe.</p>
   </div>
-  <img src="<?= $base ?>/assets/img/figma/vector-2.svg" alt="Décor">
+  <img src="<?= $base ?>/assets/img/figma/vector-2.svg" alt="">
 </section>
 
-<section class="card">
+<div class="card">
   <?php if ($errorMessage !== ''): ?><p class="error"><?= htmlspecialchars($errorMessage) ?></p><?php endif; ?>
 
   <form method="post" action="<?= $base ?>/account/profile" class="form form-wide" enctype="multipart/form-data">
@@ -51,4 +51,4 @@ $passwordFields = [
 
     <button class="btn" type="submit">Enregistrer</button>
   </form>
-</section>
+</div>

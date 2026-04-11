@@ -27,7 +27,7 @@ require __DIR__ . '/_intro.php';
       </div>
 
       <?php foreach (($members ?? []) as $member): ?>
-        <article class="admin-table__row">
+        <div class="admin-table__row">
           <div>#<?= (int)$member['id'] ?></div>
           <div><?= View::e($member['username'] ?? '') ?></div>
           <div><?= View::e($member['email'] ?? '') ?></div>
@@ -59,7 +59,7 @@ require __DIR__ . '/_intro.php';
               <button class="admin-table__danger" type="submit">Supprimer</button>
             </form>
           </div>
-        </article>
+        </div>
       <?php endforeach; ?>
 
       <?php if (empty($members)): ?>

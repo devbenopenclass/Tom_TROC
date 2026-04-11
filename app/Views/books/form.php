@@ -23,7 +23,7 @@ $statusOptions = [
 <section class="edit-page">
   <h1><?= $isEdit ? 'Modifier les informations' : 'Ajouter un livre' ?></h1>
 
-  <section class="edit-panel">
+  <div class="edit-panel">
     <?php if ($errorMessage !== ''): ?><p class="error"><?= htmlspecialchars($errorMessage) ?></p><?php endif; ?>
 
     <form method="post" enctype="multipart/form-data"
@@ -69,5 +69,5 @@ $statusOptions = [
         <button class="btn" type="submit">Valider</button>
       </div>
     </form>
-  </section>
+  </div>
 </section>

@@ -13,7 +13,7 @@
         </div>
 
         <div class="account-profile__identity">
-          <h1 class="account-profile__name"><?= htmlspecialchars($accountView['username']) ?></h1>
+          <h2 class="account-profile__name"><?= htmlspecialchars($accountView['username']) ?></h2>
           <p class="account-profile__since">Membre depuis <?= htmlspecialchars($accountView['member_since']) ?></p>
           <p class="account-profile__library">Ma bibliothèque</p>
           <p class="account-profile__count">
@@ -37,10 +37,10 @@
           <?= Csrf::input(); ?>
           <label class="account-form__field account-form__field--avatar">
             <span>Avatar</span>
-            <div class="account-form__avatar-row">
+            <span class="account-form__avatar-row">
               <img class="account-form__avatar-preview" src="<?= htmlspecialchars($accountView['avatar']) ?>" alt="Avatar actuel">
               <input type="file" name="avatar" accept="image/png,image/jpeg,image/webp">
-            </div>
+            </span>
           </label>
 
           <label class="account-form__field">

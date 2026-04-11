@@ -7,9 +7,9 @@
   --line:#f0f0f0;
   --line-strong:#e6e6e6;
   --text:#292929;
-  --muted:#6f6f6f;
-  --green:#00ac66;
-  --green-dark:#00995b;
+  --muted:#555555;
+  --green:#007a49;
+  --green-dark:#00663d;
   --danger:#cb2d2d;
 }
 
@@ -132,7 +132,7 @@ h1,h2,h3{
 .home-copy h1{font-size:36px;line-height:1.33;margin-bottom:16px}
 .home-copy p{font-size:16px;line-height:1.25;color:var(--text);max-width:330px;margin:0 0 34px}
 .home-hero-image img{width:11cm;height:15cm;object-fit:cover}
-.home-hero-image figcaption{margin-top:8px;font-size:12px;font-style:italic;color:var(--muted);text-align:right}
+.home-hero-image figcaption{margin-top:8px;font-size:12px;font-style:italic;color:#3f3f3f;text-align:right}
 
 .home-section{margin:0 auto 88px}
 .home-section--framed{
@@ -175,8 +175,8 @@ h1,h2,h3{
   display:block;margin-bottom:8px;font-size:16px;line-height:19px;
   font-family:Inter,"Segoe UI",Arial,sans-serif;font-weight:400;
 }
-.home-book .txt div{font-size:14px;line-height:17px;color:var(--muted);margin-bottom:16px}
-.home-book small{font-size:10px;color:var(--muted);font-style:italic}
+.home-book .txt div{font-size:14px;line-height:17px;color:#3f3f3f;margin-bottom:16px}
+.home-book small{font-size:10px;color:#3f3f3f;font-style:italic}
 .center-btn{text-align:center;margin-top:38px}
 .latest-books-cta{margin-top:88px !important}
 .latest-books-cta--home{margin-top:120px !important}
@@ -201,7 +201,7 @@ h1,h2,h3{
 }
 .values h2{text-align:left}
 .values p{margin:0 0 14px;font-size:16px;line-height:1.24;text-align:left}
-.values small{display:block;margin-top:22px;font-size:12px;font-style:italic;color:var(--muted)}
+.values small{display:block;margin-top:22px;font-size:12px;font-style:italic;color:#3f3f3f}
 .values-heart{
   width:120px;
   position:absolute;
@@ -264,11 +264,11 @@ h1,h2,h3{
   min-height:24px;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:500;
 }
 .book-status--ok{
-  background:#79c6a7;
+  background:#18724f;
   color:#fff;
 }
 .book-status--off{
-  background:#cf7a7a;
+  background:#a34747;
   color:#fff;
 }
 
@@ -397,9 +397,9 @@ h1,h2,h3{
   display:inline-flex;align-items:center;justify-content:center;
   min-height:24px;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:500;
 }
-.status-available{background:#6dc5a1;color:#fff}
-.status-reserved{background:#d1ab54;color:#fff}
-.status-unavailable{background:#c56d6d;color:#fff}
+.status-available{background:#18724f;color:#fff}
+.status-reserved{background:#8b6519;color:#fff}
+.status-unavailable{background:#a34747;color:#fff}
 
 /* Auth */
 .auth-wrap,.login-page{

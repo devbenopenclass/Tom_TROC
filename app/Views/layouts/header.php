@@ -44,7 +44,10 @@ if (str_starts_with($normalizedPath, '/account/profile')) {
   $backFallback = '/account';
 }
 
-$showBackMenu = $normalizedPath !== '/' && !$isAdminPage && !$isMessagesPage;
+$showBackMenu = $normalizedPath !== '/'
+  && !$isAdminPage
+  && !$isMessagesPage
+  && !str_starts_with($normalizedPath, '/books/exchange');
 ?>
 <!doctype html>
 <html lang="fr">
@@ -65,11 +68,13 @@ $showBackMenu = $normalizedPath !== '/' && !$isAdminPage && !$isMessagesPage;
 <header class="site-header <?= $isLogged ? 'is-auth' : '' ?>">
   <div class="shell header-row">
     <a class="brand" href="<?= $base ?>/" aria-label="Accueil TomTroc">
-      <img class="brand-logo" src="<?= htmlspecialchars(Url::asset('/assets/img/figma/logo.svg')) ?>" alt="TomTroc">
+      <span class="sr-only">Accueil TomTroc</span>
+      <img class="brand-logo" src="<?= htmlspecialchars(Url::asset('/assets/img/figma/logo.svg')) ?>" alt="">
     </a>
 
     <input id="nav-toggle" class="nav-toggle" type="checkbox" aria-hidden="true">
-    <label for="nav-toggle" class="menu-trigger" aria-label="Menu">
+    <label for="nav-toggle" class="menu-trigger">
+      <span class="sr-only">Menu</span>
       <img src="<?= $base ?>/assets/img/figma/icon-menu.svg" alt="">
     </label>
 

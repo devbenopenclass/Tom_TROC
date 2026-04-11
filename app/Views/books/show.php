@@ -1,6 +1,6 @@
 <?php // Fiche détail d'un livre : image, description, propriétaire et accès à la messagerie. ?>
 
-<section class="book-show">
+<div class="book-show">
   <p class="book-show-breadcrumb">
     <a href="<?= $base ?>/books/exchange">Nos livres</a>
     <span>&gt;</span>
@@ -8,12 +8,12 @@
   </p>
 
   <div class="book-show-layout">
-    <article class="book-show-media">
+    <div class="book-show-media">
       <img src="<?= htmlspecialchars($bookView['image']) ?>" alt="">
-    </article>
+    </div>
 
     <article class="book-show-panel">
-      <h1><?= htmlspecialchars($bookView['title']) ?></h1>
+      <h2><?= htmlspecialchars($bookView['title']) ?></h2>
       <p class="book-show-author">par <?= htmlspecialchars($bookView['author']) ?></p>
       <span class="book-show-divider" aria-hidden="true"></span>
 
@@ -35,4 +35,4 @@
       <?php endif; ?>
     </article>
   </div>
-</section>
+</div>

@@ -67,9 +67,9 @@
 .account-profile__edit {
   margin-top: 10px;
   border: 0;
-  border-bottom: 1px solid #adadad;
+  border-bottom: 1px solid #767676;
   background: transparent;
-  color: #8b8b8b;
+  color: #5f5f5f;
   font-size: 14px;
   line-height: 17px;
   font-family: inherit;
@@ -94,7 +94,7 @@
 
 .account-profile__since {
   margin: 11px 0 18px;
-  color: #9b9b9b;
+  color: #666666;
   font-size: 14px;
   line-height: 17px;
 }
@@ -176,7 +176,7 @@
 .account-form__field span {
   font-size: 14px;
   line-height: 17px;
-  color: #9a9a9a;
+  color: #5f5f5f;
 }
 
 .account-form__field input {
@@ -340,11 +340,11 @@
 }
 
 .status-pill--ok {
-  background: #79c6a7;
+  background: #18724f;
 }
 
 .status-pill--off {
-  background: #cc6c6c;
+  background: #a34747;
 }
 
 .account-books__actions {

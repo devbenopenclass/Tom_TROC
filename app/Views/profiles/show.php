@@ -6,10 +6,10 @@
     <h1><?= htmlspecialchars($profileView['username']) ?></h1>
     <p>Profil public et bibliothèque partagée.</p>
   </div>
-  <img src="<?= $base ?>/assets/img/figma/icon-mon-compte.svg" alt="Icône profil">
+  <img src="<?= $base ?>/assets/img/figma/icon-mon-compte.svg" alt="">
 </section>
 
-<section class="card profile-header">
+<div class="card profile-header">
   <img src="<?= htmlspecialchars($profileView['avatar']) ?>" alt="Avatar utilisateur">
   <div>
     <?php if (!empty($profileView['bio'])): ?>
@@ -22,7 +22,7 @@
       <a class="btn" href="<?= $base ?>/messages/thread?user=<?= (int)$profileView['id'] ?>">Contacter</a>
     <?php endif; ?>
   </div>
-</section>
+</div>
 
 <section class="card">
   <div class="account-books__toolbar">

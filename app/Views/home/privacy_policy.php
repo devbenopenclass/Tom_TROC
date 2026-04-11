@@ -6,7 +6,7 @@
   </div>
 </section>
 
-<section class="card">
+<div class="card">
   <p>TomTroc utilise des données de démonstration pour permettre les tests de navigation, d'authentification et de messagerie.</p>
   <p>Dans un contexte réel, les données personnelles devraient être encadrées par une politique dédiée et des procédures de sécurité adaptées.</p>
-</section>
+</div>

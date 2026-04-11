@@ -18,9 +18,9 @@ $adminAnchor = (string)($adminAnchor ?? '#admin-panel');
   </div>
 </section>
 
-<section class="admin-banner">
-  <img src="<?= htmlspecialchars(\App\Core\Url::asset('/assets/img/figma/mask-group-1.png')) ?>" alt="Bannière bibliothèque">
-</section>
+<div class="admin-banner">
+  <img src="<?= htmlspecialchars(\App\Core\Url::asset('/assets/img/figma/mask-group-1.png')) ?>" alt="">
+</div>
 
 <section class="admin-panel" id="<?= \App\Core\View::e(ltrim($adminAnchor, '#')) ?>">
   <div class="admin-panel__shell">

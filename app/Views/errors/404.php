@@ -6,7 +6,7 @@
   </div>
 </section>
 
-<section class="card">
+<div class="card">
   <p class="muted">Vérifie l'adresse saisie ou retourne à l'accueil.</p>
   <p class="center-btn"><a class="btn" href="<?= $base ?>/">Retour à l'accueil</a></p>
-</section>
+</div>

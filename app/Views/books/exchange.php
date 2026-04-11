@@ -16,7 +16,7 @@
     <p class="muted">Aucun livre disponible pour l'instant.</p>
   </section>
 <?php else: ?>
-  <section class="grid">
+  <div class="grid">
     <?php foreach ($books as $b): ?>
       <a class="book" href="<?= $base ?>/books/show?id=<?= (int)$b['id'] ?>">
         <div class="thumb">
@@ -32,5 +32,5 @@
         </div>
       </a>
     <?php endforeach; ?>
-  </section>
+  </div>
 <?php endif; ?>

@@ -5,7 +5,7 @@
 <?php // La classe d'état pilote le responsive mobile sans dépendre de :has(). ?>
 <?php $hasActiveThread = !empty($other); ?>
 
-<section class="messages-layout<?= $hasActiveThread ? ' messages-layout--thread-open' : ' messages-layout--list-open' ?>">
+<div class="messages-layout<?= $hasActiveThread ? ' messages-layout--thread-open' : ' messages-layout--list-open' ?>">
   <aside class="messages-sidebar card">
     <h2>Messagerie</h2>
     <?php if (empty($items)): ?>
@@ -62,11 +62,11 @@
           <?php foreach ($messages as $m):
             $isMe = (int)$m['sender_id'] === (int)($_SESSION['user_id'] ?? 0);
             ?>
-            <article class="bubble <?= $isMe ? 'me' : '' ?>">
+            <div class="bubble <?= $isMe ? 'me' : '' ?>">
               <strong><?= htmlspecialchars($m['sender_name']) ?></strong><br>
               <?= nl2br(htmlspecialchars($m['content'])) ?>
               <span class="bubble-meta"><?= htmlspecialchars(date('d/m/Y H:i', strtotime((string)$m['created_at']))) ?></span>
-            </article>
+            </div>
           <?php endforeach; ?>
         <?php endif; ?>
       </div>
@@ -85,4 +85,4 @@
       <?php endif; ?>
     <?php endif; ?>
   </section>
-</section>
+</div>

@@ -33,7 +33,7 @@ require __DIR__ . '/_intro.php';
           $img = Url::asset(Book::imagePath($book));
           $isAvailable = ($book['status'] ?? '') === 'available';
         ?>
-        <article class="admin-table__row">
+        <div class="admin-table__row">
           <div class="admin-table__photo">
             <div class="admin-book-thumb">
               <span class="admin-book-badge <?= $isAvailable ? 'admin-book-badge--ok' : 'admin-book-badge--off' ?>">
@@ -63,7 +63,7 @@ require __DIR__ . '/_intro.php';
               <button class="admin-table__danger" type="submit">Supprimer</button>
             </form>
           </div>
-        </article>
+        </div>
       <?php endforeach; ?>
 
       <?php if (empty($books)): ?>
