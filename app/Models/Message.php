@@ -1,6 +1,7 @@
 <?php
 namespace App\Models;
 
+use App\Entities\Message as MessageEntity;
 use App\Managers\MessageManager;
 
 // Façade du domaine messagerie : point d'entrée unique pour tout ce qui touche aux messages.
@@ -32,7 +33,7 @@ class Message
   public static function thread(int $me, int $other): array
   {
     return array_map(
-      static fn (\App\Entities\Message $message): array => $message->toArray(),
+      static fn (MessageEntity $message): array => $message->toArray(),
       MessageManager::thread($me, $other)
     );
   }
@@ -49,7 +50,7 @@ class Message
   public static function inbox(int $me): array
   {
     return array_map(
-      static fn (\App\Entities\Message $message): array => $message->toArray(),
+      static fn (MessageEntity $message): array => $message->toArray(),
       MessageManager::inbox($me)
     );
   }
@@ -59,7 +60,7 @@ class Message
   public static function contacts(int $me): array
   {
     return array_map(
-      static fn (\App\Entities\Message $message): array => $message->toArray(),
+      static fn (MessageEntity $message): array => $message->toArray(),
       MessageManager::contacts($me)
     );
   }

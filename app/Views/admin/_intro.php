@@ -1,4 +1,7 @@
 <?php
+use App\Core\Url;
+use App\Core\View;
+
 $adminTitle = (string)($adminTitle ?? '');
 $adminDescription = (string)($adminDescription ?? '');
 $adminActiveTab = (string)($adminActiveTab ?? 'books');
@@ -13,16 +16,16 @@ $adminAnchor = (string)($adminAnchor ?? '#admin-panel');
 <section class="admin-hero">
   <div class="admin-hero__copy">
     <p class="admin-hero__eyebrow">Espace management</p>
-    <h1><?= \App\Core\View::e($adminTitle) ?></h1>
-    <p><?= \App\Core\View::e($adminDescription) ?></p>
+    <h1><?= View::e($adminTitle) ?></h1>
+    <p><?= View::e($adminDescription) ?></p>
   </div>
 </section>
 
 <div class="admin-banner">
-  <img src="<?= htmlspecialchars(\App\Core\Url::asset('/assets/img/figma/mask-group-1.png')) ?>" alt="">
+  <img src="<?= htmlspecialchars(Url::asset('/assets/img/figma/mask-group-1.png')) ?>" alt="">
 </div>
 
-<section class="admin-panel" id="<?= \App\Core\View::e(ltrim($adminAnchor, '#')) ?>">
+<section class="admin-panel" id="<?= View::e(ltrim($adminAnchor, '#')) ?>">
   <div class="admin-panel__shell">
     <nav class="admin-tabs" aria-label="Navigation management">
       <a class="admin-tabs__link<?= $adminActiveTab === 'books' ? ' admin-tabs__link--active' : '' ?>" href="<?= $base ?>/admin/books<?= $adminAnchor ?>">Livres</a>
@@ -31,10 +34,10 @@ $adminAnchor = (string)($adminAnchor ?? '#admin-panel');
 
     <div class="admin-section-head">
       <div>
-        <p class="admin-section-head__eyebrow"><?= \App\Core\View::e($adminSectionEyebrow) ?></p>
-        <h2><?= \App\Core\View::e($adminSectionTitle) ?></h2>
+        <p class="admin-section-head__eyebrow"><?= View::e($adminSectionEyebrow) ?></p>
+        <h2><?= View::e($adminSectionTitle) ?></h2>
       </div>
-      <p class="admin-section-head__meta"><?= \App\Core\View::e($adminSectionMeta) ?></p>
+      <p class="admin-section-head__meta"><?= View::e($adminSectionMeta) ?></p>
     </div>
 
     <form class="admin-search" method="get" action="<?= $adminSearchAction . $adminAnchor ?>">
@@ -43,8 +46,8 @@ $adminAnchor = (string)($adminAnchor ?? '#admin-panel');
         <input
           type="search"
           name="q"
-          value="<?= \App\Core\View::e($adminQuery) ?>"
-          placeholder="<?= \App\Core\View::e($adminSearchPlaceholder) ?>"
+          value="<?= View::e($adminQuery) ?>"
+          placeholder="<?= View::e($adminSearchPlaceholder) ?>"
         >
       </label>
       <button class="btn" type="submit">Rechercher</button>

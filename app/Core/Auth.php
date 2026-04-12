@@ -1,6 +1,8 @@
 <?php
 namespace App\Core;
 
+use App\Models\Message;
+
 // Service d'authentification basé sur la session PHP.
 // Centralise les vérifications "connecté / non connecté" pour toute l'appli.
 class Auth
@@ -35,6 +37,6 @@ class Auth
       return 0;
     }
 
-    return \App\Models\Message::unreadCount($userId);
+    return Message::unreadCount($userId);
   }
 }

@@ -1,5 +1,6 @@
-<?php
+m<?php
 // Vue d'administration des membres : tableau récapitulatif des comptes inscrits.
+use App\Core\Csrf;
 use App\Core\View;
 
 $adminTitle = 'Suivi des membres';
@@ -40,7 +41,7 @@ require __DIR__ . '/_intro.php';
           <div><?= (int)($member['books_count'] ?? 0) ?></div>
           <div class="admin-table__actions">
             <form method="post" action="<?= $base ?>/admin/members/role<?= $adminAnchor ?>">
-              <?= \App\Core\Csrf::input(); ?>
+              <?= Csrf::input(); ?>
               <input type="hidden" name="id" value="<?= (int)$member['id'] ?>">
               <div class="admin-role-editor">
                 <select name="role"<?= !empty($member['is_current_admin']) ? ' disabled' : '' ?>>
@@ -54,7 +55,7 @@ require __DIR__ . '/_intro.php';
               </div>
             </form>
             <form method="post" action="<?= $base ?>/admin/members/delete<?= $adminAnchor ?>">
-              <?= \App\Core\Csrf::input(); ?>
+              <?= Csrf::input(); ?>
               <input type="hidden" name="id" value="<?= (int)$member['id'] ?>">
               <button class="admin-table__danger" type="submit">Supprimer</button>
             </form>

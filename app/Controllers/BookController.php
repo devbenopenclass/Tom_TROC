@@ -5,6 +5,7 @@ use App\Core\Auth;
 use App\Core\Controller;
 use App\Core\Url;
 use App\Models\Book;
+use App\Models\User;
 
 // Contrôleur des livres : catalogue public, fiche détail,
 // ajout, édition et suppression pour le membre connecté.
@@ -302,7 +303,7 @@ class BookController extends Controller
       'author' => trim((string)($book['author'] ?? 'Auteur inconnu')),
       'owner' => trim((string)($book['username'] ?? 'membre de la communauté')),
       'image' => Url::asset(Book::detailImagePath($book, '/assets/img/figma/mask-group-1.png')),
-      'owner_avatar' => Url::asset(\App\Models\User::avatarPath($book)),
+      'owner_avatar' => Url::asset(User::avatarPath($book)),
       'paragraphs' => array_map(static fn (string $paragraph): string => trim($paragraph), $paragraphs),
       // Seuls les membres connectés peuvent contacter le propriétaire du livre
       'can_message_owner' => Auth::check(),

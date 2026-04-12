@@ -4,12 +4,13 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Core\Auth;
+use App\Core\Controller;
 use App\Models\Book;
 use App\Models\User;
 
 // Contrôleur d'administration : gestion des livres et des membres
 // depuis le panneau réservé aux admins.
-final class AdminController extends \App\Core\Controller
+final class AdminController extends Controller
 {
   // Ancre HTML pour revenir directement au tableau admin après une action
   private const ADMIN_ANCHOR = '#admin-panel';
@@ -112,7 +113,7 @@ final class AdminController extends \App\Core\Controller
       $this->redirect('/admin/members' . self::ADMIN_ANCHOR);
     }
 
-    $currentUserId = (int)(\App\Core\Auth::id() ?? 0);
+    $currentUserId = (int)(Auth::id() ?? 0);
 
     // Un admin ne peut pas se retirer lui-même ses droits admin
     if ($currentUserId > 0 && $currentUserId === $id && $role !== 'admin') {

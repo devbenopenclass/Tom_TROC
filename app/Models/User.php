@@ -1,6 +1,7 @@
 <?php
 namespace App\Models;
 
+use App\Entities\User as UserEntity;
 use App\Managers\UserManager;
 use App\Core\Url;
 
@@ -68,7 +69,7 @@ class User
   public static function adminMembers(string $query = ''): array
   {
     return array_map(
-      static fn (\App\Entities\User $user): array => $user->toArray(),
+      static fn (UserEntity $user): array => $user->toArray(),
       UserManager::adminMembers($query)
     );
   }

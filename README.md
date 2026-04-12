@@ -1,8 +1,8 @@
 # TomTroc
 
 TomTroc est une application web PHP de partage et d'echange de livres entre membres.
-Le projet respecte une architecture MVC maison sans librairie PHP externe, avec une couche
-`Entity` / `Manager` pour structurer l'acces aux donnees.
+Le projet respecte une architecture MVC maison avec autoload PSR-4 pour le namespace `App\\`,
+ainsi qu'une couche `Entity` / `Manager` pour structurer l'acces aux donnees.
 
 ## Fonctionnalites
 
@@ -79,6 +79,17 @@ Exemple avec XAMPP :
 ```text
 /opt/lampp/htdocs/tomtroc
 ```
+
+### 1.b Generer l'autoload PSR-4
+
+Si Composer est disponible sur la machine :
+
+```bash
+composer dump-autoload
+```
+
+Le projet inclut aussi un fallback local dans `app/bootstrap.php` pour fonctionner
+sans Composer, tout en gardant la structure PSR-4.
 
 ### 2. Creer la base de donnees
 
@@ -198,6 +209,7 @@ Les relations entre tables sont definies avec des cles etrangeres et des suppres
 Le projet suit l'organisation suivante :
 
 - `public/index.php` : point d'entree unique
+- `app/bootstrap.php` : chargement de l'autoload PSR-4
 - `app/Core/Router.php` : routage GET / POST
 - `app/Controllers/` : orchestration des actions
 - `app/Views/` : rendu HTML avec layout commun

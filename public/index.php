@@ -9,10 +9,9 @@ declare(strict_types=1);
 // Cela permet de stocker et d'accéder à des données persistantes entre les requêtes via $_SESSION.
 session_start();
 
-// Inclut le fichier App.php une seule fois (require_once évite les inclusions en double).
-// Ce fichier contient la classe principale de l'application, située dans le dossier app/Core/.
-// Le chemin absolu est construit grâce à __DIR__ (répertoire du fichier courant).
-require_once __DIR__ . '/../app/Core/App.php';
+// Charge l'autoloader PSR-4 du projet. Si les dépendances Composer ne sont pas
+// encore installées, un fallback local compatible PSR-4 prend le relais.
+require_once __DIR__ . '/../app/bootstrap.php';
 
 // Instancie la classe App dans l'espace de noms \App\Core.
 // Le constructeur de cette classe initialise généralement les composants de l'application

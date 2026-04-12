@@ -1,6 +1,7 @@
 <?php
 namespace App\Models;
 
+use App\Entities\Book as BookEntity;
 use App\Managers\BookManager;
 use App\Core\Url;
 
@@ -47,7 +48,7 @@ class Book
   {
     try {
       $books = array_map(
-        static fn (\App\Entities\Book $book): array => $book->toArray(),
+        static fn (BookEntity $book): array => $book->toArray(),
         BookManager::latest($limit)
       );
       if (!empty($books)) {
@@ -66,7 +67,7 @@ class Book
   {
     try {
       $books = array_map(
-        static fn (\App\Entities\Book $book): array => $book->toArray(),
+        static fn (BookEntity $book): array => $book->toArray(),
         BookManager::exchangeList($q)
       );
       if (!empty($books)) {
@@ -107,7 +108,7 @@ class Book
   {
     try {
       return array_map(
-        static fn (\App\Entities\Book $book): array => $book->toArray(),
+        static fn (BookEntity $book): array => $book->toArray(),
         BookManager::byUser($userId)
       );
     } catch (\Throwable $e) {
@@ -125,7 +126,7 @@ class Book
   public static function adminList(string $query = ''): array
   {
     return array_map(
-      static fn (\App\Entities\Book $book): array => $book->toArray(),
+      static fn (BookEntity $book): array => $book->toArray(),
       BookManager::adminList($query)
     );
   }

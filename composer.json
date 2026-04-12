@@ -1,0 +1,11 @@
+{
+  "name": "tomtroc/tomtroc",
+  "description": "Application web PHP de partage et d'echange de livres",
+  "type": "project",
+  "require": {},
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/"
+    }
+  }
+}
