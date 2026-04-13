@@ -3,9 +3,10 @@ namespace App\Controllers;
 
 use App\Core\Auth;
 use App\Core\Controller;
-use App\Core\Url;
-use App\Models\User;
 use App\Models\Book;
+use App\Models\User;
+use App\Presenters\AccountPresenter;
+use App\Services\ImageUploadService;
 
 // Gère tout ce qui touche à l'espace "Mon compte" :
 // affichage du profil, modification des infos et suppression du compte.
@@ -13,8 +14,16 @@ class AccountController extends Controller
 {
   // Longueur minimum exigée pour le mot de passe
   private const MIN_PASSWORD_LENGTH = 6;
-  // Dossier où on enregistre les avatars uploadés
-  private const AVATAR_UPLOAD_DIR = '/assets/uploads';
+
+  private AccountPresenter $accountPresenter;
+  private ImageUploadService $imageUploadService;
+
+  public function __construct()
+  {
+    parent::__construct();
+    $this->accountPresenter = new AccountPresenter();
+    $this->imageUploadService = new ImageUploadService();
+  }
 
   // Charge la page Mon compte en injectant les infos du membre et ses livres.
   // Le tableau $extra permet de passer un message d'erreur ou de succès.
@@ -23,7 +32,7 @@ class AccountController extends Controller
     $me = User::find($this->currentUserId());
     $books = Book::byUser($this->currentUserId());
     $this->render('account/index', array_merge([
-      'accountView' => $this->buildAccountView($me, $books, $extra['form'] ?? []),
+      'accountView' => $this->accountPresenter->buildView($me, $books, $extra['form'] ?? []),
     ], $extra));
   }
 
@@ -144,44 +153,15 @@ class AccountController extends Controller
     ]);
   }
 
-  // Gère l'upload de l'avatar : vérifie le format, crée le dossier si besoin,
-  // déplace le fichier et retourne son chemin public (ou une erreur).
   private function uploadedAvatarPath(): array
   {
-    // Pas de fichier envoyé, c'est normal : on continue sans erreur
-    if (empty($_FILES['avatar']['name'])) {
-      return ['path' => null, 'error' => null];
-    }
-
-    $file = $_FILES['avatar'];
-
-    // Le transfert côté PHP a échoué avant même qu'on puisse traiter le fichier
-    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-      return ['path' => null, 'error' => "L'avatar n'a pas pu être envoyé."];
-    }
-
-    // On n'accepte que les formats image courants : JPG, PNG ou WebP
-    $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
-    $tmpName = (string)($file['tmp_name'] ?? '');
-    $mime = $tmpName !== '' ? mime_content_type($tmpName) : false;
-    if (!is_string($mime) || !isset($allowed[$mime])) {
-      return ['path' => null, 'error' => "Le format de l'avatar doit être JPG, PNG ou WebP."];
-    }
-
-    // On crée le dossier de destination si ce n'est pas déjà fait
-    $destinationDir = __DIR__ . '/../../public' . self::AVATAR_UPLOAD_DIR;
-    if (!is_dir($destinationDir) && !mkdir($destinationDir, 0777, true) && !is_dir($destinationDir)) {
-      return ['path' => null, 'error' => "Impossible d'enregistrer l'avatar pour le moment."];
-    }
-
-    // Le nom du fichier inclut l'id du membre et des octets aléatoires pour éviter les collisions
-    $fileName = 'avatar-' . $this->currentUserId() . '-' . bin2hex(random_bytes(8)) . '.' . $allowed[$mime];
-    $destination = $destinationDir . '/' . $fileName;
-    if (!move_uploaded_file($tmpName, $destination)) {
-      return ['path' => null, 'error' => "Impossible d'enregistrer l'avatar pour le moment."];
-    }
-
-    return ['path' => self::AVATAR_UPLOAD_DIR . '/' . $fileName, 'error' => null];
+    return $this->imageUploadService->uploadOptional(
+      $_FILES['avatar'] ?? [],
+      __DIR__ . '/../../public/assets/uploads',
+      '/assets/uploads',
+      'avatar-' . $this->currentUserId(),
+      'avatar'
+    );
   }
 
   // Compose un message de succès précis selon ce qui a réellement changé.
@@ -200,56 +180,5 @@ class AccountController extends Controller
     }
 
     return 'Compte mis à jour.';
-  }
-
-  // Prépare toutes les données que la vue du compte va afficher :
-  // avatar, pseudo, email, ancienneté et liste des livres du membre.
-  private function buildAccountView(?array $me, array $books, array $form = []): array
-  {
-    // Ancienneté par défaut à 1 an si la date d'inscription est absente
-    $memberSince = '1 an';
-    if (!empty($me['created_at'])) {
-      $years = max(1, (int)date('Y') - (int)date('Y', strtotime((string)$me['created_at'])));
-      $memberSince = $years . ' an' . ($years > 1 ? 's' : '');
-    }
-
-    $bookRows = [];
-    foreach ($books as $book) {
-      $description = trim((string)($book['description'] ?? ''));
-
-      // Si la description est vide, on met un texte par défaut plutôt que de laisser un blanc
-      if ($description === '') {
-        $description = 'Aucune description.';
-      }
-
-      // On tronque les descriptions trop longues pour que les cartes restent lisibles
-      if (mb_strlen($description) > 110) {
-        $description = mb_substr($description, 0, 110) . '...';
-      }
-
-      $isAvailable = ($book['status'] ?? '') === 'available';
-      $bookRows[] = [
-        'id' => (int)($book['id'] ?? 0),
-        'title' => (string)($book['title'] ?? ''),
-        'author' => (string)($book['author'] ?? ''),
-        'cover' => Url::asset(Book::imagePath($book)),
-        'description' => $description,
-        // La classe CSS change selon la disponibilité du livre
-        'status_class' => $isAvailable ? 'status-pill--ok' : 'status-pill--off',
-        'status_label' => $isAvailable ? 'disponible' : 'indisponible',
-      ];
-    }
-
-    return [
-      'avatar' => Url::asset(User::avatarPath($me, '/assets/img/figma/mask-group-2.png')),
-      'username' => (string)($me['username'] ?? ''),
-      // Si le formulaire a été soumis avec une erreur, on remet la valeur saisie
-      'username_value' => (string)($form['username'] ?? ($me['username'] ?? '')),
-      'email' => (string)($me['email'] ?? ''),
-      'bio' => (string)($me['bio'] ?? ''),
-      'member_since' => $memberSince,
-      'books_count' => count($books),
-      'book_rows' => $bookRows,
-    ];
   }
 }

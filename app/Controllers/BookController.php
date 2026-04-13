@@ -3,9 +3,9 @@ namespace App\Controllers;
 
 use App\Core\Auth;
 use App\Core\Controller;
-use App\Core\Url;
 use App\Models\Book;
-use App\Models\User;
+use App\Presenters\BookPresenter;
+use App\Services\ImageUploadService;
 
 // Contrôleur des livres : catalogue public, fiche détail,
 // ajout, édition et suppression pour le membre connecté.
@@ -16,13 +16,23 @@ class BookController extends Controller
   // Statuts valides pour un livre ; toute autre valeur sera ramenée à "available"
   private const AVAILABLE_STATUSES = ['available', 'unavailable', 'reserved'];
 
+  private BookPresenter $bookPresenter;
+  private ImageUploadService $imageUploadService;
+
+  public function __construct()
+  {
+    parent::__construct();
+    $this->bookPresenter = new BookPresenter();
+    $this->imageUploadService = new ImageUploadService();
+  }
+
   // Affiche le catalogue public des livres avec le moteur de recherche.
   public function exchange(): void
   {
     $q = trim($_GET['q'] ?? '');
     $books = Book::exchangeList($q !== '' ? $q : null);
     $this->render('books/exchange', [
-      'books' => $this->buildExchangeCards($books),
+      'books' => $this->bookPresenter->exchangeCards($books),
       'q' => $q,
     ]);
   }
@@ -40,7 +50,7 @@ class BookController extends Controller
       return;
     }
 
-    $this->render('books/show', ['bookView' => $this->buildBookShowView($book)]);
+    $this->render('books/show', ['bookView' => $this->bookPresenter->showView($book)]);
   }
 
   // Ouvre le formulaire d'ajout d'un livre pour le membre connecté.
@@ -142,41 +152,6 @@ class BookController extends Controller
     $this->redirect(self::ACCOUNT_PATH);
   }
 
-  // Gère l'upload d'une couverture dans public/assets/uploads.
-  // Vérifie l'intégrité du fichier, le format MIME, crée le dossier si besoin.
-  private function handleUpload(array $file): array
-  {
-    // Le transfert PHP a échoué : on ne peut pas aller plus loin
-    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-      return ['path' => null, 'error' => "L'image n'a pas pu être envoyée."];
-    }
-
-    // On vérifie le vrai type MIME du fichier, pas juste son extension
-    $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
-    $tmpName = (string)($file['tmp_name'] ?? '');
-    $mime = $tmpName !== '' ? mime_content_type($tmpName) : false;
-    if (!is_string($mime) || !isset($allowed[$mime])) {
-      return ['path' => null, 'error' => "Le format de l'image doit être JPG, PNG ou WebP."];
-    }
-
-    $ext = $allowed[$mime];
-    // Un nom aléatoire évite les collisions et les tentatives d'écrasement de fichier
-    $name = bin2hex(random_bytes(16)) . '.' . $ext;
-    $destDir = __DIR__ . '/../../public/assets/uploads';
-
-    // On crée le dossier de destination à la volée si nécessaire
-    if (!is_dir($destDir) && !mkdir($destDir, 0777, true) && !is_dir($destDir)) {
-      return ['path' => null, 'error' => "Impossible d'enregistrer l'image pour le moment."];
-    }
-
-    $dest = $destDir . '/' . $name;
-    if (!move_uploaded_file($tmpName, $dest)) {
-      return ['path' => null, 'error' => "Impossible d'enregistrer l'image pour le moment."];
-    }
-
-    return ['path' => '/assets/uploads/' . $name, 'error' => null];
-  }
-
   // Redirige vers la connexion si la session est vide.
   private function requireBookLogin(): void
   {
@@ -219,11 +194,13 @@ class BookController extends Controller
   // Si aucun fichier n'est envoyé, retourne null sans erreur.
   private function uploadedBookImage(): array
   {
-    if (empty($_FILES['image']['name'])) {
-      return ['path' => null, 'error' => null];
-    }
-
-    return $this->handleUpload($_FILES['image']);
+    return $this->imageUploadService->uploadOptional(
+      $_FILES['image'] ?? [],
+      __DIR__ . '/../../public/assets/uploads',
+      '/assets/uploads',
+      'book-cover',
+      'image'
+    );
   }
 
   // Vérifie que les champs obligatoires d'un livre sont bien remplis.
@@ -264,49 +241,5 @@ class BookController extends Controller
       'error' => $message,
       'book' => $book,
     ]);
-  }
-
-  // Formate les livres pour les cartes du catalogue public.
-  private function buildExchangeCards(array $books): array
-  {
-    $cards = [];
-
-    foreach ($books as $book) {
-      $isAvailable = ($book['status'] ?? '') === 'available';
-      $cards[] = [
-        'id' => (int)($book['id'] ?? 0),
-        'title' => (string)($book['title'] ?? ''),
-        'author' => (string)($book['author'] ?? ''),
-        'owner' => (string)($book['username'] ?? ''),
-        'image' => Url::asset(Book::imagePath($book)),
-        // La classe CSS change en fonction de la disponibilité du livre
-        'status_class' => $isAvailable ? 'book-status--ok' : 'book-status--off',
-        'status_label' => $isAvailable ? 'disponible' : 'non dispo.',
-      ];
-    }
-
-    return $cards;
-  }
-
-  // Prépare toutes les données nécessaires à la vue "fiche livre".
-  // On découpe la description en paragraphes pour respecter les sauts de ligne.
-  private function buildBookShowView(array $book): array
-  {
-    $description = Book::detailDescription($book);
-    // On sépare la description en paragraphes pour un rendu HTML propre
-    $paragraphs = preg_split("/\n\s*\n/", $description) ?: [$description];
-
-    return [
-      'id' => (int)($book['id'] ?? 0),
-      'user_id' => (int)($book['user_id'] ?? 0),
-      'title' => trim((string)($book['title'] ?? 'Livre')),
-      'author' => trim((string)($book['author'] ?? 'Auteur inconnu')),
-      'owner' => trim((string)($book['username'] ?? 'membre de la communauté')),
-      'image' => Url::asset(Book::detailImagePath($book, '/assets/img/figma/mask-group-1.png')),
-      'owner_avatar' => Url::asset(User::avatarPath($book)),
-      'paragraphs' => array_map(static fn (string $paragraph): string => trim($paragraph), $paragraphs),
-      // Seuls les membres connectés peuvent contacter le propriétaire du livre
-      'can_message_owner' => Auth::check(),
-    ];
   }
 }

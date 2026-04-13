@@ -38,7 +38,6 @@ app/
   Models/
   Views/
 config/
-docs/
 public/
 storage/
 README.md
